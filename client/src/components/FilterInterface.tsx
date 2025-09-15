@@ -13,6 +13,11 @@ import TablePropertiesPanel from './TablePropertiesPanel';
 import StateFilterEditor from './StateFilterEditor';
 import LabelsFilterEditor from './LabelsFilterEditor';
 import NamespaceFilterEditor from './NamespaceFilterEditor';
+import FlowFilterEditor from './FlowFilterEditor';
+import ScopeFilterEditor from './ScopeFilterEditor';
+import KindFilterEditor from './KindFilterEditor';
+import SubflowFilterEditor from './SubflowFilterEditor';
+import InitialExecutionFilterEditor from './InitialExecutionFilterEditor';
 import TimeRangeFilterEditor from './TimeRangeFilterEditor';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 
@@ -59,14 +64,29 @@ interface FilterInterfaceProps {
   onLabelsCustomValueChange: (value: string) => void;
   selectedNamespaces: string[];
   onNamespacesSelectionChange: (namespaces: string[]) => void;
+  selectedFlows: string[];
+  onFlowsSelectionChange: (flows: string[]) => void;
+  selectedScopes: string[];
+  onScopesSelectionChange: (scopes: string[]) => void;
+  selectedKinds: string[];
+  onKindsSelectionChange: (kinds: string[]) => void;
+  selectedSubflows: string[];
+  onSubflowsSelectionChange: (subflows: string[]) => void;
+  selectedInitialExecution: boolean | null;
+  onInitialExecutionSelectionChange: (value: boolean | null) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
   { id: 'state', label: 'State', description: 'Filter by execution state', enabled: false, order: 1 },
   { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 2 },
   { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 3 },
-  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 4 },
-  { id: 'duration', label: 'Duration', description: 'Filter by execution duration', enabled: false, order: 5 },
+  { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 4 },
+  { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: false, order: 5 },
+  { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: false, order: 6 },
+  { id: 'subflow', label: 'Subflow', description: 'Filter by subflow name', enabled: false, order: 7 },
+  { id: 'initial-execution', label: 'Initial Execution', description: 'Filter by first-time vs re-execution', enabled: false, order: 8 },
+  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 9 },
+  { id: 'duration', label: 'Duration', description: 'Filter by execution duration', enabled: false, order: 10 },
 ];
 
 export default function FilterInterface({
@@ -96,7 +116,17 @@ export default function FilterInterface({
   onLabelsOperatorChange,
   onLabelsCustomValueChange,
   selectedNamespaces,
-  onNamespacesSelectionChange
+  onNamespacesSelectionChange,
+  selectedFlows,
+  onFlowsSelectionChange,
+  selectedScopes,
+  onScopesSelectionChange,
+  selectedKinds,
+  onKindsSelectionChange,
+  selectedSubflows,
+  onSubflowsSelectionChange,
+  selectedInitialExecution,
+  onInitialExecutionSelectionChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
@@ -105,6 +135,11 @@ export default function FilterInterface({
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
   const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
+  const [flowFilterOpen, setFlowFilterOpen] = useState(false);
+  const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
+  const [kindFilterOpen, setKindFilterOpen] = useState(false);
+  const [subflowFilterOpen, setSubflowFilterOpen] = useState(false);
+  const [initialExecutionFilterOpen, setInitialExecutionFilterOpen] = useState(false);
   const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
 
   const handleColumnToggle = (columnId: string) => {
@@ -153,12 +188,36 @@ export default function FilterInterface({
       )
     );
     
-    // Auto-open namespace editor when namespace filter is enabled
+    // Auto-open editors when filters are enabled
     if (filterId === 'namespace') {
       const filterOption = filterOptions.find(option => option.id === 'namespace');
       if (filterOption && !filterOption.enabled) {
-        // Filter is being enabled, so open the editor
         setNamespaceFilterOpen(true);
+      }
+    } else if (filterId === 'flow') {
+      const filterOption = filterOptions.find(option => option.id === 'flow');
+      if (filterOption && !filterOption.enabled) {
+        setFlowFilterOpen(true);
+      }
+    } else if (filterId === 'scope') {
+      const filterOption = filterOptions.find(option => option.id === 'scope');
+      if (filterOption && !filterOption.enabled) {
+        setScopeFilterOpen(true);
+      }
+    } else if (filterId === 'kind') {
+      const filterOption = filterOptions.find(option => option.id === 'kind');
+      if (filterOption && !filterOption.enabled) {
+        setKindFilterOpen(true);
+      }
+    } else if (filterId === 'subflow') {
+      const filterOption = filterOptions.find(option => option.id === 'subflow');
+      if (filterOption && !filterOption.enabled) {
+        setSubflowFilterOpen(true);
+      }
+    } else if (filterId === 'initial-execution') {
+      const filterOption = filterOptions.find(option => option.id === 'initial-execution');
+      if (filterOption && !filterOption.enabled) {
+        setInitialExecutionFilterOpen(true);
       }
     }
   };
@@ -223,6 +282,26 @@ export default function FilterInterface({
     onNamespacesSelectionChange(namespaces);
   };
 
+  const handleFlowsSelectionChange = (flows: string[]) => {
+    onFlowsSelectionChange(flows);
+  };
+
+  const handleScopesSelectionChange = (scopes: string[]) => {
+    onScopesSelectionChange(scopes);
+  };
+
+  const handleKindsSelectionChange = (kinds: string[]) => {
+    onKindsSelectionChange(kinds);
+  };
+
+  const handleSubflowsSelectionChange = (subflows: string[]) => {
+    onSubflowsSelectionChange(subflows);
+  };
+
+  const handleInitialExecutionSelectionChange = (value: boolean | null) => {
+    onInitialExecutionSelectionChange(value);
+  };
+
   const handleCloseNamespaceFilter = () => {
     setNamespaceFilterOpen(false);
   };
@@ -233,6 +312,26 @@ export default function FilterInterface({
 
   const handleCloseTimeRangeFilter = () => {
     setTimeRangeFilterOpen(false);
+  };
+
+  const handleCloseFlowFilter = () => {
+    setFlowFilterOpen(false);
+  };
+
+  const handleCloseScopeFilter = () => {
+    setScopeFilterOpen(false);
+  };
+
+  const handleCloseKindFilter = () => {
+    setKindFilterOpen(false);
+  };
+
+  const handleCloseSubflowFilter = () => {
+    setSubflowFilterOpen(false);
+  };
+
+  const handleCloseInitialExecutionFilter = () => {
+    setInitialExecutionFilterOpen(false);
   };
 
   // Get enabled filters in order for display (excluding timerange since it's a direct control)
@@ -249,13 +348,58 @@ export default function FilterInterface({
 
   return (
     <div className="relative">
-      {/* Top-level Namespace Filter Editor - rendered when enabled, independent of badges */}
+      {/* Top-level Filter Editors - rendered when enabled, independent of badges */}
       {namespaceFilterOpen && (
         <div className="absolute top-full left-0 mt-2 z-50">
           <NamespaceFilterEditor
             selectedNamespaces={selectedNamespaces}
             onSelectionChange={handleNamespacesSelectionChange}
             onClose={handleCloseNamespaceFilter}
+          />
+        </div>
+      )}
+      {flowFilterOpen && (
+        <div className="absolute top-full left-0 mt-2 z-50">
+          <FlowFilterEditor
+            selectedFlows={selectedFlows}
+            onSelectionChange={handleFlowsSelectionChange}
+            onClose={handleCloseFlowFilter}
+          />
+        </div>
+      )}
+      {scopeFilterOpen && (
+        <div className="absolute top-full left-0 mt-2 z-50">
+          <ScopeFilterEditor
+            selectedScopes={selectedScopes}
+            onSelectionChange={handleScopesSelectionChange}
+            onClose={handleCloseScopeFilter}
+          />
+        </div>
+      )}
+      {kindFilterOpen && (
+        <div className="absolute top-full left-0 mt-2 z-50">
+          <KindFilterEditor
+            selectedKinds={selectedKinds}
+            onSelectionChange={handleKindsSelectionChange}
+            onClose={handleCloseKindFilter}
+          />
+        </div>
+      )}
+      {subflowFilterOpen && (
+        <div className="absolute top-full left-0 mt-2 z-50">
+          <SubflowFilterEditor
+            selectedSubflows={selectedSubflows}
+            onSelectionChange={handleSubflowsSelectionChange}
+            onClose={handleCloseSubflowFilter}
+          />
+        </div>
+      )}
+      {initialExecutionFilterOpen && (
+        <div className="absolute top-full left-0 mt-2 z-50">
+          <InitialExecutionFilterEditor
+            selectedInitialExecution={selectedInitialExecution}
+            onSelectionChange={handleInitialExecutionSelectionChange}
+            onClose={handleCloseInitialExecutionFilter}
           />
         </div>
       )}

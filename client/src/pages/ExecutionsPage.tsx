@@ -113,6 +113,11 @@ export default function ExecutionsPage() {
   const [labelsOperator, setLabelsOperator] = useState('in');
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
+  const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
+  const [selectedKinds, setSelectedKinds] = useState<string[]>([]);
+  const [selectedSubflows, setSelectedSubflows] = useState<string[]>([]);
+  const [selectedInitialExecution, setSelectedInitialExecution] = useState<boolean | null>(null);
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
@@ -167,6 +172,61 @@ export default function ExecutionsPage() {
     };
     dynamicFilters.push(namespaceFilter);
   }
+
+  // Add flow filter if flows are selected
+  if (selectedFlows.length > 0) {
+    const flowFilter = {
+      id: 'flow',
+      label: 'Flow',
+      value: `${selectedFlows.length} selected`,
+      operator: 'in'
+    };
+    dynamicFilters.push(flowFilter);
+  }
+
+  // Add scope filter if scopes are selected
+  if (selectedScopes.length > 0) {
+    const scopeFilter = {
+      id: 'scope',
+      label: 'Scope',
+      value: `${selectedScopes.length} selected`,
+      operator: 'in'
+    };
+    dynamicFilters.push(scopeFilter);
+  }
+
+  // Add kind filter if kinds are selected
+  if (selectedKinds.length > 0) {
+    const kindFilter = {
+      id: 'kind',
+      label: 'Kind',
+      value: `${selectedKinds.length} selected`,
+      operator: 'in'
+    };
+    dynamicFilters.push(kindFilter);
+  }
+
+  // Add subflow filter if subflows are selected
+  if (selectedSubflows.length > 0) {
+    const subflowFilter = {
+      id: 'subflow',
+      label: 'Subflow',
+      value: `${selectedSubflows.length} selected`,
+      operator: 'in'
+    };
+    dynamicFilters.push(subflowFilter);
+  }
+
+  // Add initial execution filter if value is selected
+  if (selectedInitialExecution !== null) {
+    const initialExecutionFilter = {
+      id: 'initial-execution',
+      label: 'Initial Execution',
+      value: selectedInitialExecution ? 'Initial execution' : 'Re-execution',
+      operator: 'is'
+    };
+    dynamicFilters.push(initialExecutionFilter);
+  }
   
   const allActiveFilters = [...dynamicFilters, ...activeFilters];
 
@@ -178,6 +238,16 @@ export default function ExecutionsPage() {
       setLabelsCustomValue('');
     } else if (filterId === 'namespace') {
       setSelectedNamespaces([]);
+    } else if (filterId === 'flow') {
+      setSelectedFlows([]);
+    } else if (filterId === 'scope') {
+      setSelectedScopes([]);
+    } else if (filterId === 'kind') {
+      setSelectedKinds([]);
+    } else if (filterId === 'subflow') {
+      setSelectedSubflows([]);
+    } else if (filterId === 'initial-execution') {
+      setSelectedInitialExecution(null);
     } else {
       setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
@@ -217,6 +287,16 @@ export default function ExecutionsPage() {
     setLabelsCustomValue('');
     // Clear namespaces
     setSelectedNamespaces([]);
+    // Clear flows
+    setSelectedFlows([]);
+    // Clear scopes
+    setSelectedScopes([]);
+    // Clear kinds
+    setSelectedKinds([]);
+    // Clear subflows
+    setSelectedSubflows([]);
+    // Clear initial execution
+    setSelectedInitialExecution(null);
     // Clear other active filters
     setActiveFilters([]);
     console.log('All filters reset to default values');
@@ -275,6 +355,16 @@ export default function ExecutionsPage() {
           onLabelsCustomValueChange={setLabelsCustomValue}
           selectedNamespaces={selectedNamespaces}
           onNamespacesSelectionChange={setSelectedNamespaces}
+          selectedFlows={selectedFlows}
+          onFlowsSelectionChange={setSelectedFlows}
+          selectedScopes={selectedScopes}
+          onScopesSelectionChange={setSelectedScopes}
+          selectedKinds={selectedKinds}
+          onKindsSelectionChange={setSelectedKinds}
+          selectedSubflows={selectedSubflows}
+          onSubflowsSelectionChange={setSelectedSubflows}
+          selectedInitialExecution={selectedInitialExecution}
+          onInitialExecutionSelectionChange={setSelectedInitialExecution}
         />
 
 
