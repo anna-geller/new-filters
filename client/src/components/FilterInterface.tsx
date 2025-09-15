@@ -8,6 +8,7 @@ import FilterBadge from './FilterBadge';
 import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
 import TablePropertiesPanel from './TablePropertiesPanel';
+import StateFilterEditor from './StateFilterEditor';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 
 interface FilterOption {
@@ -65,6 +66,8 @@ export default function FilterInterface({
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
+  const [stateFilterOpen, setStateFilterOpen] = useState(false);
+  const [selectedStates, setSelectedStates] = useState(['SUCCESS', 'RUNNING', 'FAILED']);
 
   const handleColumnToggle = (columnId: string) => {
     const updatedColumns = columns.map(col => 
@@ -132,6 +135,23 @@ export default function FilterInterface({
     setFilterOptions(reorderedFilters);
   };
 
+  const handleEditFilter = (filterId: string) => {
+    if (filterId === 'state') {
+      setStateFilterOpen(true);
+    }
+    onEditFilter(filterId);
+  };
+
+  const handleStateSelectionChange = (states: string[]) => {
+    setSelectedStates(states);
+    // Update the active filter value to reflect selection count
+    // This would typically trigger a parent state update
+  };
+
+  const handleCloseStateFilter = () => {
+    setStateFilterOpen(false);
+  };
+
   return (
     <div className="relative">
       <div className="flex items-center gap-3 p-4 border-b border-border">
@@ -157,7 +177,7 @@ export default function FilterInterface({
                 label={filter.label}
                 value={filter.value}
                 onClear={() => onClearFilter(filter.id)}
-                onEdit={() => onEditFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
               />
             ))}
           </div>
@@ -243,6 +263,17 @@ export default function FilterInterface({
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* State Filter Editor */}
+      {stateFilterOpen && (
+        <div className="px-4 py-3 border-b border-border bg-card/30 relative">
+          <StateFilterEditor
+            selectedStates={selectedStates}
+            onSelectionChange={handleStateSelectionChange}
+            onClose={handleCloseStateFilter}
+          />
         </div>
       )}
 
