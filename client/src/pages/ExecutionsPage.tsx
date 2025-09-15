@@ -161,6 +161,20 @@ export default function ExecutionsPage() {
     dynamicFilters.push(stateFilter);
   }
 
+  // Helper function to get short operator label for display
+  const getOperatorDisplayLabel = (operatorId: string) => {
+    const operatorMap = {
+      'in': 'in',
+      'not-in': 'not in',
+      'starts-with': 'starts with',
+      'ends-with': 'ends with',
+      'contains': 'contains',
+      'does-not-contain': 'does not contain',
+      'exactly-matches': 'exactly matches'
+    };
+    return operatorMap[operatorId as keyof typeof operatorMap] || operatorId;
+  };
+
   // Add labels filter if labels are selected or custom value is set
   const isTextBasedLabelsOperator = ['starts-with', 'ends-with', 'contains', 'does-not-contain', 'exactly-matches'].includes(labelsOperator);
   if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || (!isTextBasedLabelsOperator && selectedLabels.length > 0)) {
@@ -168,7 +182,7 @@ export default function ExecutionsPage() {
       id: 'labels',
       label: 'Labels',
       value: isTextBasedLabelsOperator ? labelsCustomValue : `${selectedLabels.length} selected`,
-      operator: labelsOperator
+      operator: getOperatorDisplayLabel(labelsOperator)
     };
     dynamicFilters.push(labelsFilter);
   }

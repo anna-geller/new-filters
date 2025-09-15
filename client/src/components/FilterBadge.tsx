@@ -30,7 +30,10 @@ export default function FilterBadge({ label, value, operator = "in", onClear, on
       <Button
         size="icon"
         variant="ghost"
-        onClick={onClear}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClear();
+        }}
         className="h-4 w-4 p-0 hover:bg-destructive/20"
         data-testid={`button-clear-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
       >

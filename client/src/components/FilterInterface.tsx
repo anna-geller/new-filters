@@ -489,7 +489,7 @@ export default function FilterInterface({
     <div className="relative">
       
       {/* First Row */}
-      <div className="flex items-center gap-3 p-4 border-b border-border">
+      <div className="flex items-center gap-3 p-4">
         {/* Customize Filters Button */}
         <Popover open={customizationOpen} onOpenChange={setCustomizationOpen}>
           <PopoverTrigger asChild>
@@ -524,7 +524,7 @@ export default function FilterInterface({
         />
 
         {/* Active Filter Badges in first row - space permitting */}
-        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0">
+        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0 mr-4">
           {firstRowFilters.map((filter) => {
             // State Filter with Popover
             if (filter.id === 'state') {
