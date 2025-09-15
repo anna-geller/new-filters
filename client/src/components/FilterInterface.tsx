@@ -11,6 +11,7 @@ import SearchBar from './SearchBar';
 import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
 import StateFilterEditor from './StateFilterEditor';
+import LabelsFilterEditor from './LabelsFilterEditor';
 import TimeRangeFilterEditor from './TimeRangeFilterEditor';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 
@@ -49,13 +50,19 @@ interface FilterInterfaceProps {
   timeRangeStartDate?: string;
   timeRangeEndDate?: string;
   onTimeRangeChange: (timeRange: string, startDate?: string, endDate?: string) => void;
+  selectedLabels: string[];
+  labelsOperator: string;
+  labelsCustomValue: string;
+  onLabelsSelectionChange: (labels: string[]) => void;
+  onLabelsOperatorChange: (operator: string) => void;
+  onLabelsCustomValueChange: (value: string) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
   { id: 'state', label: 'State', description: 'Filter by execution state', enabled: false, order: 1 },
-  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 2 },
-  { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 3 },
-  { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 4 },
+  { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 2 },
+  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 3 },
+  { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 4 },
   { id: 'duration', label: 'Duration', description: 'Filter by execution duration', enabled: false, order: 5 },
 ];
 
@@ -78,13 +85,20 @@ export default function FilterInterface({
   selectedTimeRange,
   timeRangeStartDate,
   timeRangeEndDate,
-  onTimeRangeChange
+  onTimeRangeChange,
+  selectedLabels,
+  labelsOperator,
+  labelsCustomValue,
+  onLabelsSelectionChange,
+  onLabelsOperatorChange,
+  onLabelsCustomValueChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
+  const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
   const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
 
   const handleColumnToggle = (columnId: string) => {
@@ -156,6 +170,8 @@ export default function FilterInterface({
   const handleEditFilter = (filterId: string) => {
     if (filterId === 'state') {
       setStateFilterOpen(true);
+    } else if (filterId === 'labels') {
+      setLabelsFilterOpen(true);
     } else if (filterId === 'timerange') {
       setTimeRangeFilterOpen(true);
     }
@@ -168,6 +184,22 @@ export default function FilterInterface({
 
   const handleCloseStateFilter = () => {
     setStateFilterOpen(false);
+  };
+
+  const handleLabelsSelectionChange = (labels: string[]) => {
+    onLabelsSelectionChange(labels);
+  };
+
+  const handleLabelsOperatorChange = (operator: string) => {
+    onLabelsOperatorChange(operator);
+  };
+
+  const handleLabelsCustomValueChange = (value: string) => {
+    onLabelsCustomValueChange(value);
+  };
+
+  const handleCloseLabelsFilter = () => {
+    setLabelsFilterOpen(false);
   };
 
   const handleTimeRangeChange = (timeRange: string, startDate?: string, endDate?: string) => {
@@ -241,6 +273,20 @@ export default function FilterInterface({
                   />
                 </div>
               )}
+              {/* Labels Filter Editor positioned directly below Labels badge */}
+              {filter.id === 'labels' && labelsFilterOpen && (
+                <div className="absolute top-full left-0 mt-2 z-50">
+                  <LabelsFilterEditor
+                    selectedLabels={selectedLabels}
+                    selectedOperator={labelsOperator}
+                    customValue={labelsCustomValue}
+                    onSelectionChange={handleLabelsSelectionChange}
+                    onOperatorChange={handleLabelsOperatorChange}
+                    onCustomValueChange={handleLabelsCustomValueChange}
+                    onClose={handleCloseLabelsFilter}
+                  />
+                </div>
+              )}
               {/* Time Range Filter Editor positioned directly below Time range badge */}
               {filter.id === 'timerange' && timeRangeFilterOpen && (
                 <div className="absolute top-full left-0 mt-2 z-50">
@@ -300,6 +346,20 @@ export default function FilterInterface({
                       selectedStates={selectedStates}
                       onSelectionChange={handleStateSelectionChange}
                       onClose={handleCloseStateFilter}
+                    />
+                  </div>
+                )}
+                {/* Labels Filter Editor positioned directly below Labels badge */}
+                {filter.id === 'labels' && labelsFilterOpen && (
+                  <div className="absolute top-full left-0 mt-2 z-50">
+                    <LabelsFilterEditor
+                      selectedLabels={selectedLabels}
+                      selectedOperator={labelsOperator}
+                      customValue={labelsCustomValue}
+                      onSelectionChange={handleLabelsSelectionChange}
+                      onOperatorChange={handleLabelsOperatorChange}
+                      onCustomValueChange={handleLabelsCustomValueChange}
+                      onClose={handleCloseLabelsFilter}
                     />
                   </div>
                 )}

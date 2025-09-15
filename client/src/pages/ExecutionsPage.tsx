@@ -109,6 +109,9 @@ export default function ExecutionsPage() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('last-7-days');
   const [timeRangeStartDate, setTimeRangeStartDate] = useState<string>();
   const [timeRangeEndDate, setTimeRangeEndDate] = useState<string>();
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
+  const [labelsOperator, setLabelsOperator] = useState('in');
+  const [labelsCustomValue, setLabelsCustomValue] = useState('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
@@ -140,12 +143,27 @@ export default function ExecutionsPage() {
     };
     dynamicFilters.push(stateFilter);
   }
+
+  // Add labels filter if labels are selected or custom value is set
+  const isTextBasedLabelsOperator = ['starts-with', 'ends-with', 'contains', 'does-not-contain', 'exactly-matches'].includes(labelsOperator);
+  if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || (!isTextBasedLabelsOperator && selectedLabels.length > 0)) {
+    const labelsFilter = {
+      id: 'labels',
+      label: 'Labels',
+      value: isTextBasedLabelsOperator ? labelsCustomValue : `${selectedLabels.length} selected`,
+      operator: labelsOperator
+    };
+    dynamicFilters.push(labelsFilter);
+  }
   
   const allActiveFilters = [...dynamicFilters, ...activeFilters];
 
   const handleClearFilter = (filterId: string) => {
     if (filterId === 'state') {
       setSelectedStates([]);
+    } else if (filterId === 'labels') {
+      setSelectedLabels([]);
+      setLabelsCustomValue('');
     } else {
       setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
@@ -179,6 +197,10 @@ export default function ExecutionsPage() {
     setTimeRangeEndDate(undefined);
     // Clear selected states
     setSelectedStates([]);
+    // Clear labels
+    setSelectedLabels([]);
+    setLabelsOperator('in');
+    setLabelsCustomValue('');
     // Clear other active filters
     setActiveFilters([]);
     console.log('All filters reset to default values');
@@ -229,6 +251,12 @@ export default function ExecutionsPage() {
           timeRangeStartDate={timeRangeStartDate}
           timeRangeEndDate={timeRangeEndDate}
           onTimeRangeChange={handleTimeRangeChange}
+          selectedLabels={selectedLabels}
+          labelsOperator={labelsOperator}
+          labelsCustomValue={labelsCustomValue}
+          onLabelsSelectionChange={setSelectedLabels}
+          onLabelsOperatorChange={setLabelsOperator}
+          onLabelsCustomValueChange={setLabelsCustomValue}
         />
 
 
