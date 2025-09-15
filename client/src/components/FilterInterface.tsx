@@ -171,15 +171,26 @@ export default function FilterInterface({
 
         {/* Active Filter Badges - Only after search bar */}
         {activeFilters.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap relative">
             {activeFilters.map((filter) => (
-              <FilterBadge
-                key={filter.id}
-                label={filter.label}
-                value={filter.value}
-                onClear={() => onClearFilter(filter.id)}
-                onEdit={() => handleEditFilter(filter.id)}
-              />
+              <div key={filter.id} className="relative">
+                <FilterBadge
+                  label={filter.label}
+                  value={filter.value}
+                  onClear={() => onClearFilter(filter.id)}
+                  onEdit={() => handleEditFilter(filter.id)}
+                />
+                {/* State Filter Editor positioned directly below State badge */}
+                {filter.id === 'state' && stateFilterOpen && (
+                  <div className="absolute top-full left-0 mt-2 z-50">
+                    <StateFilterEditor
+                      selectedStates={selectedStates}
+                      onSelectionChange={handleStateSelectionChange}
+                      onClose={handleCloseStateFilter}
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
@@ -267,16 +278,6 @@ export default function FilterInterface({
         </div>
       )}
 
-      {/* State Filter Editor */}
-      {stateFilterOpen && (
-        <div className="px-4 py-3 border-b border-border bg-card/30 relative">
-          <StateFilterEditor
-            selectedStates={selectedStates}
-            onSelectionChange={handleStateSelectionChange}
-            onClose={handleCloseStateFilter}
-          />
-        </div>
-      )}
 
       {/* Customization Panel */}
       <FilterCustomizationPanel

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play } from "lucide-react";
+import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play, XCircle, X, AlertTriangle, Pause, Ban, SkipForward, Clock, RefreshCw, Circle } from "lucide-react";
 
 const stateOptions = [
   { 
@@ -28,6 +28,72 @@ const stateOptions = [
     label: 'RUNNING', 
     icon: Play,
     description: 'Execution is currently running'
+  },
+  { 
+    id: 'KILLING', 
+    label: 'KILLING', 
+    icon: XCircle,
+    description: 'Execution is being killed'
+  },
+  { 
+    id: 'KILLED', 
+    label: 'KILLED', 
+    icon: X,
+    description: 'Execution has been killed'
+  },
+  { 
+    id: 'WARNING', 
+    label: 'WARNING', 
+    icon: AlertTriangle,
+    description: 'Execution completed with warnings'
+  },
+  { 
+    id: 'FAILED', 
+    label: 'FAILED', 
+    icon: XCircle,
+    description: 'Execution has failed'
+  },
+  { 
+    id: 'PAUSED', 
+    label: 'PAUSED', 
+    icon: Pause,
+    description: 'Execution has been paused'
+  },
+  { 
+    id: 'CANCELLED', 
+    label: 'CANCELLED', 
+    icon: Ban,
+    description: 'Execution has been cancelled'
+  },
+  { 
+    id: 'SKIPPED', 
+    label: 'SKIPPED', 
+    icon: SkipForward,
+    description: 'Execution has been skipped'
+  },
+  { 
+    id: 'QUEUED', 
+    label: 'QUEUED', 
+    icon: Clock,
+    description: 'Execution is queued for processing'
+  },
+  { 
+    id: 'RETRYING', 
+    label: 'RETRYING', 
+    icon: RefreshCw,
+    description: 'Execution is being retried'
+  },
+  { 
+    id: 'RETRIED', 
+    label: 'RETRIED', 
+    icon: RotateCcw,
+    description: 'Execution has been retried'
+  },
+  { 
+    id: 'BREAKPOINT', 
+    label: 'BREAKPOINT', 
+    icon: Circle,
+    description: 'Execution stopped at breakpoint'
   },
 ];
 
@@ -74,7 +140,7 @@ export default function StateFilterEditor({
   const noneVisible = filteredStates.every(state => !selectedStates.includes(state.id));
 
   return (
-    <Card className="absolute top-full left-0 mt-2 w-96 p-0 bg-popover border border-popover-border shadow-lg z-50">
+    <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with search */}
       <div className="p-4 border-b border-border">
         <Input
