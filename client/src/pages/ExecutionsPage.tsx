@@ -107,7 +107,7 @@ const mockExecutions = [
 
 export default function ExecutionsPage() {
   const [searchValue, setSearchValue] = useState('');
-  const [selectedStates, setSelectedStates] = useState(['SUCCESS', 'RUNNING', 'CREATED']);
+  const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [selectedTimeRange, setSelectedTimeRange] = useState('last-7-days');
   const [timeRangeStartDate, setTimeRangeStartDate] = useState<string>();
   const [timeRangeEndDate, setTimeRangeEndDate] = useState<string>();
