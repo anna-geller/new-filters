@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FilterInterface from '@/components/FilterInterface';
 import ExecutionsTable, { ColumnConfig, defaultColumns } from '@/components/ExecutionsTable';
+import { SavedFilter } from '@/types/savedFilters';
+import { savedFiltersStorage } from '@/utils/savedFiltersStorage';
 
 interface ActiveFilter {
   id: string;
@@ -121,6 +123,15 @@ export default function ExecutionsPage() {
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
+  
+  // Saved filters state
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+
+  // Load saved filters on component mount
+  useEffect(() => {
+    const loadedFilters = savedFiltersStorage.getAll();
+    setSavedFilters(loadedFilters);
+  }, []);
   
   // Helper function to get display value for time range
   const getTimeRangeDisplayValue = () => {
@@ -302,6 +313,84 @@ export default function ExecutionsPage() {
     console.log('All filters reset to default values');
   };
 
+  // Get current filter state for saving
+  const getCurrentFilterState = (): SavedFilter['filterState'] => {
+    return {
+      searchValue,
+      selectedStates,
+      selectedTimeRange,
+      timeRangeStartDate,
+      timeRangeEndDate,
+      selectedLabels,
+      labelsOperator,
+      labelsCustomValue,
+      selectedNamespaces,
+      selectedFlows,
+      selectedScopes,
+      selectedKinds,
+      selectedSubflows,
+      selectedInitialExecution,
+    };
+  };
+
+  // Save current filter state
+  const handleSaveFilter = (name: string, description: string) => {
+    const filterId = `filter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date().toISOString();
+    
+    const newFilter: SavedFilter = {
+      id: filterId,
+      name,
+      description,
+      createdAt: now,
+      updatedAt: now,
+      filterState: getCurrentFilterState(),
+    };
+
+    savedFiltersStorage.save(newFilter);
+    const updatedFilters = savedFiltersStorage.getAll();
+    setSavedFilters(updatedFilters);
+    console.log('Filter saved:', name);
+  };
+
+  // Load a saved filter
+  const handleLoadFilter = (filter: SavedFilter) => {
+    const state = filter.filterState;
+    
+    setSearchValue(state.searchValue);
+    setSelectedStates(state.selectedStates);
+    setSelectedTimeRange(state.selectedTimeRange);
+    setTimeRangeStartDate(state.timeRangeStartDate);
+    setTimeRangeEndDate(state.timeRangeEndDate);
+    setSelectedLabels(state.selectedLabels);
+    setLabelsOperator(state.labelsOperator);
+    setLabelsCustomValue(state.labelsCustomValue);
+    setSelectedNamespaces(state.selectedNamespaces);
+    setSelectedFlows(state.selectedFlows);
+    setSelectedScopes(state.selectedScopes);
+    setSelectedKinds(state.selectedKinds);
+    setSelectedSubflows(state.selectedSubflows);
+    setSelectedInitialExecution(state.selectedInitialExecution);
+    
+    console.log('Filter loaded:', filter.name);
+  };
+
+  // Delete a saved filter
+  const handleDeleteFilter = (filterId: string) => {
+    savedFiltersStorage.delete(filterId);
+    const updatedFilters = savedFiltersStorage.getAll();
+    setSavedFilters(updatedFilters);
+    console.log('Filter deleted:', filterId);
+  };
+
+  // Update saved filter metadata
+  const handleUpdateFilter = (filterId: string, name: string, description: string) => {
+    savedFiltersStorage.update(filterId, { name, description });
+    const updatedFilters = savedFiltersStorage.getAll();
+    setSavedFilters(updatedFilters);
+    console.log('Filter updated:', filterId);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -365,6 +454,11 @@ export default function ExecutionsPage() {
           onSubflowsSelectionChange={setSelectedSubflows}
           selectedInitialExecution={selectedInitialExecution}
           onInitialExecutionSelectionChange={setSelectedInitialExecution}
+          savedFilters={savedFilters}
+          onSaveFilter={handleSaveFilter}
+          onLoadFilter={handleLoadFilter}
+          onDeleteFilter={handleDeleteFilter}
+          onUpdateFilter={handleUpdateFilter}
         />
 
 

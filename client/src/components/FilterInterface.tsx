@@ -19,7 +19,11 @@ import KindFilterEditor from './KindFilterEditor';
 import SubflowFilterEditor from './SubflowFilterEditor';
 import InitialExecutionFilterEditor from './InitialExecutionFilterEditor';
 import TimeRangeFilterEditor from './TimeRangeFilterEditor';
+import SaveFilterButton from './SaveFilterButton';
+import SavedFiltersDropdown from './SavedFiltersDropdown';
+import SaveFilterDialog from './SaveFilterDialog';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
+import { SavedFilter } from '../types/savedFilters';
 
 interface FilterOption {
   id: string;
@@ -74,6 +78,11 @@ interface FilterInterfaceProps {
   onSubflowsSelectionChange: (subflows: string[]) => void;
   selectedInitialExecution: boolean | null;
   onInitialExecutionSelectionChange: (value: boolean | null) => void;
+  savedFilters: SavedFilter[];
+  onSaveFilter: (name: string, description: string) => void;
+  onLoadFilter: (filter: SavedFilter) => void;
+  onDeleteFilter: (filterId: string) => void;
+  onUpdateFilter: (filterId: string, name: string, description: string) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -126,7 +135,12 @@ export default function FilterInterface({
   selectedSubflows,
   onSubflowsSelectionChange,
   selectedInitialExecution,
-  onInitialExecutionSelectionChange
+  onInitialExecutionSelectionChange,
+  savedFilters,
+  onSaveFilter,
+  onLoadFilter,
+  onDeleteFilter,
+  onUpdateFilter
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
@@ -141,6 +155,7 @@ export default function FilterInterface({
   const [subflowFilterOpen, setSubflowFilterOpen] = useState(false);
   const [initialExecutionFilterOpen, setInitialExecutionFilterOpen] = useState(false);
   const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
+  const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
 
   const handleColumnToggle = (columnId: string) => {
     const updatedColumns = columns.map(col => 
@@ -302,6 +317,21 @@ export default function FilterInterface({
     onInitialExecutionSelectionChange(value);
   };
 
+  // Save filter handlers
+  const handleSaveFilterClick = () => {
+    setSaveFilterDialogOpen(true);
+  };
+
+  const handleSaveFilterSubmit = (name: string, description: string) => {
+    onSaveFilter(name, description);
+    setSaveFilterDialogOpen(false);
+  };
+
+  const handleEditSavedFilter = (filterId: string) => {
+    // For now, we'll just log it - full edit functionality could be added later
+    console.log('Edit saved filter:', filterId);
+  };
+
   const handleCloseNamespaceFilter = () => {
     setNamespaceFilterOpen(false);
   };
@@ -415,6 +445,19 @@ export default function FilterInterface({
         {/* Reset Button */}
         <ResetFiltersButton
           onClick={onResetFilters}
+        />
+
+        {/* Save Filter Button */}
+        <SaveFilterButton
+          onClick={handleSaveFilterClick}
+        />
+
+        {/* Saved Filters Dropdown */}
+        <SavedFiltersDropdown
+          savedFilters={savedFilters}
+          onLoadFilter={onLoadFilter}
+          onDeleteFilter={onDeleteFilter}
+          onEditFilter={handleEditSavedFilter}
         />
 
         {/* Search Bar */}
@@ -637,6 +680,13 @@ export default function FilterInterface({
         onToggleFilter={handleToggleFilter}
         onReorderFilters={handleFilterReorder}
         onClose={() => setCustomizationOpen(false)}
+      />
+
+      {/* Save Filter Dialog */}
+      <SaveFilterDialog
+        isOpen={saveFilterDialogOpen}
+        onClose={() => setSaveFilterDialogOpen(false)}
+        onSave={handleSaveFilterSubmit}
       />
 
       {/* Table Properties Panel */}
