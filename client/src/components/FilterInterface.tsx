@@ -91,8 +91,8 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 2 },
   { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 3 },
   { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 4 },
-  { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: false, order: 5 },
-  { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: false, order: 6 },
+  { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
+  { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
   { id: 'subflow', label: 'Subflow', description: 'Filter by subflow name', enabled: false, order: 7 },
   { id: 'initial-execution', label: 'Parent Execution ID', description: 'Filter by parent execution ID', enabled: false, order: 8 },
   { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 9 },
@@ -382,12 +382,30 @@ export default function FilterInterface({
     setInitialExecutionFilterOpen(false);
   };
 
-  // Get enabled filters in order for display (excluding timerange since it's a direct control)
-  const enabledFilters = filterOptions
-    .filter(option => option.enabled && option.id !== 'timerange') // Exclude timerange as it's now a direct control
-    .sort((a, b) => a.order - b.order)
-    .map(option => activeFilters.find(filter => filter.id === option.id))
-    .filter(Boolean) as ActiveFilter[];
+  // Get all filters that have data OR are enabled for display
+  const allAvailableFilters = [...activeFilters];
+  
+  // Add placeholder filters for enabled options that don't have data yet
+  filterOptions
+    .filter(option => option.enabled)
+    .forEach(option => {
+      if (!activeFilters.find(filter => filter.id === option.id)) {
+        // Add placeholder filter for enabled options without data
+        allAvailableFilters.push({
+          id: option.id,
+          label: option.label,
+          value: 'Configure',
+          operator: 'in'
+        });
+      }
+    });
+  
+  const enabledFilters = allAvailableFilters
+    .sort((a, b) => {
+      const aOption = filterOptions.find(opt => opt.id === a.id);
+      const bOption = filterOptions.find(opt => opt.id === b.id);
+      return (aOption?.order || 999) - (bOption?.order || 999);
+    });
 
   // Dynamic filter wrapping calculation
   const calculateFilterDistribution = useCallback((availableWidth: number, filters: ActiveFilter[]) => {

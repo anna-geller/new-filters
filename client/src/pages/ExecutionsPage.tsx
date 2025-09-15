@@ -116,7 +116,7 @@ export default function ExecutionsPage() {
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
-  const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
+  const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
   const [selectedSubflows, setSelectedSubflows] = useState<string[]>([]);
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
@@ -148,7 +148,7 @@ export default function ExecutionsPage() {
   // Build active filters array
   const dynamicFilters = [];
   
-  // Time range is now a direct control, not a filter badge
+  // Building dynamic filters from current state
   
   // Add state filter if states are selected
   if (selectedStates.length > 0) {
@@ -261,9 +261,9 @@ export default function ExecutionsPage() {
     } else if (filterId === 'flow') {
       setSelectedFlows([]);
     } else if (filterId === 'scope') {
-      setSelectedScopes([]);
+      setSelectedScopes(['user']);
     } else if (filterId === 'kind') {
-      setSelectedKinds([]);
+      setSelectedKinds(['default']);
     } else if (filterId === 'subflow') {
       setSelectedSubflows([]);
     } else if (filterId === 'initial-execution') {
@@ -313,8 +313,8 @@ export default function ExecutionsPage() {
     setSelectedNamespaces([]);
     // Clear flows
     setSelectedFlows([]);
-    // Clear scopes
-    setSelectedScopes([]);
+    // Reset scopes to default
+    setSelectedScopes(['user']);
     // Clear kinds
     setSelectedKinds(['default']);
     // Clear subflows
