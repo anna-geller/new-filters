@@ -7,6 +7,7 @@ import CustomizeFiltersButton from './CustomizeFiltersButton';
 import FilterBadge from './FilterBadge';
 import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
+import TablePropertiesPanel from './TablePropertiesPanel';
 
 interface FilterOption {
   id: string;
@@ -58,6 +59,7 @@ export default function FilterInterface({
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
+  const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
 
   const handleToggleFilter = (filterId: string) => {
@@ -172,7 +174,7 @@ export default function FilterInterface({
             <Button
               variant="ghost"
               size="sm"
-              onClick={onTableOptions}
+              onClick={() => setTablePropertiesOpen(!tablePropertiesOpen)}
               className="flex items-center gap-2 hover-elevate"
               data-testid="button-table-properties"
             >
@@ -189,6 +191,12 @@ export default function FilterInterface({
         filterOptions={filterOptions}
         onToggleFilter={handleToggleFilter}
         onClose={() => setCustomizationOpen(false)}
+      />
+
+      {/* Table Properties Panel */}
+      <TablePropertiesPanel
+        isOpen={tablePropertiesOpen}
+        onClose={() => setTablePropertiesOpen(false)}
       />
     </div>
   );
