@@ -112,6 +112,7 @@ export default function ExecutionsPage() {
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const [labelsOperator, setLabelsOperator] = useState('in');
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
+  const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
@@ -155,6 +156,17 @@ export default function ExecutionsPage() {
     };
     dynamicFilters.push(labelsFilter);
   }
+
+  // Add namespace filter if namespaces are selected
+  if (selectedNamespaces.length > 0) {
+    const namespaceFilter = {
+      id: 'namespace',
+      label: 'Namespace',
+      value: `${selectedNamespaces.length} selected`,
+      operator: 'in'
+    };
+    dynamicFilters.push(namespaceFilter);
+  }
   
   const allActiveFilters = [...dynamicFilters, ...activeFilters];
 
@@ -164,6 +176,8 @@ export default function ExecutionsPage() {
     } else if (filterId === 'labels') {
       setSelectedLabels([]);
       setLabelsCustomValue('');
+    } else if (filterId === 'namespace') {
+      setSelectedNamespaces([]);
     } else {
       setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
@@ -201,6 +215,8 @@ export default function ExecutionsPage() {
     setSelectedLabels([]);
     setLabelsOperator('in');
     setLabelsCustomValue('');
+    // Clear namespaces
+    setSelectedNamespaces([]);
     // Clear other active filters
     setActiveFilters([]);
     console.log('All filters reset to default values');
@@ -257,6 +273,8 @@ export default function ExecutionsPage() {
           onLabelsSelectionChange={setSelectedLabels}
           onLabelsOperatorChange={setLabelsOperator}
           onLabelsCustomValueChange={setLabelsCustomValue}
+          selectedNamespaces={selectedNamespaces}
+          onNamespacesSelectionChange={setSelectedNamespaces}
         />
 
 

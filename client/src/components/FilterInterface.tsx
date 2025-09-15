@@ -12,6 +12,7 @@ import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
 import StateFilterEditor from './StateFilterEditor';
 import LabelsFilterEditor from './LabelsFilterEditor';
+import NamespaceFilterEditor from './NamespaceFilterEditor';
 import TimeRangeFilterEditor from './TimeRangeFilterEditor';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 
@@ -56,13 +57,15 @@ interface FilterInterfaceProps {
   onLabelsSelectionChange: (labels: string[]) => void;
   onLabelsOperatorChange: (operator: string) => void;
   onLabelsCustomValueChange: (value: string) => void;
+  selectedNamespaces: string[];
+  onNamespacesSelectionChange: (namespaces: string[]) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
   { id: 'state', label: 'State', description: 'Filter by execution state', enabled: false, order: 1 },
   { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 2 },
-  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 3 },
-  { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 4 },
+  { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 3 },
+  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 4 },
   { id: 'duration', label: 'Duration', description: 'Filter by execution duration', enabled: false, order: 5 },
 ];
 
@@ -91,7 +94,9 @@ export default function FilterInterface({
   labelsCustomValue,
   onLabelsSelectionChange,
   onLabelsOperatorChange,
-  onLabelsCustomValueChange
+  onLabelsCustomValueChange,
+  selectedNamespaces,
+  onNamespacesSelectionChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
@@ -99,6 +104,7 @@ export default function FilterInterface({
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
+  const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
   const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
 
   const handleColumnToggle = (columnId: string) => {
@@ -146,6 +152,15 @@ export default function FilterInterface({
           : option
       )
     );
+    
+    // Auto-open namespace editor when namespace filter is enabled
+    if (filterId === 'namespace') {
+      const filterOption = filterOptions.find(option => option.id === 'namespace');
+      if (filterOption && !filterOption.enabled) {
+        // Filter is being enabled, so open the editor
+        setNamespaceFilterOpen(true);
+      }
+    }
   };
 
   const handleFilterReorder = (draggedId: string, targetId: string) => {
@@ -172,6 +187,8 @@ export default function FilterInterface({
       setStateFilterOpen(true);
     } else if (filterId === 'labels') {
       setLabelsFilterOpen(true);
+    } else if (filterId === 'namespace') {
+      setNamespaceFilterOpen(true);
     } else if (filterId === 'timerange') {
       setTimeRangeFilterOpen(true);
     }
@@ -202,6 +219,14 @@ export default function FilterInterface({
     setLabelsFilterOpen(false);
   };
 
+  const handleNamespacesSelectionChange = (namespaces: string[]) => {
+    onNamespacesSelectionChange(namespaces);
+  };
+
+  const handleCloseNamespaceFilter = () => {
+    setNamespaceFilterOpen(false);
+  };
+
   const handleTimeRangeChange = (timeRange: string, startDate?: string, endDate?: string) => {
     onTimeRangeChange(timeRange, startDate, endDate);
   };
@@ -224,6 +249,17 @@ export default function FilterInterface({
 
   return (
     <div className="relative">
+      {/* Top-level Namespace Filter Editor - rendered when enabled, independent of badges */}
+      {namespaceFilterOpen && (
+        <div className="absolute top-full left-0 mt-2 z-50">
+          <NamespaceFilterEditor
+            selectedNamespaces={selectedNamespaces}
+            onSelectionChange={handleNamespacesSelectionChange}
+            onClose={handleCloseNamespaceFilter}
+          />
+        </div>
+      )}
+      
       {/* First Row */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
         {/* Customize Filters Button */}
@@ -284,6 +320,16 @@ export default function FilterInterface({
                     onOperatorChange={handleLabelsOperatorChange}
                     onCustomValueChange={handleLabelsCustomValueChange}
                     onClose={handleCloseLabelsFilter}
+                  />
+                </div>
+              )}
+              {/* Namespace Filter Editor positioned directly below Namespace badge */}
+              {filter.id === 'namespace' && namespaceFilterOpen && (
+                <div className="absolute top-full left-0 mt-2 z-50">
+                  <NamespaceFilterEditor
+                    selectedNamespaces={selectedNamespaces}
+                    onSelectionChange={handleNamespacesSelectionChange}
+                    onClose={handleCloseNamespaceFilter}
                   />
                 </div>
               )}
@@ -360,6 +406,16 @@ export default function FilterInterface({
                       onOperatorChange={handleLabelsOperatorChange}
                       onCustomValueChange={handleLabelsCustomValueChange}
                       onClose={handleCloseLabelsFilter}
+                    />
+                  </div>
+                )}
+                {/* Namespace Filter Editor positioned directly below Namespace badge */}
+                {filter.id === 'namespace' && namespaceFilterOpen && (
+                  <div className="absolute top-full left-0 mt-2 z-50">
+                    <NamespaceFilterEditor
+                      selectedNamespaces={selectedNamespaces}
+                      onSelectionChange={handleNamespacesSelectionChange}
+                      onClose={handleCloseNamespaceFilter}
                     />
                   </div>
                 )}
