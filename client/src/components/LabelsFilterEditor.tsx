@@ -142,7 +142,9 @@ export default function LabelsFilterEditor({
           </label>
           <Select value={selectedOperator} onValueChange={onOperatorChange}>
             <SelectTrigger data-testid="select-labels-operator">
-              <SelectValue placeholder="Select operator..." />
+              <SelectValue placeholder="Select operator...">
+                {selectedOperatorObj?.label || "Select operator..."}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {operatorOptions.map((operator) => (

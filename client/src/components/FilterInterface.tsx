@@ -524,7 +524,7 @@ export default function FilterInterface({
         />
 
         {/* Active Filter Badges in first row - space permitting */}
-        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0 mr-4">
+        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden" style={{maxWidth: 'calc(100% - 320px)'}}>
           {firstRowFilters.map((filter) => {
             // State Filter with Popover
             if (filter.id === 'state') {
