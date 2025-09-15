@@ -104,16 +104,31 @@ const mockExecutions = [
 
 export default function ExecutionsPage() {
   const [searchValue, setSearchValue] = useState('');
-  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([
-    { id: 'state', label: 'State', value: '6 selected' },
-    { id: 'timerange', label: 'Time range', value: 'last 7 days' }
-  ]);
+  const [selectedStates, setSelectedStates] = useState(['SUCCESS', 'RUNNING', 'CREATED']);
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
+  
+  // Derive active filters from state
+  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([
+    { id: 'timerange', label: 'Time range', value: 'last 7 days' }
+  ]);
+  
+  // Add state filter to active filters if states are selected
+  const stateFilter = selectedStates.length > 0 
+    ? { id: 'state', label: 'State', value: `${selectedStates.length} selected` }
+    : null;
+  
+  const allActiveFilters = stateFilter 
+    ? [stateFilter, ...activeFilters]
+    : activeFilters;
 
   const handleClearFilter = (filterId: string) => {
-    setActiveFilters(prev => prev.filter(f => f.id !== filterId));
+    if (filterId === 'state') {
+      setSelectedStates([]);
+    } else {
+      setActiveFilters(prev => prev.filter(f => f.id !== filterId));
+    }
     console.log(`Cleared filter: ${filterId}`);
   };
 
@@ -157,7 +172,7 @@ export default function ExecutionsPage() {
         <FilterInterface
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          activeFilters={activeFilters}
+          activeFilters={allActiveFilters}
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
           showChart={showChart}
@@ -167,6 +182,8 @@ export default function ExecutionsPage() {
           onRefreshData={handleRefreshData}
           columns={columns}
           onColumnsChange={handleColumnsChange}
+          selectedStates={selectedStates}
+          onSelectedStatesChange={setSelectedStates}
         />
 
 

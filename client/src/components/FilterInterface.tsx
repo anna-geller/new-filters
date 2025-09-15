@@ -38,6 +38,8 @@ interface FilterInterfaceProps {
   onRefreshData: () => void;
   columns: ColumnConfig[];
   onColumnsChange: (columns: ColumnConfig[]) => void;
+  selectedStates: string[];
+  onSelectedStatesChange: (states: string[]) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -60,14 +62,15 @@ export default function FilterInterface({
   onTogglePeriodicRefresh,
   onRefreshData,
   columns,
-  onColumnsChange
+  onColumnsChange,
+  selectedStates,
+  onSelectedStatesChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
-  const [selectedStates, setSelectedStates] = useState(['SUCCESS', 'RUNNING', 'FAILED']);
 
   const handleColumnToggle = (columnId: string) => {
     const updatedColumns = columns.map(col => 
@@ -143,9 +146,7 @@ export default function FilterInterface({
   };
 
   const handleStateSelectionChange = (states: string[]) => {
-    setSelectedStates(states);
-    // Update the active filter value to reflect selection count
-    // This would typically trigger a parent state update
+    onSelectedStatesChange(states);
   };
 
   const handleCloseStateFilter = () => {
