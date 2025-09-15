@@ -62,7 +62,14 @@ export default function FilterInterface({
           isOpen={customizationOpen}
         />
 
-        {/* Active Filter Badges */}
+        {/* Search Bar - Always shown first */}
+        <SearchBar
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder="Search executions..."
+        />
+
+        {/* Active Filter Badges - Only after search bar */}
         {activeFilters.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             {activeFilters.map((filter) => (
@@ -77,12 +84,15 @@ export default function FilterInterface({
           </div>
         )}
 
-        {/* Search Bar */}
-        <SearchBar
-          value={searchValue}
-          onChange={onSearchChange}
-          placeholder="Search executions..."
-        />
+        {/* Save Filter and Saved Filters - Right aligned */}
+        <div className="ml-auto flex items-center gap-3">
+          <button className="text-sm text-primary hover:text-primary/80">
+            Save filter
+          </button>
+          <button className="text-sm text-muted-foreground hover:text-foreground">
+            Saved filters
+          </button>
+        </div>
       </div>
 
       {/* Customization Panel */}

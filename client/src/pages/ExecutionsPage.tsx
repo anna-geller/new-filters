@@ -162,38 +162,6 @@ export default function ExecutionsPage() {
           onEditFilter={handleEditFilter}
         />
 
-        {/* Applied Filters Summary (when filters are active) */}
-        {activeFilters.length > 0 && (
-          <div className="px-4 py-2 bg-card/30 border-b border-border">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
-                <span className="text-foreground">Scope: User Executions</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-foreground">Subflow: All Executions</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-foreground">Time range: Last 7 days</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-foreground">Kind: Default</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-foreground">State: to SUCCESS, CREATED</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setActiveFilters([])}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Clear all
-                </button>
-                <button className="text-primary hover:text-primary/80">
-                  Save filter
-                </button>
-                <button className="text-muted-foreground hover:text-foreground">
-                  Saved filters
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Chart Toggle */}
         <div className="px-4 py-3 border-b border-border">
