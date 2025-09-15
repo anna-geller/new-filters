@@ -465,7 +465,7 @@ export default function FilterInterface({
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const availableWidth = entry.contentRect.width - 80; // More conservative spacing for complete badge visibility
+        const availableWidth = entry.contentRect.width - 200; // Much more aggressive wrapping to prevent overlap
         calculateFilterDistribution(availableWidth, enabledFilters);
       }
     });
@@ -480,7 +480,7 @@ export default function FilterInterface({
   // Update filter distribution when enabledFilters change
   useEffect(() => {
     if (firstRowContainerRef.current) {
-      const availableWidth = firstRowContainerRef.current.offsetWidth - 80;
+      const availableWidth = firstRowContainerRef.current.offsetWidth - 200; // Much more aggressive wrapping to prevent overlap
       calculateFilterDistribution(availableWidth, enabledFilters);
     }
   }, [enabledFilters, calculateFilterDistribution]);
@@ -527,7 +527,7 @@ export default function FilterInterface({
         </div>
 
         {/* Middle Section: Filter Badges with guaranteed space */}
-        <div className="flex-1 min-w-0 pr-6">
+        <div className="flex-1 min-w-0 pr-8" style={{maxWidth: 'calc(100% - 500px)'}}>
           <div ref={firstRowContainerRef} className="flex items-center gap-2 overflow-hidden">
             {firstRowFilters.map((filter) => {
             // State Filter with Popover
