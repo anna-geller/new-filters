@@ -1,0 +1,39 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { X, Edit2 } from "lucide-react";
+
+interface FilterBadgeProps {
+  label: string;
+  value: string;
+  onClear: () => void;
+  onEdit: () => void;
+}
+
+export default function FilterBadge({ label, value, onClear, onEdit }: FilterBadgeProps) {
+  return (
+    <Badge 
+      variant="secondary" 
+      className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary-foreground hover-elevate"
+      data-testid={`badge-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <button
+        onClick={onEdit}
+        className="flex items-center gap-1 hover:opacity-80"
+        data-testid={`button-edit-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <span className="text-xs font-medium">{label}:</span>
+        <span className="text-xs">{value}</span>
+        <Edit2 className="h-3 w-3 opacity-70" />
+      </button>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={onClear}
+        className="h-4 w-4 p-0 hover:bg-destructive/20"
+        data-testid={`button-clear-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <X className="h-3 w-3" />
+      </Button>
+    </Badge>
+  );
+}
