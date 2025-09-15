@@ -105,27 +105,55 @@ const mockExecutions = [
 export default function ExecutionsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [selectedStates, setSelectedStates] = useState(['SUCCESS', 'RUNNING', 'CREATED']);
+  const [selectedTimeRange, setSelectedTimeRange] = useState('last-7-days');
+  const [timeRangeStartDate, setTimeRangeStartDate] = useState<string>();
+  const [timeRangeEndDate, setTimeRangeEndDate] = useState<string>();
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
   
+  // Helper function to get display value for time range
+  const getTimeRangeDisplayValue = () => {
+    if (selectedTimeRange === 'custom-range' && timeRangeStartDate && timeRangeEndDate) {
+      return `${new Date(timeRangeStartDate).toLocaleDateString()} - ${new Date(timeRangeEndDate).toLocaleDateString()}`;
+    }
+    // Convert kebab-case to readable format
+    return selectedTimeRange.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+  
   // Derive active filters from state
-  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([
-    { id: 'timerange', label: 'Time range', value: 'last 7 days' }
-  ]);
+  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   
-  // Add state filter to active filters if states are selected
-  const stateFilter = selectedStates.length > 0 
-    ? { id: 'state', label: 'State', value: `${selectedStates.length} selected` }
-    : null;
+  // Build active filters array
+  const dynamicFilters = [];
   
-  const allActiveFilters = stateFilter 
-    ? [stateFilter, ...activeFilters]
-    : activeFilters;
+  // Add time range filter
+  const timeRangeFilter = {
+    id: 'timerange',
+    label: 'Time range',
+    value: getTimeRangeDisplayValue()
+  };
+  dynamicFilters.push(timeRangeFilter);
+  
+  // Add state filter if states are selected
+  if (selectedStates.length > 0) {
+    const stateFilter = {
+      id: 'state',
+      label: 'State',
+      value: `${selectedStates.length} selected`
+    };
+    dynamicFilters.push(stateFilter);
+  }
+  
+  const allActiveFilters = [...dynamicFilters, ...activeFilters];
 
   const handleClearFilter = (filterId: string) => {
     if (filterId === 'state') {
       setSelectedStates([]);
+    } else if (filterId === 'timerange') {
+      setSelectedTimeRange('last-7-days');
+      setTimeRangeStartDate(undefined);
+      setTimeRangeEndDate(undefined);
     } else {
       setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
@@ -142,6 +170,12 @@ export default function ExecutionsPage() {
 
   const handleColumnsChange = (newColumns: ColumnConfig[]) => {
     setColumns(newColumns);
+  };
+
+  const handleTimeRangeChange = (timeRange: string, startDate?: string, endDate?: string) => {
+    setSelectedTimeRange(timeRange);
+    setTimeRangeStartDate(startDate);
+    setTimeRangeEndDate(endDate);
   };
 
   return (
@@ -184,6 +218,10 @@ export default function ExecutionsPage() {
           onColumnsChange={handleColumnsChange}
           selectedStates={selectedStates}
           onSelectedStatesChange={setSelectedStates}
+          selectedTimeRange={selectedTimeRange}
+          timeRangeStartDate={timeRangeStartDate}
+          timeRangeEndDate={timeRangeEndDate}
+          onTimeRangeChange={handleTimeRangeChange}
         />
 
 

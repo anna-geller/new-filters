@@ -9,6 +9,7 @@ import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
 import TablePropertiesPanel from './TablePropertiesPanel';
 import StateFilterEditor from './StateFilterEditor';
+import TimeRangeFilterEditor from './TimeRangeFilterEditor';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 
 interface FilterOption {
@@ -40,6 +41,10 @@ interface FilterInterfaceProps {
   onColumnsChange: (columns: ColumnConfig[]) => void;
   selectedStates: string[];
   onSelectedStatesChange: (states: string[]) => void;
+  selectedTimeRange: string;
+  timeRangeStartDate?: string;
+  timeRangeEndDate?: string;
+  onTimeRangeChange: (timeRange: string, startDate?: string, endDate?: string) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -64,13 +69,18 @@ export default function FilterInterface({
   columns,
   onColumnsChange,
   selectedStates,
-  onSelectedStatesChange
+  onSelectedStatesChange,
+  selectedTimeRange,
+  timeRangeStartDate,
+  timeRangeEndDate,
+  onTimeRangeChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
+  const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
 
   const handleColumnToggle = (columnId: string) => {
     const updatedColumns = columns.map(col => 
@@ -141,6 +151,8 @@ export default function FilterInterface({
   const handleEditFilter = (filterId: string) => {
     if (filterId === 'state') {
       setStateFilterOpen(true);
+    } else if (filterId === 'timerange') {
+      setTimeRangeFilterOpen(true);
     }
     onEditFilter(filterId);
   };
@@ -151,6 +163,14 @@ export default function FilterInterface({
 
   const handleCloseStateFilter = () => {
     setStateFilterOpen(false);
+  };
+
+  const handleTimeRangeChange = (timeRange: string, startDate?: string, endDate?: string) => {
+    onTimeRangeChange(timeRange, startDate, endDate);
+  };
+
+  const handleCloseTimeRangeFilter = () => {
+    setTimeRangeFilterOpen(false);
   };
 
   return (
@@ -187,6 +207,18 @@ export default function FilterInterface({
                       selectedStates={selectedStates}
                       onSelectionChange={handleStateSelectionChange}
                       onClose={handleCloseStateFilter}
+                    />
+                  </div>
+                )}
+                {/* Time Range Filter Editor positioned directly below Time range badge */}
+                {filter.id === 'timerange' && timeRangeFilterOpen && (
+                  <div className="absolute top-full left-0 mt-2 z-50">
+                    <TimeRangeFilterEditor
+                      selectedTimeRange={selectedTimeRange}
+                      startDate={timeRangeStartDate}
+                      endDate={timeRangeEndDate}
+                      onTimeRangeChange={handleTimeRangeChange}
+                      onClose={handleCloseTimeRangeFilter}
                     />
                   </div>
                 )}
