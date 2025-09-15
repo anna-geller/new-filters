@@ -8,6 +8,7 @@ import FilterBadge from './FilterBadge';
 import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
 import TablePropertiesPanel from './TablePropertiesPanel';
+import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 
 interface FilterOption {
   id: string;
@@ -33,7 +34,8 @@ interface FilterInterfaceProps {
   periodicRefresh: boolean;
   onTogglePeriodicRefresh: (enabled: boolean) => void;
   onRefreshData: () => void;
-  onTableOptions: () => void;
+  columns: ColumnConfig[];
+  onColumnsChange: (columns: ColumnConfig[]) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -55,12 +57,50 @@ export default function FilterInterface({
   periodicRefresh,
   onTogglePeriodicRefresh,
   onRefreshData,
-  onTableOptions
+  columns,
+  onColumnsChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
+
+  const handleColumnToggle = (columnId: string) => {
+    const updatedColumns = columns.map(col => 
+      col.id === columnId 
+        ? { ...col, visible: !col.visible }
+        : col
+    );
+    onColumnsChange(updatedColumns);
+  };
+
+  const handleColumnReorder = (draggedId: string, targetId: string) => {
+    const draggedIndex = columns.findIndex(col => col.id === draggedId);
+    const targetIndex = columns.findIndex(col => col.id === targetId);
+    
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const newColumns = [...columns];
+    const [draggedColumn] = newColumns.splice(draggedIndex, 1);
+    newColumns.splice(targetIndex, 0, draggedColumn);
+
+    // Update order numbers
+    const reorderedColumns = newColumns.map((col, index) => ({
+      ...col,
+      order: index + 1
+    }));
+
+    onColumnsChange(reorderedColumns);
+  };
+
+  // Close table properties panel when table options collapse
+  const handleTableOptionsToggle = () => {
+    const newState = !tableOptionsOpen;
+    setTableOptionsOpen(newState);
+    if (!newState) {
+      setTablePropertiesOpen(false);
+    }
+  };
 
   const handleToggleFilter = (filterId: string) => {
     setFilterOptions(prev => 
@@ -105,10 +145,10 @@ export default function FilterInterface({
 
         {/* Save Filter and Saved Filters - Right aligned */}
         <div className="ml-auto flex items-center gap-3">
-          <button className="text-sm text-primary hover:text-primary/80">
+          <button className="text-sm text-primary hover:text-primary/80" data-testid="button-save-filter">
             Save filter
           </button>
-          <button className="text-sm text-muted-foreground hover:text-foreground">
+          <button className="text-sm text-muted-foreground hover:text-foreground" data-testid="button-saved-filters">
             Saved filters
           </button>
           
@@ -116,7 +156,7 @@ export default function FilterInterface({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setTableOptionsOpen(!tableOptionsOpen)}
+            onClick={handleTableOptionsToggle}
             className="flex items-center gap-2 text-muted-foreground hover-elevate"
             data-testid="button-toggle-table-options"
           >
@@ -130,20 +170,21 @@ export default function FilterInterface({
       {tableOptionsOpen && (
         <div className="px-4 py-3 border-b border-border bg-card/30">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              {/* Show Chart */}
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="show-chart"
-                  checked={showChart}
-                  onCheckedChange={onToggleShowChart}
-                  data-testid="switch-show-chart"
-                />
-                <Label htmlFor="show-chart" className="text-sm cursor-pointer">
-                  Show Chart
-                </Label>
-              </div>
+            {/* Show Chart - Left side */}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="show-chart"
+                checked={showChart}
+                onCheckedChange={onToggleShowChart}
+                data-testid="switch-show-chart"
+              />
+              <Label htmlFor="show-chart" className="text-sm cursor-pointer">
+                Show Chart
+              </Label>
+            </div>
 
+            {/* Right side controls */}
+            <div className="flex items-center gap-6">
               {/* Periodic Refresh */}
               <div className="flex items-center gap-2">
                 <Switch
@@ -168,19 +209,19 @@ export default function FilterInterface({
                 <RefreshCw className="h-4 w-4" />
                 Refresh data
               </Button>
-            </div>
 
-            {/* Table Properties Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setTablePropertiesOpen(!tablePropertiesOpen)}
-              className="flex items-center gap-2 hover-elevate"
-              data-testid="button-table-properties"
-            >
-              <Settings className="h-4 w-4" />
-              Table properties
-            </Button>
+              {/* Columns Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTablePropertiesOpen(!tablePropertiesOpen)}
+                className="flex items-center gap-2 hover-elevate"
+                data-testid="button-columns"
+              >
+                <Settings className="h-4 w-4" />
+                Columns
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -197,6 +238,9 @@ export default function FilterInterface({
       <TablePropertiesPanel
         isOpen={tablePropertiesOpen}
         onClose={() => setTablePropertiesOpen(false)}
+        columns={columns}
+        onToggleColumn={handleColumnToggle}
+        onReorderColumns={handleColumnReorder}
       />
     </div>
   );

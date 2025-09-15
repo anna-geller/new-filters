@@ -53,7 +53,6 @@ export default function FilterCustomizationPanel({
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
           <h3 className="text-sm font-medium text-foreground">Customize Filters</h3>
-          <p className="text-xs text-muted-foreground mt-1">Drag to reorder</p>
         </div>
         <button
           onClick={onClose}

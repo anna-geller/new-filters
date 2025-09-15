@@ -1,47 +1,29 @@
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Eye, EyeOff, GripVertical, X } from "lucide-react";
-
-interface ColumnOption {
-  id: string;
-  label: string;
-  description: string;
-  visible: boolean;
-  order: number;
-}
+import { ColumnConfig } from './ExecutionsTable';
 
 interface TablePropertiesPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  columns: ColumnConfig[];
+  onToggleColumn: (columnId: string) => void;
+  onReorderColumns: (draggedId: string, targetId: string) => void;
 }
 
-const defaultColumns: ColumnOption[] = [
-  { id: 'start-date', label: 'Start date', description: 'When the execution started', visible: true, order: 1 },
-  { id: 'end-date', label: 'End date', description: 'When the execution finished', visible: true, order: 2 },
-  { id: 'duration', label: 'Duration', description: 'Total runtime of the execution', visible: true, order: 3 },
-  { id: 'namespace', label: 'Namespace', description: 'Namespace to which the executed flow belongs', visible: true, order: 4 },
-  { id: 'flow', label: 'Flow', description: 'ID of the executed flow', visible: true, order: 5 },
-  { id: 'labels', label: 'Labels', description: 'Execution labels (key:value format)', visible: false, order: 6 },
-  { id: 'state', label: 'State', description: 'Current execution state', visible: false, order: 7 },
-  { id: 'revision', label: 'Revision', description: 'Version of the flow used for this execution', visible: false, order: 8 },
-  { id: 'inputs', label: 'Inputs', description: 'Input values provided to the flow at the start of execution', visible: false, order: 9 },
-  { id: 'task-id', label: 'Task ID', description: 'ID of the last task in the execution', visible: false, order: 10 },
-];
-
-export default function TablePropertiesPanel({ isOpen, onClose }: TablePropertiesPanelProps) {
-  const [columns, setColumns] = useState(defaultColumns);
+export default function TablePropertiesPanel({ 
+  isOpen, 
+  onClose, 
+  columns, 
+  onToggleColumn, 
+  onReorderColumns 
+}: TablePropertiesPanelProps) {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleToggleVisibility = (columnId: string) => {
-    setColumns(prev => 
-      prev.map(col => 
-        col.id === columnId 
-          ? { ...col, visible: !col.visible }
-          : col
-      )
-    );
+    onToggleColumn(columnId);
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, columnId: string) => {
@@ -62,25 +44,7 @@ export default function TablePropertiesPanel({ isOpen, onClose }: TablePropertie
       return;
     }
 
-    const draggedIndex = columns.findIndex(col => col.id === draggedItem);
-    const targetIndex = columns.findIndex(col => col.id === targetColumnId);
-    
-    if (draggedIndex === -1 || targetIndex === -1) {
-      setDraggedItem(null);
-      return;
-    }
-
-    const newColumns = [...columns];
-    const [draggedColumn] = newColumns.splice(draggedIndex, 1);
-    newColumns.splice(targetIndex, 0, draggedColumn);
-
-    // Update order numbers
-    const reorderedColumns = newColumns.map((col, index) => ({
-      ...col,
-      order: index + 1
-    }));
-
-    setColumns(reorderedColumns);
+    onReorderColumns(draggedItem, targetColumnId);
     setDraggedItem(null);
   };
 

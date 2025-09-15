@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import FilterInterface from '@/components/FilterInterface';
-import ExecutionsTable from '@/components/ExecutionsTable';
+import ExecutionsTable, { ColumnConfig, defaultColumns } from '@/components/ExecutionsTable';
 
 interface ActiveFilter {
   id: string;
@@ -110,6 +110,7 @@ export default function ExecutionsPage() {
   ]);
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
+  const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
 
   const handleClearFilter = (filterId: string) => {
     setActiveFilters(prev => prev.filter(f => f.id !== filterId));
@@ -124,8 +125,8 @@ export default function ExecutionsPage() {
     console.log('Refreshing execution data...');
   };
 
-  const handleTableOptions = () => {
-    console.log('Opening table options...');
+  const handleColumnsChange = (newColumns: ColumnConfig[]) => {
+    setColumns(newColumns);
   };
 
   return (
@@ -164,13 +165,14 @@ export default function ExecutionsPage() {
           periodicRefresh={periodicRefresh}
           onTogglePeriodicRefresh={setPeriodicRefresh}
           onRefreshData={handleRefreshData}
-          onTableOptions={handleTableOptions}
+          columns={columns}
+          onColumnsChange={handleColumnsChange}
         />
 
 
         {/* Table */}
         <div className="p-4">
-          <ExecutionsTable executions={mockExecutions} />
+          <ExecutionsTable executions={mockExecutions} columns={columns} />
         </div>
 
       </main>
