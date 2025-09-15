@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -156,6 +156,14 @@ export default function FilterInterface({
   const [initialExecutionFilterOpen, setInitialExecutionFilterOpen] = useState(false);
   const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
   const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
+  
+  // Dynamic wrapping state
+  const [firstRowFilters, setFirstRowFilters] = useState<ActiveFilter[]>([]);
+  const [secondRowFilters, setSecondRowFilters] = useState<ActiveFilter[]>([]);
+  
+  // Refs for measuring widths
+  const firstRowContainerRef = useRef<HTMLDivElement>(null);
+  const measurementContainerRef = useRef<HTMLDivElement>(null);
 
   const handleColumnToggle = (columnId: string) => {
     const updatedColumns = columns.map(col => 
@@ -371,10 +379,83 @@ export default function FilterInterface({
     .map(option => activeFilters.find(filter => filter.id === option.id))
     .filter(Boolean) as ActiveFilter[];
 
-  // Basic wrapping logic: first 2 filters in first row, rest in second row
-  // TODO: Implement proper overflow measurement with ResizeObserver
-  const firstRowFilters = enabledFilters.slice(0, 2);
-  const secondRowFilters = enabledFilters.slice(2);
+  // Dynamic filter wrapping calculation
+  const calculateFilterDistribution = useCallback((availableWidth: number, filters: ActiveFilter[]) => {
+    if (!measurementContainerRef.current || filters.length === 0) {
+      setFirstRowFilters(filters.slice(0, 2)); // Fallback to basic logic
+      setSecondRowFilters(filters.slice(2));
+      return;
+    }
+
+    // Measure filter badge widths by temporarily rendering them
+    const measurementContainer = measurementContainerRef.current;
+    measurementContainer.innerHTML = '';
+    
+    let totalWidth = 0;
+    let firstRowCount = 0;
+    const gap = 8; // 2 (0.5rem gap between badges)
+    
+    for (let i = 0; i < filters.length; i++) {
+      const filter = filters[i];
+      
+      // Create temporary badge element for measurement
+      const tempBadge = document.createElement('div');
+      tempBadge.className = 'inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-secondary border border-border gap-1.5 whitespace-nowrap';
+      tempBadge.style.visibility = 'hidden';
+      tempBadge.style.position = 'absolute';
+      tempBadge.innerHTML = `
+        <span class="text-green-600 font-semibold">${filter.operator || 'in'}</span>
+        <span class="text-foreground">${filter.value}</span>
+        <button class="ml-1 text-xs opacity-70 hover:opacity-100">×</button>
+        <button class="ml-1 text-xs opacity-70 hover:opacity-100">✎</button>
+      `;
+      
+      measurementContainer.appendChild(tempBadge);
+      const badgeWidth = tempBadge.offsetWidth;
+      measurementContainer.removeChild(tempBadge);
+      
+      const newTotalWidth = totalWidth + badgeWidth + (i > 0 ? gap : 0);
+      
+      if (newTotalWidth <= availableWidth || i === 0) {
+        // Filter fits in first row (always include at least one filter)
+        totalWidth = newTotalWidth;
+        firstRowCount = i + 1;
+      } else {
+        // Filter doesn't fit, stop here
+        break;
+      }
+    }
+    
+    setFirstRowFilters(filters.slice(0, firstRowCount));
+    setSecondRowFilters(filters.slice(firstRowCount));
+  }, []);
+
+  // ResizeObserver to watch container size changes
+  useEffect(() => {
+    if (!firstRowContainerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const availableWidth = entry.contentRect.width - 100; // Reserve space for buttons
+        calculateFilterDistribution(availableWidth, enabledFilters);
+      }
+    });
+
+    resizeObserver.observe(firstRowContainerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [calculateFilterDistribution, enabledFilters]);
+
+  // Update filter distribution when enabledFilters change
+  useEffect(() => {
+    if (firstRowContainerRef.current) {
+      const availableWidth = firstRowContainerRef.current.offsetWidth - 100;
+      calculateFilterDistribution(availableWidth, enabledFilters);
+    }
+  }, [enabledFilters, calculateFilterDistribution]);
 
   return (
     <div className="relative">
@@ -476,7 +557,7 @@ export default function FilterInterface({
         />
 
         {/* Active Filter Badges in first row - space permitting */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0">
           {firstRowFilters.map((filter) => (
             <div key={filter.id} className="relative flex-shrink-0">
               <FilterBadge
@@ -696,6 +777,13 @@ export default function FilterInterface({
         columns={columns}
         onToggleColumn={handleColumnToggle}
         onReorderColumns={handleColumnReorder}
+      />
+
+      {/* Hidden measurement container for filter badge width calculation */}
+      <div 
+        ref={measurementContainerRef}
+        className="fixed top-0 left-0 pointer-events-none z-[-1]"
+        aria-hidden="true"
       />
     </div>
   );
