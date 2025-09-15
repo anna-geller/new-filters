@@ -6,54 +6,19 @@ import { CheckSquare, Square, CheckCircle, Target } from "lucide-react";
 
 const scopeOptions = [
   { 
-    id: 'global', 
-    label: 'global', 
-    description: 'System-wide scope'
-  },
-  { 
-    id: 'tenant', 
-    label: 'tenant', 
-    description: 'Tenant-specific scope'
-  },
-  { 
     id: 'user', 
-    label: 'user', 
-    description: 'User-specific scope'
+    label: 'User Executions', 
+    description: 'Executions initiated by regular users'
   },
   { 
-    id: 'organization', 
-    label: 'organization', 
-    description: 'Organization-level scope'
+    id: 'system', 
+    label: 'System Executions', 
+    description: 'Maintenance executions'
   },
   { 
-    id: 'project', 
-    label: 'project', 
-    description: 'Project-specific scope'
-  },
-  { 
-    id: 'service', 
-    label: 'service', 
-    description: 'Service-level scope'
-  },
-  { 
-    id: 'environment', 
-    label: 'environment', 
-    description: 'Environment-specific scope'
-  },
-  { 
-    id: 'region', 
-    label: 'region', 
-    description: 'Regional scope'
-  },
-  { 
-    id: 'cluster', 
-    label: 'cluster', 
-    description: 'Cluster-level scope'
-  },
-  { 
-    id: 'node', 
-    label: 'node', 
-    description: 'Node-specific scope'
+    id: 'all', 
+    label: 'All Executions', 
+    description: 'Both user and system executions'
   },
 ];
 

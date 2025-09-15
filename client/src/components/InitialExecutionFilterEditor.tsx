@@ -2,26 +2,11 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, CheckCircle, PlayCircle } from "lucide-react";
-
-const initialExecutionOptions = [
-  { 
-    id: 'true', 
-    label: 'Initial execution', 
-    value: true,
-    description: 'First-time execution of the workflow'
-  },
-  { 
-    id: 'false', 
-    label: 'Re-execution', 
-    value: false,
-    description: 'Subsequent or retry execution'
-  },
-];
+import { PlayCircle } from "lucide-react";
 
 interface InitialExecutionFilterEditorProps {
-  selectedInitialExecution: boolean | null;
-  onSelectionChange: (value: boolean | null) => void;
+  selectedInitialExecution: string;
+  onSelectionChange: (value: string) => void;
   onClose: () => void;
 }
 
@@ -30,105 +15,64 @@ export default function InitialExecutionFilterEditor({
   onSelectionChange, 
   onClose 
 }: InitialExecutionFilterEditorProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [inputValue, setInputValue] = useState(selectedInitialExecution || '');
 
-  const filteredOptions = initialExecutionOptions.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    option.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleToggleOption = (value: boolean) => {
-    if (selectedInitialExecution === value) {
-      // Deselect if already selected
-      onSelectionChange(null);
-    } else {
-      // Select the new value
-      onSelectionChange(value);
-    }
+  const handleApply = () => {
+    onSelectionChange(inputValue.trim());
+    onClose();
   };
 
   const handleClear = () => {
-    onSelectionChange(null);
+    setInputValue('');
+    onSelectionChange('');
   };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header with search */}
+      {/* Header */}
       <div className="p-4 border-b border-border">
+        <div className="flex items-center gap-2 mb-3">
+          <PlayCircle className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-sm">Parent Execution ID</h3>
+        </div>
+        
         <Input
-          placeholder="Search execution types..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Enter parent execution ID..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           className="mb-3"
-          data-testid="initial-execution-search-input"
+          data-testid="parent-execution-id-input"
         />
         
-        {/* Clear button */}
+        {/* Action buttons */}
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleClear}
-            disabled={selectedInitialExecution === null}
+            disabled={!inputValue}
             className="flex-1"
-            data-testid="initial-execution-clear-button"
+            data-testid="parent-execution-clear-button"
           >
-            <Square className="w-3 h-3 mr-1" />
-            Clear Selection
+            Clear
+          </Button>
+          
+          <Button
+            size="sm"
+            onClick={handleApply}
+            disabled={!inputValue.trim()}
+            className="flex-1"
+            data-testid="parent-execution-apply-button"
+          >
+            Apply
           </Button>
         </div>
       </div>
 
-      {/* Option list */}
-      <div className="max-h-64 overflow-y-auto" data-testid="initial-execution-options-list">
-        {filteredOptions.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground text-center">
-            No execution types found matching "{searchTerm}"
-          </div>
-        ) : (
-          filteredOptions.map((option) => {
-            const isSelected = selectedInitialExecution === option.value;
-            return (
-              <div
-                key={option.id}
-                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
-                onClick={() => handleToggleOption(option.value)}
-                data-testid={`initial-execution-option-${option.id}`}
-              >
-                <div className="flex items-center gap-2 flex-1">
-                  <PlayCircle className={`w-4 h-4 flex-shrink-0 ${option.value ? 'text-green-500' : 'text-blue-500'}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{option.label}</div>
-                    <div className="text-xs text-muted-foreground truncate">{option.description}</div>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  {isSelected ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" data-testid={`initial-execution-selected-${option.id}`} />
-                  ) : (
-                    <div className="w-4 h-4 border border-input rounded-sm" data-testid={`initial-execution-unselected-${option.id}`} />
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Footer */}
+      {/* Description */}
       <div className="p-4 border-t border-border bg-muted/20">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {selectedInitialExecution !== null ? '1 option selected' : 'No selection'}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            data-testid="initial-execution-close-button"
-          >
-            Done
-          </Button>
+        <div className="text-xs text-muted-foreground">
+          Enter the ID of a parent execution to filter results to only executions started from that parent.
         </div>
       </div>
     </Card>

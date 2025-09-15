@@ -117,9 +117,9 @@ export default function ExecutionsPage() {
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
-  const [selectedKinds, setSelectedKinds] = useState<string[]>([]);
+  const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
   const [selectedSubflows, setSelectedSubflows] = useState<string[]>([]);
-  const [selectedInitialExecution, setSelectedInitialExecution] = useState<boolean | null>(null);
+  const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
@@ -228,16 +228,25 @@ export default function ExecutionsPage() {
     dynamicFilters.push(subflowFilter);
   }
 
-  // Add initial execution filter if value is selected
-  if (selectedInitialExecution !== null) {
-    const initialExecutionFilter = {
+  // Add parent execution filter if value is entered
+  if (selectedInitialExecution.trim() !== '') {
+    const parentExecutionFilter = {
       id: 'initial-execution',
-      label: 'Initial Execution',
-      value: selectedInitialExecution ? 'Initial execution' : 'Re-execution',
-      operator: 'is'
+      label: 'Parent Execution ID',
+      value: selectedInitialExecution.trim(),
+      operator: 'equals'
     };
-    dynamicFilters.push(initialExecutionFilter);
+    dynamicFilters.push(parentExecutionFilter);
   }
+
+  // Add time range filter - always show since default is set
+  const timeRangeFilter = {
+    id: 'timerange',
+    label: 'Time range',
+    value: getTimeRangeDisplayValue(),
+    operator: 'in'
+  };
+  dynamicFilters.push(timeRangeFilter);
   
   const allActiveFilters = [...dynamicFilters, ...activeFilters];
 
@@ -258,7 +267,11 @@ export default function ExecutionsPage() {
     } else if (filterId === 'subflow') {
       setSelectedSubflows([]);
     } else if (filterId === 'initial-execution') {
-      setSelectedInitialExecution(null);
+      setSelectedInitialExecution('');
+    } else if (filterId === 'timerange') {
+      setSelectedTimeRange('last-7-days');
+      setTimeRangeStartDate(undefined);
+      setTimeRangeEndDate(undefined);
     } else {
       setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
@@ -303,11 +316,11 @@ export default function ExecutionsPage() {
     // Clear scopes
     setSelectedScopes([]);
     // Clear kinds
-    setSelectedKinds([]);
+    setSelectedKinds(['default']);
     // Clear subflows
     setSelectedSubflows([]);
     // Clear initial execution
-    setSelectedInitialExecution(null);
+    setSelectedInitialExecution('');
     // Clear other active filters
     setActiveFilters([]);
     console.log('All filters reset to default values');

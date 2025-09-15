@@ -6,54 +6,19 @@ import { CheckSquare, Square, CheckCircle, Tag } from "lucide-react";
 
 const kindOptions = [
   { 
-    id: 'workflow', 
-    label: 'workflow', 
-    description: 'Standard workflow execution'
+    id: 'default', 
+    label: 'Default', 
+    description: 'Standard workflow executions'
   },
   { 
-    id: 'job', 
-    label: 'job', 
-    description: 'Batch job execution'
+    id: 'playground', 
+    label: 'Playground', 
+    description: 'Executions triggered from Playground mode'
   },
   { 
-    id: 'task', 
-    label: 'task', 
-    description: 'Individual task execution'
-  },
-  { 
-    id: 'service', 
-    label: 'service', 
-    description: 'Service-based execution'
-  },
-  { 
-    id: 'function', 
-    label: 'function', 
-    description: 'Function execution'
-  },
-  { 
-    id: 'cron', 
-    label: 'cron', 
-    description: 'Scheduled cron execution'
-  },
-  { 
-    id: 'event', 
-    label: 'event', 
-    description: 'Event-driven execution'
-  },
-  { 
-    id: 'webhook', 
-    label: 'webhook', 
-    description: 'Webhook-triggered execution'
-  },
-  { 
-    id: 'manual', 
-    label: 'manual', 
-    description: 'Manual trigger execution'
-  },
-  { 
-    id: 'api', 
-    label: 'api', 
-    description: 'API-triggered execution'
+    id: 'test', 
+    label: 'Test', 
+    description: 'Executions triggered by Unit Tests'
   },
 ];
 

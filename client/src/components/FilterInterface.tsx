@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronDown, ChevronUp, RefreshCw, Settings } from "lucide-react";
 import CustomizeFiltersButton from './CustomizeFiltersButton';
 import ResetFiltersButton from './ResetFiltersButton';
@@ -76,8 +77,8 @@ interface FilterInterfaceProps {
   onKindsSelectionChange: (kinds: string[]) => void;
   selectedSubflows: string[];
   onSubflowsSelectionChange: (subflows: string[]) => void;
-  selectedInitialExecution: boolean | null;
-  onInitialExecutionSelectionChange: (value: boolean | null) => void;
+  selectedInitialExecution: string;
+  onInitialExecutionSelectionChange: (value: string) => void;
   savedFilters: SavedFilter[];
   onSaveFilter: (name: string, description: string) => void;
   onLoadFilter: (filter: SavedFilter) => void;
@@ -93,9 +94,8 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: false, order: 5 },
   { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: false, order: 6 },
   { id: 'subflow', label: 'Subflow', description: 'Filter by subflow name', enabled: false, order: 7 },
-  { id: 'initial-execution', label: 'Initial Execution', description: 'Filter by first-time vs re-execution', enabled: false, order: 8 },
+  { id: 'initial-execution', label: 'Parent Execution ID', description: 'Filter by parent execution ID', enabled: false, order: 8 },
   { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 9 },
-  { id: 'duration', label: 'Duration', description: 'Filter by execution duration', enabled: false, order: 10 },
 ];
 
 export default function FilterInterface({
@@ -271,6 +271,16 @@ export default function FilterInterface({
       setLabelsFilterOpen(true);
     } else if (filterId === 'namespace') {
       setNamespaceFilterOpen(true);
+    } else if (filterId === 'flow') {
+      setFlowFilterOpen(true);
+    } else if (filterId === 'scope') {
+      setScopeFilterOpen(true);
+    } else if (filterId === 'kind') {
+      setKindFilterOpen(true);
+    } else if (filterId === 'subflow') {
+      setSubflowFilterOpen(true);
+    } else if (filterId === 'initial-execution') {
+      setInitialExecutionFilterOpen(true);
     } else if (filterId === 'timerange') {
       setTimeRangeFilterOpen(true);
     }
@@ -321,7 +331,7 @@ export default function FilterInterface({
     onSubflowsSelectionChange(subflows);
   };
 
-  const handleInitialExecutionSelectionChange = (value: boolean | null) => {
+  const handleInitialExecutionSelectionChange = (value: string) => {
     onInitialExecutionSelectionChange(value);
   };
 
@@ -459,86 +469,33 @@ export default function FilterInterface({
 
   return (
     <div className="relative">
-      {/* Top-level Filter Editors - rendered when enabled, independent of badges */}
-      {namespaceFilterOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50">
-          <NamespaceFilterEditor
-            selectedNamespaces={selectedNamespaces}
-            onSelectionChange={handleNamespacesSelectionChange}
-            onClose={handleCloseNamespaceFilter}
-          />
-        </div>
-      )}
-      {flowFilterOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50">
-          <FlowFilterEditor
-            selectedFlows={selectedFlows}
-            onSelectionChange={handleFlowsSelectionChange}
-            onClose={handleCloseFlowFilter}
-          />
-        </div>
-      )}
-      {scopeFilterOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50">
-          <ScopeFilterEditor
-            selectedScopes={selectedScopes}
-            onSelectionChange={handleScopesSelectionChange}
-            onClose={handleCloseScopeFilter}
-          />
-        </div>
-      )}
-      {kindFilterOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50">
-          <KindFilterEditor
-            selectedKinds={selectedKinds}
-            onSelectionChange={handleKindsSelectionChange}
-            onClose={handleCloseKindFilter}
-          />
-        </div>
-      )}
-      {subflowFilterOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50">
-          <SubflowFilterEditor
-            selectedSubflows={selectedSubflows}
-            onSelectionChange={handleSubflowsSelectionChange}
-            onClose={handleCloseSubflowFilter}
-          />
-        </div>
-      )}
-      {initialExecutionFilterOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50">
-          <InitialExecutionFilterEditor
-            selectedInitialExecution={selectedInitialExecution}
-            onSelectionChange={handleInitialExecutionSelectionChange}
-            onClose={handleCloseInitialExecutionFilter}
-          />
-        </div>
-      )}
       
       {/* First Row */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
         {/* Customize Filters Button */}
-        <CustomizeFiltersButton
-          onClick={() => setCustomizationOpen(!customizationOpen)}
-          isOpen={customizationOpen}
-        />
+        <Popover open={customizationOpen} onOpenChange={setCustomizationOpen}>
+          <PopoverTrigger asChild>
+            <div>
+              <CustomizeFiltersButton
+                onClick={() => setCustomizationOpen(!customizationOpen)}
+                isOpen={customizationOpen}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <FilterCustomizationPanel
+              isOpen={true}
+              filterOptions={filterOptions}
+              onToggleFilter={handleToggleFilter}
+              onReorderFilters={handleFilterReorder}
+              onClose={() => setCustomizationOpen(false)}
+            />
+          </PopoverContent>
+        </Popover>
 
         {/* Reset Button */}
         <ResetFiltersButton
           onClick={onResetFilters}
-        />
-
-        {/* Save Filter Button */}
-        <SaveFilterButton
-          onClick={handleSaveFilterClick}
-        />
-
-        {/* Saved Filters Dropdown */}
-        <SavedFiltersDropdown
-          savedFilters={savedFilters}
-          onLoadFilter={onLoadFilter}
-          onDeleteFilter={onDeleteFilter}
-          onEditFilter={handleEditSavedFilter}
         />
 
         {/* Search Bar */}
@@ -548,83 +505,271 @@ export default function FilterInterface({
           placeholder="Search executions..."
         />
 
-        {/* Time Range Selector - Always visible direct control */}
-        <TimeRangeSelector
-          selectedTimeRange={selectedTimeRange}
-          startDate={timeRangeStartDate}
-          endDate={timeRangeEndDate}
-          onTimeRangeChange={onTimeRangeChange}
-        />
-
         {/* Active Filter Badges in first row - space permitting */}
         <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0">
-          {firstRowFilters.map((filter) => (
-            <div key={filter.id} className="relative flex-shrink-0">
-              <FilterBadge
-                label={filter.label}
-                value={filter.value}
-                operator={filter.operator || "in"}
-                onClear={() => onClearFilter(filter.id)}
-                onEdit={() => handleEditFilter(filter.id)}
-              />
-              {/* State Filter Editor positioned directly below State badge */}
-              {filter.id === 'state' && stateFilterOpen && (
-                <div className="absolute top-full left-0 mt-2 z-50">
-                  <StateFilterEditor
-                    selectedStates={selectedStates}
-                    onSelectionChange={handleStateSelectionChange}
-                    onClose={handleCloseStateFilter}
+          {firstRowFilters.map((filter) => {
+            // State Filter with Popover
+            if (filter.id === 'state') {
+              return (
+                <Popover key={filter.id} open={stateFilterOpen} onOpenChange={setStateFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <StateFilterEditor
+                      selectedStates={selectedStates}
+                      onSelectionChange={handleStateSelectionChange}
+                      onClose={handleCloseStateFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Labels Filter with Popover
+            else if (filter.id === 'labels') {
+              return (
+                <Popover key={filter.id} open={labelsFilterOpen} onOpenChange={setLabelsFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <LabelsFilterEditor
+                      selectedLabels={selectedLabels}
+                      selectedOperator={labelsOperator}
+                      customValue={labelsCustomValue}
+                      onSelectionChange={handleLabelsSelectionChange}
+                      onOperatorChange={handleLabelsOperatorChange}
+                      onCustomValueChange={handleLabelsCustomValueChange}
+                      onClose={handleCloseLabelsFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Namespace Filter with Popover
+            else if (filter.id === 'namespace') {
+              return (
+                <Popover key={filter.id} open={namespaceFilterOpen} onOpenChange={setNamespaceFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <NamespaceFilterEditor
+                      selectedNamespaces={selectedNamespaces}
+                      onSelectionChange={handleNamespacesSelectionChange}
+                      onClose={handleCloseNamespaceFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Flow Filter with Popover
+            else if (filter.id === 'flow') {
+              return (
+                <Popover key={filter.id} open={flowFilterOpen} onOpenChange={setFlowFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <FlowFilterEditor
+                      selectedFlows={selectedFlows}
+                      onSelectionChange={handleFlowsSelectionChange}
+                      onClose={handleCloseFlowFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Scope Filter with Popover
+            else if (filter.id === 'scope') {
+              return (
+                <Popover key={filter.id} open={scopeFilterOpen} onOpenChange={setScopeFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <ScopeFilterEditor
+                      selectedScopes={selectedScopes}
+                      onSelectionChange={handleScopesSelectionChange}
+                      onClose={handleCloseScopeFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Kind Filter with Popover
+            else if (filter.id === 'kind') {
+              return (
+                <Popover key={filter.id} open={kindFilterOpen} onOpenChange={setKindFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <KindFilterEditor
+                      selectedKinds={selectedKinds}
+                      onSelectionChange={handleKindsSelectionChange}
+                      onClose={handleCloseKindFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Subflow Filter with Popover
+            else if (filter.id === 'subflow') {
+              return (
+                <Popover key={filter.id} open={subflowFilterOpen} onOpenChange={setSubflowFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <SubflowFilterEditor
+                      selectedSubflows={selectedSubflows}
+                      onSelectionChange={handleSubflowsSelectionChange}
+                      onClose={handleCloseSubflowFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Initial Execution Filter with Popover
+            else if (filter.id === 'initial-execution') {
+              return (
+                <Popover key={filter.id} open={initialExecutionFilterOpen} onOpenChange={setInitialExecutionFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <InitialExecutionFilterEditor
+                      selectedInitialExecution={selectedInitialExecution}
+                      onSelectionChange={handleInitialExecutionSelectionChange}
+                      onClose={handleCloseInitialExecutionFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Time Range Filter with Popover
+            else if (filter.id === 'timerange') {
+              return (
+                <Popover key={filter.id} open={timeRangeFilterOpen} onOpenChange={setTimeRangeFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <div className="flex-shrink-0">
+                      <FilterBadge
+                        label={filter.label}
+                        value={filter.value}
+                        operator={filter.operator || "in"}
+                        onClear={() => onClearFilter(filter.id)}
+                        onEdit={() => handleEditFilter(filter.id)}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                    <TimeRangeFilterEditor
+                      selectedTimeRange={selectedTimeRange}
+                      startDate={timeRangeStartDate}
+                      endDate={timeRangeEndDate}
+                      onTimeRangeChange={handleTimeRangeChange}
+                      onClose={handleCloseTimeRangeFilter}
+                    />
+                  </PopoverContent>
+                </Popover>
+              );
+            }
+            // Default case - just render the badge without popover
+            else {
+              return (
+                <div key={filter.id} className="flex-shrink-0">
+                  <FilterBadge
+                    label={filter.label}
+                    value={filter.value}
+                    operator={filter.operator || "in"}
+                    onClear={() => onClearFilter(filter.id)}
+                    onEdit={() => handleEditFilter(filter.id)}
                   />
                 </div>
-              )}
-              {/* Labels Filter Editor positioned directly below Labels badge */}
-              {filter.id === 'labels' && labelsFilterOpen && (
-                <div className="absolute top-full left-0 mt-2 z-50">
-                  <LabelsFilterEditor
-                    selectedLabels={selectedLabels}
-                    selectedOperator={labelsOperator}
-                    customValue={labelsCustomValue}
-                    onSelectionChange={handleLabelsSelectionChange}
-                    onOperatorChange={handleLabelsOperatorChange}
-                    onCustomValueChange={handleLabelsCustomValueChange}
-                    onClose={handleCloseLabelsFilter}
-                  />
-                </div>
-              )}
-              {/* Namespace Filter Editor positioned directly below Namespace badge */}
-              {filter.id === 'namespace' && namespaceFilterOpen && (
-                <div className="absolute top-full left-0 mt-2 z-50">
-                  <NamespaceFilterEditor
-                    selectedNamespaces={selectedNamespaces}
-                    onSelectionChange={handleNamespacesSelectionChange}
-                    onClose={handleCloseNamespaceFilter}
-                  />
-                </div>
-              )}
-              {/* Time Range Filter Editor positioned directly below Time range badge */}
-              {filter.id === 'timerange' && timeRangeFilterOpen && (
-                <div className="absolute top-full left-0 mt-2 z-50">
-                  <TimeRangeFilterEditor
-                    selectedTimeRange={selectedTimeRange}
-                    startDate={timeRangeStartDate}
-                    endDate={timeRangeEndDate}
-                    onTimeRangeChange={handleTimeRangeChange}
-                    onClose={handleCloseTimeRangeFilter}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+              );
+            }
+          })}
         </div>
 
         {/* Save Filter, Saved Filters, and Table Options - Right aligned */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          <button className="text-sm text-primary hover:text-primary/80" data-testid="button-save-filter">
-            Save filter
-          </button>
-          <button className="text-sm text-muted-foreground hover:text-foreground" data-testid="button-saved-filters">
-            Saved filters
-          </button>
+          {/* Save Filter Button */}
+          <SaveFilterButton
+            onClick={handleSaveFilterClick}
+          />
+
+          {/* Saved Filters Dropdown */}
+          <SavedFiltersDropdown
+            savedFilters={savedFilters}
+            onLoadFilter={onLoadFilter}
+            onDeleteFilter={onDeleteFilter}
+            onEditFilter={handleEditSavedFilter}
+          />
           
           {/* Table Options Toggle */}
           <Button
@@ -642,53 +787,255 @@ export default function FilterInterface({
 
       {/* Second Row - Additional filters that don't fit in first row */}
       {secondRowFilters.length > 0 && (
-        <div className="px-4 py-2 border-b border-border bg-card/20">
+        <div className="px-4 py-2 bg-card/20">
           <div className="flex items-center gap-2 flex-wrap">
-            {secondRowFilters.map((filter) => (
-              <div key={filter.id} className="relative flex-shrink-0">
-                <FilterBadge
-                  label={filter.label}
-                  value={filter.value}
-                  operator={filter.operator || "in"}
-                  onClear={() => onClearFilter(filter.id)}
-                  onEdit={() => handleEditFilter(filter.id)}
-                />
-                {/* State Filter Editor positioned directly below State badge */}
-                {filter.id === 'state' && stateFilterOpen && (
-                  <div className="absolute top-full left-0 mt-2 z-50">
-                    <StateFilterEditor
-                      selectedStates={selectedStates}
-                      onSelectionChange={handleStateSelectionChange}
-                      onClose={handleCloseStateFilter}
+            {secondRowFilters.map((filter) => {
+              // State Filter with Popover
+              if (filter.id === 'state') {
+                return (
+                  <Popover key={filter.id} open={stateFilterOpen} onOpenChange={setStateFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <StateFilterEditor
+                        selectedStates={selectedStates}
+                        onSelectionChange={handleStateSelectionChange}
+                        onClose={handleCloseStateFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Labels Filter with Popover
+              else if (filter.id === 'labels') {
+                return (
+                  <Popover key={filter.id} open={labelsFilterOpen} onOpenChange={setLabelsFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <LabelsFilterEditor
+                        selectedLabels={selectedLabels}
+                        selectedOperator={labelsOperator}
+                        customValue={labelsCustomValue}
+                        onSelectionChange={handleLabelsSelectionChange}
+                        onOperatorChange={handleLabelsOperatorChange}
+                        onCustomValueChange={handleLabelsCustomValueChange}
+                        onClose={handleCloseLabelsFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Namespace Filter with Popover
+              else if (filter.id === 'namespace') {
+                return (
+                  <Popover key={filter.id} open={namespaceFilterOpen} onOpenChange={setNamespaceFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <NamespaceFilterEditor
+                        selectedNamespaces={selectedNamespaces}
+                        onSelectionChange={handleNamespacesSelectionChange}
+                        onClose={handleCloseNamespaceFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Flow Filter with Popover
+              else if (filter.id === 'flow') {
+                return (
+                  <Popover key={filter.id} open={flowFilterOpen} onOpenChange={setFlowFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <FlowFilterEditor
+                        selectedFlows={selectedFlows}
+                        onSelectionChange={handleFlowsSelectionChange}
+                        onClose={handleCloseFlowFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Scope Filter with Popover
+              else if (filter.id === 'scope') {
+                return (
+                  <Popover key={filter.id} open={scopeFilterOpen} onOpenChange={setScopeFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <ScopeFilterEditor
+                        selectedScopes={selectedScopes}
+                        onSelectionChange={handleScopesSelectionChange}
+                        onClose={handleCloseScopeFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Kind Filter with Popover
+              else if (filter.id === 'kind') {
+                return (
+                  <Popover key={filter.id} open={kindFilterOpen} onOpenChange={setKindFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <KindFilterEditor
+                        selectedKinds={selectedKinds}
+                        onSelectionChange={handleKindsSelectionChange}
+                        onClose={handleCloseKindFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Subflow Filter with Popover
+              else if (filter.id === 'subflow') {
+                return (
+                  <Popover key={filter.id} open={subflowFilterOpen} onOpenChange={setSubflowFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <SubflowFilterEditor
+                        selectedSubflows={selectedSubflows}
+                        onSelectionChange={handleSubflowsSelectionChange}
+                        onClose={handleCloseSubflowFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Initial Execution Filter with Popover
+              else if (filter.id === 'initial-execution') {
+                return (
+                  <Popover key={filter.id} open={initialExecutionFilterOpen} onOpenChange={setInitialExecutionFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <InitialExecutionFilterEditor
+                        selectedInitialExecution={selectedInitialExecution}
+                        onSelectionChange={handleInitialExecutionSelectionChange}
+                        onClose={handleCloseInitialExecutionFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Time Range Filter with Popover
+              else if (filter.id === 'timerange') {
+                return (
+                  <Popover key={filter.id} open={timeRangeFilterOpen} onOpenChange={setTimeRangeFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <div className="flex-shrink-0">
+                        <FilterBadge
+                          label={filter.label}
+                          value={filter.value}
+                          operator={filter.operator || "in"}
+                          onClear={() => onClearFilter(filter.id)}
+                          onEdit={() => handleEditFilter(filter.id)}
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="w-80 p-0">
+                      <TimeRangeFilterEditor
+                        selectedTimeRange={selectedTimeRange}
+                        startDate={timeRangeStartDate}
+                        endDate={timeRangeEndDate}
+                        onTimeRangeChange={handleTimeRangeChange}
+                        onClose={handleCloseTimeRangeFilter}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              // Default case - just render the badge without popover
+              else {
+                return (
+                  <div key={filter.id} className="flex-shrink-0">
+                    <FilterBadge
+                      label={filter.label}
+                      value={filter.value}
+                      operator={filter.operator || "in"}
+                      onClear={() => onClearFilter(filter.id)}
+                      onEdit={() => handleEditFilter(filter.id)}
                     />
                   </div>
-                )}
-                {/* Labels Filter Editor positioned directly below Labels badge */}
-                {filter.id === 'labels' && labelsFilterOpen && (
-                  <div className="absolute top-full left-0 mt-2 z-50">
-                    <LabelsFilterEditor
-                      selectedLabels={selectedLabels}
-                      selectedOperator={labelsOperator}
-                      customValue={labelsCustomValue}
-                      onSelectionChange={handleLabelsSelectionChange}
-                      onOperatorChange={handleLabelsOperatorChange}
-                      onCustomValueChange={handleLabelsCustomValueChange}
-                      onClose={handleCloseLabelsFilter}
-                    />
-                  </div>
-                )}
-                {/* Namespace Filter Editor positioned directly below Namespace badge */}
-                {filter.id === 'namespace' && namespaceFilterOpen && (
-                  <div className="absolute top-full left-0 mt-2 z-50">
-                    <NamespaceFilterEditor
-                      selectedNamespaces={selectedNamespaces}
-                      onSelectionChange={handleNamespacesSelectionChange}
-                      onClose={handleCloseNamespaceFilter}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+                );
+              }
+            })}
           </div>
         </div>
       )}
@@ -753,15 +1100,6 @@ export default function FilterInterface({
         </div>
       )}
 
-
-      {/* Customization Panel */}
-      <FilterCustomizationPanel
-        isOpen={customizationOpen}
-        filterOptions={filterOptions}
-        onToggleFilter={handleToggleFilter}
-        onReorderFilters={handleFilterReorder}
-        onClose={() => setCustomizationOpen(false)}
-      />
 
       {/* Save Filter Dialog */}
       <SaveFilterDialog
