@@ -9,6 +9,8 @@ const mockActiveFilters = [
 export default function FilterInterfaceExample() {
   const [searchValue, setSearchValue] = useState('');
   const [activeFilters, setActiveFilters] = useState(mockActiveFilters);
+  const [showChart, setShowChart] = useState(false);
+  const [periodicRefresh, setPeriodicRefresh] = useState(true);
 
   const handleClearFilter = (filterId: string) => {
     setActiveFilters(prev => prev.filter(f => f.id !== filterId));
@@ -27,6 +29,12 @@ export default function FilterInterfaceExample() {
         activeFilters={activeFilters}
         onClearFilter={handleClearFilter}
         onEditFilter={handleEditFilter}
+        showChart={showChart}
+        onToggleShowChart={setShowChart}
+        periodicRefresh={periodicRefresh}
+        onTogglePeriodicRefresh={setPeriodicRefresh}
+        onRefreshData={() => console.log('Refreshing data...')}
+        onTableOptions={() => console.log('Opening table options...')}
       />
     </div>
   );

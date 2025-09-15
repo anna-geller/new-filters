@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import FilterInterface from '@/components/FilterInterface';
 import ExecutionsTable from '@/components/ExecutionsTable';
-import TableControls from '@/components/TableControls';
 
 interface ActiveFilter {
   id: string;
@@ -109,7 +108,7 @@ export default function ExecutionsPage() {
     { id: 'state', label: 'State', value: '6 selected' },
     { id: 'timerange', label: 'Time range', value: 'last 7 days' }
   ]);
-  const [tableControlsExpanded, setTableControlsExpanded] = useState(false);
+  const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
 
   const handleClearFilter = (filterId: string) => {
@@ -160,31 +159,20 @@ export default function ExecutionsPage() {
           activeFilters={activeFilters}
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
+          showChart={showChart}
+          onToggleShowChart={setShowChart}
+          periodicRefresh={periodicRefresh}
+          onTogglePeriodicRefresh={setPeriodicRefresh}
+          onRefreshData={handleRefreshData}
+          onTableOptions={handleTableOptions}
         />
 
-
-        {/* Chart Toggle */}
-        <div className="px-4 py-3 border-b border-border">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" className="rounded" />
-            <span className="text-foreground">Show Chart</span>
-          </label>
-        </div>
 
         {/* Table */}
         <div className="p-4">
           <ExecutionsTable executions={mockExecutions} />
         </div>
 
-        {/* Table Controls */}
-        <TableControls
-          isExpanded={tableControlsExpanded}
-          onToggleExpanded={() => setTableControlsExpanded(!tableControlsExpanded)}
-          periodicRefresh={periodicRefresh}
-          onTogglePeriodicRefresh={setPeriodicRefresh}
-          onRefreshData={handleRefreshData}
-          onTableOptions={handleTableOptions}
-        />
       </main>
     </div>
   );
