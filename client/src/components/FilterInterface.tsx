@@ -465,7 +465,7 @@ export default function FilterInterface({
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const availableWidth = entry.contentRect.width - 100; // Reserve space for buttons
+        const availableWidth = entry.contentRect.width - 80; // More conservative spacing for complete badge visibility
         calculateFilterDistribution(availableWidth, enabledFilters);
       }
     });
@@ -480,7 +480,7 @@ export default function FilterInterface({
   // Update filter distribution when enabledFilters change
   useEffect(() => {
     if (firstRowContainerRef.current) {
-      const availableWidth = firstRowContainerRef.current.offsetWidth - 100;
+      const availableWidth = firstRowContainerRef.current.offsetWidth - 80;
       calculateFilterDistribution(availableWidth, enabledFilters);
     }
   }, [enabledFilters, calculateFilterDistribution]);
@@ -524,7 +524,7 @@ export default function FilterInterface({
         />
 
         {/* Active Filter Badges in first row - space permitting */}
-        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden" style={{maxWidth: 'calc(100% - 320px)'}}>
+        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden" style={{maxWidth: 'calc(100% - 400px)'}}>
           {firstRowFilters.map((filter) => {
             // State Filter with Popover
             if (filter.id === 'state') {
