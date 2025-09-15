@@ -490,42 +490,46 @@ export default function FilterInterface({
       
       {/* First Row */}
       <div className="flex items-center gap-3 p-4">
-        {/* Customize Filters Button */}
-        <Popover open={customizationOpen} onOpenChange={setCustomizationOpen}>
-          <PopoverTrigger asChild>
-            <div>
-              <CustomizeFiltersButton
-                onClick={() => setCustomizationOpen(!customizationOpen)}
-                isOpen={customizationOpen}
+        {/* Left Section: Control buttons and search */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Customize Filters Button */}
+          <Popover open={customizationOpen} onOpenChange={setCustomizationOpen}>
+            <PopoverTrigger asChild>
+              <div>
+                <CustomizeFiltersButton
+                  onClick={() => setCustomizationOpen(!customizationOpen)}
+                  isOpen={customizationOpen}
+                />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent side="bottom" align="start" className="w-80 p-0">
+              <FilterCustomizationPanel
+                isOpen={true}
+                filterOptions={filterOptions}
+                onToggleFilter={handleToggleFilter}
+                onReorderFilters={handleFilterReorder}
+                onClose={() => setCustomizationOpen(false)}
               />
-            </div>
-          </PopoverTrigger>
-          <PopoverContent side="bottom" align="start" className="w-80 p-0">
-            <FilterCustomizationPanel
-              isOpen={true}
-              filterOptions={filterOptions}
-              onToggleFilter={handleToggleFilter}
-              onReorderFilters={handleFilterReorder}
-              onClose={() => setCustomizationOpen(false)}
-            />
-          </PopoverContent>
-        </Popover>
+            </PopoverContent>
+          </Popover>
 
-        {/* Reset Button */}
-        <ResetFiltersButton
-          onClick={onResetFilters}
-        />
+          {/* Reset Button */}
+          <ResetFiltersButton
+            onClick={onResetFilters}
+          />
 
-        {/* Search Bar */}
-        <SearchBar
-          value={searchValue}
-          onChange={onSearchChange}
-          placeholder="Search executions..."
-        />
+          {/* Search Bar */}
+          <SearchBar
+            value={searchValue}
+            onChange={onSearchChange}
+            placeholder="Search executions..."
+          />
+        </div>
 
-        {/* Active Filter Badges in first row - space permitting */}
-        <div ref={firstRowContainerRef} className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden" style={{maxWidth: 'calc(100% - 400px)'}}>
-          {firstRowFilters.map((filter) => {
+        {/* Middle Section: Filter Badges with guaranteed space */}
+        <div className="flex-1 min-w-0 pr-6">
+          <div ref={firstRowContainerRef} className="flex items-center gap-2 overflow-hidden">
+            {firstRowFilters.map((filter) => {
             // State Filter with Popover
             if (filter.id === 'state') {
               return (
@@ -772,10 +776,11 @@ export default function FilterInterface({
               );
             }
           })}
+          </div>
         </div>
 
-        {/* Save Filter, Saved Filters, and Table Options - Right aligned */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Right Section: Save Filter, Saved Filters, and Table Options - Protected from overlap */}
+        <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
           {/* Save Filter Button */}
           <SaveFilterButton
             onClick={handleSaveFilterClick}
