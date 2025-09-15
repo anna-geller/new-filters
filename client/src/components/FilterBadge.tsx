@@ -5,11 +5,12 @@ import { X, Edit2 } from "lucide-react";
 interface FilterBadgeProps {
   label: string;
   value: string;
+  operator?: string; // e.g., "in", "not in", "starts with"
   onClear: () => void;
   onEdit: () => void;
 }
 
-export default function FilterBadge({ label, value, onClear, onEdit }: FilterBadgeProps) {
+export default function FilterBadge({ label, value, operator = "in", onClear, onEdit }: FilterBadgeProps) {
   return (
     <Badge 
       variant="secondary" 
@@ -21,8 +22,9 @@ export default function FilterBadge({ label, value, onClear, onEdit }: FilterBad
         className="flex items-center gap-1 hover:opacity-80"
         data-testid={`button-edit-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
       >
-        <span className="text-xs font-medium">{label}:</span>
-        <span className="text-xs">{value}</span>
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+        <span className="text-xs font-medium text-green-500">{operator}</span>
+        <span className="text-xs text-white">{value}</span>
         <Edit2 className="h-3 w-3 opacity-70" />
       </button>
       <Button

@@ -4,9 +4,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, ChevronUp, RefreshCw, Settings } from "lucide-react";
 import CustomizeFiltersButton from './CustomizeFiltersButton';
+import ResetFiltersButton from './ResetFiltersButton';
 import FilterBadge from './FilterBadge';
 import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
+import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
 import StateFilterEditor from './StateFilterEditor';
 import TimeRangeFilterEditor from './TimeRangeFilterEditor';
@@ -24,6 +26,7 @@ interface ActiveFilter {
   id: string;
   label: string;
   value: string;
+  operator?: string;
 }
 
 interface FilterInterfaceProps {
@@ -32,6 +35,7 @@ interface FilterInterfaceProps {
   activeFilters: ActiveFilter[];
   onClearFilter: (filterId: string) => void;
   onEditFilter: (filterId: string) => void;
+  onResetFilters: () => void;
   showChart: boolean;
   onToggleShowChart: (enabled: boolean) => void;
   periodicRefresh: boolean;
@@ -48,7 +52,7 @@ interface FilterInterfaceProps {
 }
 
 const defaultFilterOptions: FilterOption[] = [
-  { id: 'state', label: 'State', description: 'Filter by execution state', enabled: true, order: 1 },
+  { id: 'state', label: 'State', description: 'Filter by execution state', enabled: false, order: 1 },
   { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 2 },
   { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 3 },
   { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 4 },
@@ -61,6 +65,7 @@ export default function FilterInterface({
   activeFilters,
   onClearFilter,
   onEditFilter,
+  onResetFilters,
   showChart,
   onToggleShowChart,
   periodicRefresh,
@@ -173,8 +178,21 @@ export default function FilterInterface({
     setTimeRangeFilterOpen(false);
   };
 
+  // Get enabled filters in order for display (excluding timerange since it's a direct control)
+  const enabledFilters = filterOptions
+    .filter(option => option.enabled && option.id !== 'timerange') // Exclude timerange as it's now a direct control
+    .sort((a, b) => a.order - b.order)
+    .map(option => activeFilters.find(filter => filter.id === option.id))
+    .filter(Boolean) as ActiveFilter[];
+
+  // Basic wrapping logic: first 2 filters in first row, rest in second row
+  // TODO: Implement proper overflow measurement with ResizeObserver
+  const firstRowFilters = enabledFilters.slice(0, 2);
+  const secondRowFilters = enabledFilters.slice(2);
+
   return (
     <div className="relative">
+      {/* First Row */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
         {/* Customize Filters Button */}
         <CustomizeFiltersButton
@@ -182,53 +200,65 @@ export default function FilterInterface({
           isOpen={customizationOpen}
         />
 
-        {/* Search Bar - Always shown first */}
+        {/* Reset Button */}
+        <ResetFiltersButton
+          onClick={onResetFilters}
+        />
+
+        {/* Search Bar */}
         <SearchBar
           value={searchValue}
           onChange={onSearchChange}
           placeholder="Search executions..."
         />
 
-        {/* Active Filter Badges - Only after search bar */}
-        {activeFilters.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap relative">
-            {activeFilters.map((filter) => (
-              <div key={filter.id} className="relative">
-                <FilterBadge
-                  label={filter.label}
-                  value={filter.value}
-                  onClear={() => onClearFilter(filter.id)}
-                  onEdit={() => handleEditFilter(filter.id)}
-                />
-                {/* State Filter Editor positioned directly below State badge */}
-                {filter.id === 'state' && stateFilterOpen && (
-                  <div className="absolute top-full left-0 mt-2 z-50">
-                    <StateFilterEditor
-                      selectedStates={selectedStates}
-                      onSelectionChange={handleStateSelectionChange}
-                      onClose={handleCloseStateFilter}
-                    />
-                  </div>
-                )}
-                {/* Time Range Filter Editor positioned directly below Time range badge */}
-                {filter.id === 'timerange' && timeRangeFilterOpen && (
-                  <div className="absolute top-full left-0 mt-2 z-50">
-                    <TimeRangeFilterEditor
-                      selectedTimeRange={selectedTimeRange}
-                      startDate={timeRangeStartDate}
-                      endDate={timeRangeEndDate}
-                      onTimeRangeChange={handleTimeRangeChange}
-                      onClose={handleCloseTimeRangeFilter}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Time Range Selector - Always visible direct control */}
+        <TimeRangeSelector
+          selectedTimeRange={selectedTimeRange}
+          startDate={timeRangeStartDate}
+          endDate={timeRangeEndDate}
+          onTimeRangeChange={onTimeRangeChange}
+        />
 
-        {/* Save Filter and Saved Filters - Right aligned */}
-        <div className="ml-auto flex items-center gap-3">
+        {/* Active Filter Badges in first row - space permitting */}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          {firstRowFilters.map((filter) => (
+            <div key={filter.id} className="relative flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || "in"}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+              {/* State Filter Editor positioned directly below State badge */}
+              {filter.id === 'state' && stateFilterOpen && (
+                <div className="absolute top-full left-0 mt-2 z-50">
+                  <StateFilterEditor
+                    selectedStates={selectedStates}
+                    onSelectionChange={handleStateSelectionChange}
+                    onClose={handleCloseStateFilter}
+                  />
+                </div>
+              )}
+              {/* Time Range Filter Editor positioned directly below Time range badge */}
+              {filter.id === 'timerange' && timeRangeFilterOpen && (
+                <div className="absolute top-full left-0 mt-2 z-50">
+                  <TimeRangeFilterEditor
+                    selectedTimeRange={selectedTimeRange}
+                    startDate={timeRangeStartDate}
+                    endDate={timeRangeEndDate}
+                    onTimeRangeChange={handleTimeRangeChange}
+                    onClose={handleCloseTimeRangeFilter}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Save Filter, Saved Filters, and Table Options - Right aligned */}
+        <div className="flex items-center gap-3 flex-shrink-0">
           <button className="text-sm text-primary hover:text-primary/80" data-testid="button-save-filter">
             Save filter
           </button>
@@ -249,6 +279,35 @@ export default function FilterInterface({
           </Button>
         </div>
       </div>
+
+      {/* Second Row - Additional filters that don't fit in first row */}
+      {secondRowFilters.length > 0 && (
+        <div className="px-4 py-2 border-b border-border bg-card/20">
+          <div className="flex items-center gap-2 flex-wrap">
+            {secondRowFilters.map((filter) => (
+              <div key={filter.id} className="relative flex-shrink-0">
+                <FilterBadge
+                  label={filter.label}
+                  value={filter.value}
+                  operator={filter.operator || "in"}
+                  onClear={() => onClearFilter(filter.id)}
+                  onEdit={() => handleEditFilter(filter.id)}
+                />
+                {/* State Filter Editor positioned directly below State badge */}
+                {filter.id === 'state' && stateFilterOpen && (
+                  <div className="absolute top-full left-0 mt-2 z-50">
+                    <StateFilterEditor
+                      selectedStates={selectedStates}
+                      onSelectionChange={handleStateSelectionChange}
+                      onClose={handleCloseStateFilter}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Table Options Panel */}
       {tableOptionsOpen && (

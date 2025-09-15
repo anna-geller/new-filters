@@ -6,6 +6,7 @@ interface ActiveFilter {
   id: string;
   label: string;
   value: string;
+  operator?: string;
 }
 
 // todo: remove mock functionality
@@ -127,20 +128,15 @@ export default function ExecutionsPage() {
   // Build active filters array
   const dynamicFilters = [];
   
-  // Add time range filter
-  const timeRangeFilter = {
-    id: 'timerange',
-    label: 'Time range',
-    value: getTimeRangeDisplayValue()
-  };
-  dynamicFilters.push(timeRangeFilter);
+  // Time range is now a direct control, not a filter badge
   
   // Add state filter if states are selected
   if (selectedStates.length > 0) {
     const stateFilter = {
       id: 'state',
       label: 'State',
-      value: `${selectedStates.length} selected`
+      value: `${selectedStates.length} selected`,
+      operator: 'in'
     };
     dynamicFilters.push(stateFilter);
   }
@@ -150,10 +146,6 @@ export default function ExecutionsPage() {
   const handleClearFilter = (filterId: string) => {
     if (filterId === 'state') {
       setSelectedStates([]);
-    } else if (filterId === 'timerange') {
-      setSelectedTimeRange('last-7-days');
-      setTimeRangeStartDate(undefined);
-      setTimeRangeEndDate(undefined);
     } else {
       setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
@@ -176,6 +168,20 @@ export default function ExecutionsPage() {
     setSelectedTimeRange(timeRange);
     setTimeRangeStartDate(startDate);
     setTimeRangeEndDate(endDate);
+  };
+
+  const handleResetFilters = () => {
+    // Reset search to empty
+    setSearchValue('');
+    // Reset time range to default (7 days)
+    setSelectedTimeRange('last-7-days');
+    setTimeRangeStartDate(undefined);
+    setTimeRangeEndDate(undefined);
+    // Clear selected states
+    setSelectedStates([]);
+    // Clear other active filters
+    setActiveFilters([]);
+    console.log('All filters reset to default values');
   };
 
   return (
@@ -209,6 +215,7 @@ export default function ExecutionsPage() {
           activeFilters={allActiveFilters}
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
+          onResetFilters={handleResetFilters}
           showChart={showChart}
           onToggleShowChart={setShowChart}
           periodicRefresh={periodicRefresh}

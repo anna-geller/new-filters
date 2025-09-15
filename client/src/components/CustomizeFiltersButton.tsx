@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Filter } from "lucide-react";
 
 interface CustomizeFiltersButtonProps {
   onClick: () => void;
@@ -15,7 +15,7 @@ export default function CustomizeFiltersButton({ onClick, isOpen }: CustomizeFil
       className="flex items-center gap-2 text-muted-foreground border border-border hover-elevate"
       data-testid="button-customize-filters"
     >
-      <Settings className="h-4 w-4" />
+      <Filter className="h-4 w-4" />
       Customize filters
     </Button>
   );
