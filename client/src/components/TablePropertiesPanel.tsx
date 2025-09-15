@@ -73,7 +73,7 @@ export default function TablePropertiesPanel({
 
       {/* Column List */}
       <div className="max-h-80 overflow-y-auto">
-        {columns
+        {[...columns]
           .sort((a, b) => a.order - b.order)
           .map((column) => (
           <div

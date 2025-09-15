@@ -7,13 +7,14 @@ interface FilterOption {
   label: string;
   description: string;
   enabled: boolean;
-  order?: number;
+  order: number;
 }
 
 interface FilterCustomizationPanelProps {
   isOpen: boolean;
   filterOptions: FilterOption[];
   onToggleFilter: (filterId: string) => void;
+  onReorderFilters: (draggedId: string, targetId: string) => void;
   onClose: () => void;
 }
 
@@ -21,6 +22,7 @@ export default function FilterCustomizationPanel({
   isOpen, 
   filterOptions, 
   onToggleFilter, 
+  onReorderFilters,
   onClose 
 }: FilterCustomizationPanelProps) {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
@@ -39,8 +41,14 @@ export default function FilterCustomizationPanel({
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetFilterId: string) => {
     e.preventDefault();
+    
+    if (!draggedItem || draggedItem === targetFilterId) {
+      setDraggedItem(null);
+      return;
+    }
+
+    onReorderFilters(draggedItem, targetFilterId);
     setDraggedItem(null);
-    // TODO: Implement reordering logic if needed
   };
 
   const handleDragEnd = () => {
@@ -53,6 +61,7 @@ export default function FilterCustomizationPanel({
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
           <h3 className="text-sm font-medium text-foreground">Customize Filters</h3>
+          <p className="text-xs text-muted-foreground mt-1">Drag to reorder</p>
         </div>
         <button
           onClick={onClose}
@@ -65,7 +74,9 @@ export default function FilterCustomizationPanel({
 
       {/* Filter List */}
       <div className="max-h-72 overflow-y-auto">
-        {filterOptions.map((option) => (
+        {[...filterOptions]
+          .sort((a, b) => a.order - b.order)
+          .map((option) => (
           <div
             key={option.id}
             draggable
