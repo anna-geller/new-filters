@@ -117,6 +117,8 @@ export default function ExecutionsPage() {
   const [labelsOperator, setLabelsOperator] = useState('has-any-of');
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
+  const [namespaceOperator, setNamespaceOperator] = useState('in');
+  const [namespaceCustomValue, setNamespaceCustomValue] = useState('');
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
   const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
@@ -202,13 +204,27 @@ export default function ExecutionsPage() {
     dynamicFilters.push(labelsFilter);
   }
 
-  // Add namespace filter if namespaces are selected
-  if (selectedNamespaces.length > 0) {
+  // Add namespace filter if namespaces are selected or text value is provided
+  const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
+  const hasTextValue = isTextBasedOperator && namespaceCustomValue.trim();
+  const hasSelectedNamespaces = selectedNamespaces.length > 0;
+  
+  if (hasSelectedNamespaces || hasTextValue) {
+    const operatorLabels = {
+      'in': 'in',
+      'not-in': 'not in', 
+      'contains': 'contains',
+      'starts-with': 'starts with',
+      'ends-with': 'ends with'
+    };
+    
     const namespaceFilter = {
       id: 'namespace',
       label: 'Namespace',
-      value: `${selectedNamespaces.length}`,
-      operator: 'in'
+      value: isTextBasedOperator 
+        ? `"${namespaceCustomValue}"` 
+        : `${selectedNamespaces.length}`,
+      operator: operatorLabels[namespaceOperator as keyof typeof operatorLabels] || namespaceOperator
     };
     dynamicFilters.push(namespaceFilter);
   }
@@ -292,6 +308,8 @@ export default function ExecutionsPage() {
       setLabelsCustomValue('');
     } else if (filterId === 'namespace') {
       setSelectedNamespaces([]);
+      setNamespaceOperator('in');
+      setNamespaceCustomValue('');
     } else if (filterId === 'flow') {
       setSelectedFlows([]);
     } else if (filterId === 'scope') {
@@ -346,6 +364,8 @@ export default function ExecutionsPage() {
     setLabelsCustomValue('');
     // Clear namespaces
     setSelectedNamespaces([]);
+    setNamespaceOperator('in');
+    setNamespaceCustomValue('');
     // Clear flows
     setSelectedFlows([]);
     // Reset scopes to default
@@ -374,6 +394,8 @@ export default function ExecutionsPage() {
       labelsOperator,
       labelsCustomValue,
       selectedNamespaces,
+      namespaceOperator,
+      namespaceCustomValue,
       selectedFlows,
       selectedScopes,
       selectedKinds,
@@ -440,6 +462,8 @@ export default function ExecutionsPage() {
     setLabelsOperator(normalizedLabels.operator);
     setLabelsCustomValue(normalizedLabels.customValue);
     setSelectedNamespaces(state.selectedNamespaces);
+    setNamespaceOperator(state.namespaceOperator || 'in');
+    setNamespaceCustomValue(state.namespaceCustomValue || '');
     setSelectedFlows(state.selectedFlows);
     setSelectedScopes(state.selectedScopes);
     setSelectedKinds(state.selectedKinds);
@@ -538,7 +562,11 @@ export default function ExecutionsPage() {
           onLabelsOperatorChange={setLabelsOperator}
           onLabelsCustomValueChange={setLabelsCustomValue}
           selectedNamespaces={selectedNamespaces}
+          namespaceOperator={namespaceOperator}
+          namespaceCustomValue={namespaceCustomValue}
           onNamespacesSelectionChange={setSelectedNamespaces}
+          onNamespaceOperatorChange={setNamespaceOperator}
+          onNamespaceCustomValueChange={setNamespaceCustomValue}
           selectedFlows={selectedFlows}
           onFlowsSelectionChange={setSelectedFlows}
           selectedScopes={selectedScopes}

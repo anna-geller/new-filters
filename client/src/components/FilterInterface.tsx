@@ -70,7 +70,11 @@ interface FilterInterfaceProps {
   onLabelsOperatorChange: (operator: string) => void;
   onLabelsCustomValueChange: (value: string) => void;
   selectedNamespaces: string[];
+  namespaceOperator: string;
+  namespaceCustomValue: string;
   onNamespacesSelectionChange: (namespaces: string[]) => void;
+  onNamespaceOperatorChange: (operator: string) => void;
+  onNamespaceCustomValueChange: (value: string) => void;
   selectedFlows: string[];
   onFlowsSelectionChange: (flows: string[]) => void;
   selectedScopes: string[];
@@ -129,7 +133,11 @@ export default function FilterInterface({
   onLabelsOperatorChange,
   onLabelsCustomValueChange,
   selectedNamespaces,
+  namespaceOperator,
+  namespaceCustomValue,
   onNamespacesSelectionChange,
+  onNamespaceOperatorChange,
+  onNamespaceCustomValueChange,
   selectedFlows,
   onFlowsSelectionChange,
   selectedScopes,
@@ -353,6 +361,14 @@ export default function FilterInterface({
 
   const handleNamespacesSelectionChange = (namespaces: string[]) => {
     onNamespacesSelectionChange(namespaces);
+  };
+
+  const handleNamespaceOperatorChange = (operator: string) => {
+    onNamespaceOperatorChange(operator);
+  };
+
+  const handleNamespaceCustomValueChange = (value: string) => {
+    onNamespaceCustomValueChange(value);
   };
 
   const handleFlowsSelectionChange = (flows: string[]) => {
@@ -668,7 +684,11 @@ export default function FilterInterface({
                   <PopoverContent side="bottom" align="start" className="w-80 p-0">
                     <NamespaceFilterEditor
                       selectedNamespaces={selectedNamespaces}
+                      namespaceOperator={namespaceOperator}
+                      customValue={namespaceCustomValue}
                       onSelectionChange={handleNamespacesSelectionChange}
+                      onOperatorChange={handleNamespaceOperatorChange}
+                      onCustomValueChange={handleNamespaceCustomValueChange}
                       onClose={handleCloseNamespaceFilter}
                     />
                   </PopoverContent>
@@ -953,7 +973,11 @@ export default function FilterInterface({
                     <PopoverContent side="bottom" align="start" className="w-80 p-0">
                       <NamespaceFilterEditor
                         selectedNamespaces={selectedNamespaces}
+                        namespaceOperator={namespaceOperator}
+                        customValue={namespaceCustomValue}
                         onSelectionChange={handleNamespacesSelectionChange}
+                        onOperatorChange={handleNamespaceOperatorChange}
+                        onCustomValueChange={handleNamespaceCustomValueChange}
                         onClose={handleCloseNamespaceFilter}
                       />
                     </PopoverContent>
