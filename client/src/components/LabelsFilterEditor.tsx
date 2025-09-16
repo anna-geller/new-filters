@@ -6,13 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckSquare, Square, CheckCircle, Link2 } from "lucide-react";
 
 const operatorOptions = [
-  { id: 'has-any-of', label: 'has any of', description: 'Execution has at least one of the selected labels (OR)' },
-  { id: 'has-none-of', label: 'has none of', description: 'Execution has none of the selected labels (NOT OR)' },
-  { id: 'has-all-of', label: 'has all of', description: 'Execution has all of the selected labels (AND)' },
+  { id: 'has-any-of', label: 'has any of', description: 'Matches at least one of the selected labels (OR)' },
+  { id: 'has-none-of', label: 'has none of', description: 'Matches none of the selected labels (NOT OR)' },
+  { id: 'has-all-of', label: 'has all of', description: 'Matches all of the selected labels (AND)' },
   { id: 'contains', label: 'contains', description: 'Label contains the specified text (LIKE)' },
   { id: 'does-not-contain', label: 'does not contain', description: 'Label does not contain the specified text (NOT LIKE)' },
-  { id: 'is-set', label: 'is set', description: 'Execution has any labels (regardless of value) (EXISTS)' },
-  { id: 'is-not-set', label: 'is not set', description: 'Execution has no labels at all (NOT EXISTS)' },
+  { id: 'is-set', label: 'is set', description: 'Has any labels (regardless of value) (EXISTS)' },
+  { id: 'is-not-set', label: 'is not set', description: 'Has no labels at all (NOT EXISTS)' },
 ];
 
 const labelOptions = [
