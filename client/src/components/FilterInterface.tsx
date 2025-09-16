@@ -56,7 +56,9 @@ interface FilterInterfaceProps {
   columns: ColumnConfig[];
   onColumnsChange: (columns: ColumnConfig[]) => void;
   selectedStates: string[];
+  statesOperator: string;
   onSelectedStatesChange: (states: string[]) => void;
+  onStatesOperatorChange: (operator: string) => void;
   selectedTimeRange: string;
   timeRangeStartDate?: string;
   timeRangeEndDate?: string;
@@ -113,7 +115,9 @@ export default function FilterInterface({
   columns,
   onColumnsChange,
   selectedStates,
+  statesOperator,
   onSelectedStatesChange,
+  onStatesOperatorChange,
   selectedTimeRange,
   timeRangeStartDate,
   timeRangeEndDate,
@@ -321,6 +325,10 @@ export default function FilterInterface({
 
   const handleStateSelectionChange = (states: string[]) => {
     onSelectedStatesChange(states);
+  };
+
+  const handleStatesOperatorChange = (operator: string) => {
+    onStatesOperatorChange(operator);
   };
 
   const handleCloseStateFilter = () => {
@@ -604,7 +612,9 @@ export default function FilterInterface({
                   <PopoverContent side="bottom" align="start" className="w-80 p-0">
                     <StateFilterEditor
                       selectedStates={selectedStates}
+                      statesOperator={statesOperator}
                       onSelectionChange={handleStateSelectionChange}
+                      onOperatorChange={handleStatesOperatorChange}
                       onClose={handleCloseStateFilter}
                     />
                   </PopoverContent>
@@ -887,7 +897,9 @@ export default function FilterInterface({
                     <PopoverContent side="bottom" align="start" className="w-80 p-0">
                       <StateFilterEditor
                         selectedStates={selectedStates}
+                        statesOperator={statesOperator}
                         onSelectionChange={handleStateSelectionChange}
+                        onOperatorChange={handleStatesOperatorChange}
                         onClose={handleCloseStateFilter}
                       />
                     </PopoverContent>

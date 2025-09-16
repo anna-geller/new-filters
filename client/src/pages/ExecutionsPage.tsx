@@ -109,6 +109,7 @@ const mockExecutions = [
 export default function ExecutionsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [statesOperator, setStatesOperator] = useState<string>('in');
   const [selectedTimeRange, setSelectedTimeRange] = useState('last-7-days');
   const [timeRangeStartDate, setTimeRangeStartDate] = useState<string>();
   const [timeRangeEndDate, setTimeRangeEndDate] = useState<string>();
@@ -153,11 +154,15 @@ export default function ExecutionsPage() {
   
   // Add state filter if states are selected
   if (selectedStates.length > 0) {
+    const operatorLabels = {
+      'in': 'in',
+      'not-in': 'not in'
+    };
     const stateFilter = {
       id: 'state',
       label: 'State',
-      value: `${selectedStates.length}`,
-      operator: 'in'
+      value: `${operatorLabels[statesOperator as keyof typeof operatorLabels]} ${selectedStates.length}`,
+      operator: statesOperator
     };
     dynamicFilters.push(stateFilter);
   }
@@ -281,6 +286,7 @@ export default function ExecutionsPage() {
   const handleClearFilter = (filterId: string) => {
     if (filterId === 'state') {
       setSelectedStates([]);
+      setStatesOperator('in');
     } else if (filterId === 'labels') {
       setSelectedLabels([]);
       setLabelsCustomValue('');
@@ -333,6 +339,7 @@ export default function ExecutionsPage() {
     setTimeRangeEndDate(undefined);
     // Clear selected states
     setSelectedStates([]);
+    setStatesOperator('in');
     // Clear labels
     setSelectedLabels([]);
     setLabelsOperator('has-any-of');
@@ -359,6 +366,7 @@ export default function ExecutionsPage() {
     return {
       searchValue,
       selectedStates,
+      statesOperator,
       selectedTimeRange,
       timeRangeStartDate,
       timeRangeEndDate,
@@ -424,6 +432,7 @@ export default function ExecutionsPage() {
     
     setSearchValue(state.searchValue);
     setSelectedStates(state.selectedStates);
+    setStatesOperator(state.statesOperator || 'in');
     setSelectedTimeRange(state.selectedTimeRange);
     setTimeRangeStartDate(state.timeRangeStartDate);
     setTimeRangeEndDate(state.timeRangeEndDate);
@@ -515,7 +524,9 @@ export default function ExecutionsPage() {
           columns={columns}
           onColumnsChange={handleColumnsChange}
           selectedStates={selectedStates}
+          statesOperator={statesOperator}
           onSelectedStatesChange={setSelectedStates}
+          onStatesOperatorChange={setStatesOperator}
           selectedTimeRange={selectedTimeRange}
           timeRangeStartDate={timeRangeStartDate}
           timeRangeEndDate={timeRangeEndDate}

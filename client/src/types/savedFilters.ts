@@ -7,6 +7,7 @@ export interface SavedFilter {
   filterState: {
     searchValue: string;
     selectedStates: string[];
+    statesOperator: string;
     selectedTimeRange: string;
     timeRangeStartDate?: string;
     timeRangeEndDate?: string;

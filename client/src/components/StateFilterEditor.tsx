@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play, XCircle, X, AlertTriangle, Pause, Ban, SkipForward, Clock, RefreshCw, Circle } from "lucide-react";
+
+const operatorOptions = [
+  { id: 'in', label: 'is any of', description: 'Execution state is one of the selected states' },
+  { id: 'not-in', label: 'is not any of', description: 'Execution state is not one of the selected states' },
+];
 
 const stateOptions = [
   { 
@@ -99,13 +105,17 @@ const stateOptions = [
 
 interface StateFilterEditorProps {
   selectedStates: string[];
+  statesOperator: string;
   onSelectionChange: (states: string[]) => void;
+  onOperatorChange: (operator: string) => void;
   onClose: () => void;
 }
 
 export default function StateFilterEditor({ 
   selectedStates, 
+  statesOperator,
   onSelectionChange, 
+  onOperatorChange,
   onClose 
 }: StateFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -141,8 +151,28 @@ export default function StateFilterEditor({
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header with search */}
+      {/* Header with operator and search */}
       <div className="p-4 border-b border-border">
+        {/* Operator Selection */}
+        <div className="mb-3">
+          <label className="text-sm font-medium text-foreground mb-2 block">Filter Type</label>
+          <Select value={statesOperator} onValueChange={onOperatorChange} data-testid="select-states-operator">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select filter type..." />
+            </SelectTrigger>
+            <SelectContent>
+              {operatorOptions.map((option) => (
+                <SelectItem key={option.id} value={option.id} data-testid={`states-operator-${option.id}`}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{option.label}</span>
+                    <span className="text-xs text-muted-foreground">{option.description}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
         <Input
           placeholder="Search state..."
           value={searchTerm}
