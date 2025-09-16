@@ -110,7 +110,7 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
                 onClick={() => onLabelClick?.(label)}
                 data-testid={`label-badge-${label}`}
               >
-                {label}
+                {label.startsWith('team-') ? label.replace('team-', 'team:') : label}
               </Badge>
             ))}
             {execution.labels.length > 2 && (
