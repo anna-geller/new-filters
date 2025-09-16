@@ -155,7 +155,7 @@ export default function ExecutionsPage() {
     const stateFilter = {
       id: 'state',
       label: 'State',
-      value: `${selectedStates.length} selected`,
+      value: `${selectedStates.length}`,
       operator: 'in'
     };
     dynamicFilters.push(stateFilter);
@@ -181,7 +181,7 @@ export default function ExecutionsPage() {
     const labelsFilter = {
       id: 'labels',
       label: 'Labels',
-      value: isTextBasedLabelsOperator ? labelsCustomValue : `${selectedLabels.length} selected`,
+      value: isTextBasedLabelsOperator ? labelsCustomValue : `${selectedLabels.length}`,
       operator: getOperatorDisplayLabel(labelsOperator)
     };
     dynamicFilters.push(labelsFilter);
@@ -192,7 +192,7 @@ export default function ExecutionsPage() {
     const namespaceFilter = {
       id: 'namespace',
       label: 'Namespace',
-      value: `${selectedNamespaces.length} selected`,
+      value: `${selectedNamespaces.length}`,
       operator: 'in'
     };
     dynamicFilters.push(namespaceFilter);
@@ -203,7 +203,7 @@ export default function ExecutionsPage() {
     const flowFilter = {
       id: 'flow',
       label: 'Flow',
-      value: `${selectedFlows.length} selected`,
+      value: `${selectedFlows.length}`,
       operator: 'in'
     };
     dynamicFilters.push(flowFilter);
@@ -214,7 +214,7 @@ export default function ExecutionsPage() {
     const scopeFilter = {
       id: 'scope',
       label: 'Scope',
-      value: `${selectedScopes.length} selected`,
+      value: `${selectedScopes.length}`,
       operator: 'in'
     };
     dynamicFilters.push(scopeFilter);
@@ -225,7 +225,7 @@ export default function ExecutionsPage() {
     const kindFilter = {
       id: 'kind',
       label: 'Kind',
-      value: `${selectedKinds.length} selected`,
+      value: `${selectedKinds.length}`,
       operator: 'in'
     };
     dynamicFilters.push(kindFilter);
@@ -236,7 +236,7 @@ export default function ExecutionsPage() {
     const subflowFilter = {
       id: 'subflow',
       label: 'Subflow',
-      value: `${selectedSubflows.length} selected`,
+      value: `${selectedSubflows.length}`,
       operator: 'in'
     };
     dynamicFilters.push(subflowFilter);
