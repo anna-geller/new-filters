@@ -25,6 +25,7 @@ export interface ColumnConfig {
 interface ExecutionsTableProps {
   executions: Execution[];
   columns?: ColumnConfig[];
+  onLabelClick?: (label: string) => void;
 }
 
 export const defaultColumns: ColumnConfig[] = [
@@ -50,7 +51,7 @@ const stateColors = {
   CANCELLED: 'bg-red-900/30 text-red-400 border-red-700'
 };
 
-export default function ExecutionsTable({ executions, columns }: ExecutionsTableProps) {
+export default function ExecutionsTable({ executions, columns, onLabelClick }: ExecutionsTableProps) {
   const cols = Array.isArray(columns) ? columns : defaultColumns;
   const visibleColumns = cols
     .filter(col => col.visible)
@@ -97,12 +98,27 @@ export default function ExecutionsTable({ executions, columns }: ExecutionsTable
         return (
           <div className="flex flex-wrap gap-1">
             {execution.labels.slice(0, 2).map((label, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+              <Badge
+                key={index}
+                variant="outline"
+                className={`text-xs cursor-pointer transition-all duration-200 
+                  ${onLabelClick 
+                    ? 'hover:bg-blue-500/20 hover:border-blue-400 hover:text-blue-300 border-border/40 text-foreground/80' 
+                    : 'border-border text-foreground/80'
+                  }
+                  hover:scale-105 active:scale-95`}
+                onClick={() => onLabelClick?.(label)}
+                data-testid={`label-badge-${label}`}
+              >
                 {label}
               </Badge>
             ))}
             {execution.labels.length > 2 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge 
+                variant="outline" 
+                className="text-xs border-border/40 text-muted-foreground pointer-events-none"
+                data-testid="label-overflow-badge"
+              >
                 +{execution.labels.length - 2}
               </Badge>
             )}

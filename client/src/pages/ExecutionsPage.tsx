@@ -451,6 +451,25 @@ export default function ExecutionsPage() {
     console.log('Filter updated:', filterId);
   };
 
+  // Handle label click from table - add to Labels filter with 'has-all-of' operator using logical AND
+  const handleLabelClick = (clickedLabel: string) => {
+    // Set operator to 'has-all-of' as specified in requirements
+    setLabelsOperator('has-all-of');
+    
+    // Use logical AND - add to existing selectedLabels (don't replace)
+    setSelectedLabels(prevLabels => {
+      if (!prevLabels.includes(clickedLabel)) {
+        return [...prevLabels, clickedLabel];
+      }
+      return prevLabels; // Don't add duplicates
+    });
+    
+    // Clear custom value since we're using selection-based operator
+    setLabelsCustomValue('');
+    
+    console.log('Label clicked:', clickedLabel, '- added to Labels filter with has-all-of operator');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -524,7 +543,11 @@ export default function ExecutionsPage() {
 
         {/* Table */}
         <div className="p-4">
-          <ExecutionsTable executions={mockExecutions} columns={columns} />
+          <ExecutionsTable 
+            executions={mockExecutions} 
+            columns={columns}
+            onLabelClick={handleLabelClick}
+          />
         </div>
 
       </main>
