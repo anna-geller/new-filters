@@ -6,13 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckSquare, Square, CheckCircle, Link2 } from "lucide-react";
 
 const operatorOptions = [
-  { id: 'in', label: 'in', description: 'Includes any of the selected labels' },
-  { id: 'not-in', label: 'not in', description: 'Does not include any of the selected labels' },
-  { id: 'starts-with', label: 'starts with', description: 'Label starts with the specified text' },
-  { id: 'ends-with', label: 'ends with', description: 'Label ends with the specified text' },
+  { id: 'has-any-of', label: 'has any of', description: 'Execution has at least one of the selected labels' },
+  { id: 'has-none-of', label: 'has none of', description: 'Execution has none of the selected labels' },
+  { id: 'has-all-of', label: 'has all of', description: 'Execution has all of the selected labels' },
   { id: 'contains', label: 'contains', description: 'Label contains the specified text' },
   { id: 'does-not-contain', label: 'does not contain', description: 'Label does not contain the specified text' },
-  { id: 'exactly-matches', label: 'exactly matches', description: 'Label exactly matches the specified text' },
+  { id: 'is-set', label: 'is set', description: 'Execution has any labels (regardless of value)' },
+  { id: 'is-not-set', label: 'is not set', description: 'Execution has no labels at all' },
 ];
 
 const labelOptions = [
@@ -129,7 +129,9 @@ export default function LabelsFilterEditor({
   const noneVisible = filteredLabels.every(label => !selectedLabels.includes(label.id));
   
   const selectedOperatorObj = operatorOptions.find(op => op.id === selectedOperator);
-  const isTextBasedOperator = ['starts-with', 'ends-with', 'contains', 'does-not-contain', 'exactly-matches'].includes(selectedOperator);
+  const isTextBasedOperator = ['contains', 'does-not-contain'].includes(selectedOperator);
+  const isNoInputOperator = ['is-set', 'is-not-set'].includes(selectedOperator);
+  const isSelectionBasedOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(selectedOperator);
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -176,7 +178,7 @@ export default function LabelsFilterEditor({
         )}
 
         {/* Search for selection-based operators */}
-        {!isTextBasedOperator && (
+        {isSelectionBasedOperator && (
           <div className="mb-3">
             <Input
               placeholder="Search labels..."
@@ -188,8 +190,26 @@ export default function LabelsFilterEditor({
           </div>
         )}
         
+        {/* Information display for no-input operators */}
+        {isNoInputOperator && (
+          <div className="mb-3 p-3 bg-muted/30 rounded-md border border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+              <span className="text-sm font-medium text-foreground">
+                {selectedOperatorObj?.label}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {selectedOperatorObj?.description}
+            </p>
+            <p className="text-xs text-blue-600 mt-2">
+              No additional configuration needed for this operator.
+            </p>
+          </div>
+        )}
+
         {/* Select All / Deselect All for selection-based operators */}
-        {!isTextBasedOperator && (
+        {isSelectionBasedOperator && (
           <div className="flex items-center gap-4">
             <button
               onClick={handleSelectAll}
@@ -223,7 +243,7 @@ export default function LabelsFilterEditor({
       </div>
 
       {/* Label Options for selection-based operators */}
-      {!isTextBasedOperator && (
+      {isSelectionBasedOperator && (
         <div className="max-h-64 overflow-y-auto">
           {filteredLabels.map((label) => {
             const isSelected = selectedLabels.includes(label.id);
@@ -265,6 +285,8 @@ export default function LabelsFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {isTextBasedOperator 
+            ? `Operator: ${selectedOperatorObj?.label || 'None'}`
+            : isNoInputOperator
             ? `Operator: ${selectedOperatorObj?.label || 'None'}`
             : `${selectedLabels.length} of ${labelOptions.length} labels selected`
           }

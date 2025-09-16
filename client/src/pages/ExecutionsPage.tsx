@@ -112,7 +112,7 @@ export default function ExecutionsPage() {
   const [timeRangeStartDate, setTimeRangeStartDate] = useState<string>();
   const [timeRangeEndDate, setTimeRangeEndDate] = useState<string>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const [labelsOperator, setLabelsOperator] = useState('in');
+  const [labelsOperator, setLabelsOperator] = useState('has-any-of');
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
@@ -164,24 +164,33 @@ export default function ExecutionsPage() {
   // Helper function to get short operator label for display
   const getOperatorDisplayLabel = (operatorId: string) => {
     const operatorMap = {
-      'in': 'in',
-      'not-in': 'not in',
-      'starts-with': 'starts with',
-      'ends-with': 'ends with',
+      'has-any-of': 'has any of',
+      'has-none-of': 'has none of',
+      'has-all-of': 'has all of',
       'contains': 'contains',
       'does-not-contain': 'does not contain',
-      'exactly-matches': 'exactly matches'
+      'is-set': 'is set',
+      'is-not-set': 'is not set'
     };
     return operatorMap[operatorId as keyof typeof operatorMap] || operatorId;
   };
 
-  // Add labels filter if labels are selected or custom value is set
-  const isTextBasedLabelsOperator = ['starts-with', 'ends-with', 'contains', 'does-not-contain', 'exactly-matches'].includes(labelsOperator);
-  if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || (!isTextBasedLabelsOperator && selectedLabels.length > 0)) {
+  // Add labels filter if labels are selected, custom value is set, or no-input operator is used
+  const isTextBasedLabelsOperator = ['contains', 'does-not-contain'].includes(labelsOperator);
+  const isNoInputLabelsOperator = ['is-set', 'is-not-set'].includes(labelsOperator);
+  const isSelectionBasedLabelsOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(labelsOperator);
+  
+  if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || 
+      (isSelectionBasedLabelsOperator && selectedLabels.length > 0) || 
+      isNoInputLabelsOperator) {
     const labelsFilter = {
       id: 'labels',
       label: 'Labels',
-      value: isTextBasedLabelsOperator ? labelsCustomValue : `${selectedLabels.length}`,
+      value: isTextBasedLabelsOperator 
+        ? labelsCustomValue 
+        : isNoInputLabelsOperator 
+        ? (labelsOperator === 'is-set' ? 'any' : 'none')
+        : `${selectedLabels.length}`,
       operator: getOperatorDisplayLabel(labelsOperator)
     };
     dynamicFilters.push(labelsFilter);
@@ -321,7 +330,7 @@ export default function ExecutionsPage() {
     setSelectedStates([]);
     // Clear labels
     setSelectedLabels([]);
-    setLabelsOperator('in');
+    setLabelsOperator('has-any-of');
     setLabelsCustomValue('');
     // Clear namespaces
     setSelectedNamespaces([]);
@@ -380,9 +389,33 @@ export default function ExecutionsPage() {
     console.log('Filter saved:', name);
   };
 
+  // Normalize legacy operators to new ones
+  const normalizeLegacyOperator = (operator: string, customValue: string) => {
+    const operatorMigrations: { [key: string]: string } = {
+      'in': 'has-any-of',
+      'not-in': 'has-none-of', 
+      'starts-with': 'contains',
+      'ends-with': 'contains',
+      'exactly-matches': 'contains'
+    };
+    
+    const newOperator = operatorMigrations[operator] || operator;
+    
+    // For text-based operators that became selection-based, clear custom value
+    const shouldClearCustomValue = ['in', 'not-in'].includes(operator) && customValue;
+    
+    return {
+      operator: newOperator,
+      customValue: shouldClearCustomValue ? '' : customValue
+    };
+  };
+
   // Load a saved filter
   const handleLoadFilter = (filter: SavedFilter) => {
     const state = filter.filterState;
+    
+    // Normalize legacy labels operator
+    const normalizedLabels = normalizeLegacyOperator(state.labelsOperator, state.labelsCustomValue || '');
     
     setSearchValue(state.searchValue);
     setSelectedStates(state.selectedStates);
@@ -390,8 +423,8 @@ export default function ExecutionsPage() {
     setTimeRangeStartDate(state.timeRangeStartDate);
     setTimeRangeEndDate(state.timeRangeEndDate);
     setSelectedLabels(state.selectedLabels);
-    setLabelsOperator(state.labelsOperator);
-    setLabelsCustomValue(state.labelsCustomValue);
+    setLabelsOperator(normalizedLabels.operator);
+    setLabelsCustomValue(normalizedLabels.customValue);
     setSelectedNamespaces(state.selectedNamespaces);
     setSelectedFlows(state.selectedFlows);
     setSelectedScopes(state.selectedScopes);

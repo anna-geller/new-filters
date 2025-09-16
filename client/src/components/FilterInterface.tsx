@@ -229,7 +229,7 @@ export default function FilterInterface({
       } else if (filterOption && filterOption.enabled) {
         // Clear labels filter values when disabling
         onLabelsSelectionChange([]);
-        onLabelsOperatorChange('in');
+        onLabelsOperatorChange('has-any-of');
         onLabelsCustomValueChange('');
       }
     } else if (filterId === 'namespace') {
