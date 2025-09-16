@@ -15,11 +15,6 @@ const scopeOptions = [
     label: 'System Executions', 
     description: 'Maintenance executions'
   },
-  { 
-    id: 'all', 
-    label: 'All Executions', 
-    description: 'Both user and system executions'
-  },
 ];
 
 interface ScopeFilterEditorProps {

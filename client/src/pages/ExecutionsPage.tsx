@@ -240,13 +240,19 @@ export default function ExecutionsPage() {
     dynamicFilters.push(flowFilter);
   }
 
-  // Add scope filter if scopes are selected
-  if (selectedScopes.length > 0) {
+  // Add scope filter only if exactly one scope is selected (not both user and system)
+  // When both are selected, it's equivalent to no constraint
+  const validScopes = selectedScopes.filter(scope => scope === 'user' || scope === 'system');
+  if (validScopes.length === 1) {
+    const scopeLabels = {
+      'user': 'User',
+      'system': 'System'
+    };
     const scopeFilter = {
       id: 'scope',
       label: 'Scope',
-      value: `${selectedScopes.length}`,
-      operator: 'in'
+      value: scopeLabels[validScopes[0] as keyof typeof scopeLabels] || validScopes[0],
+      operator: 'is'
     };
     dynamicFilters.push(scopeFilter);
   }
@@ -313,7 +319,7 @@ export default function ExecutionsPage() {
     } else if (filterId === 'flow') {
       setSelectedFlows([]);
     } else if (filterId === 'scope') {
-      setSelectedScopes(['user']);
+      setSelectedScopes([]);
     } else if (filterId === 'kind') {
       setSelectedKinds(['default']);
     } else if (filterId === 'subflow') {
@@ -465,7 +471,16 @@ export default function ExecutionsPage() {
     setNamespaceOperator(state.namespaceOperator || 'in');
     setNamespaceCustomValue(state.namespaceCustomValue || '');
     setSelectedFlows(state.selectedFlows);
-    setSelectedScopes(state.selectedScopes);
+    
+    // Normalize legacy scope values
+    let normalizedScopes = state.selectedScopes || [];
+    if (normalizedScopes.includes('all') || (normalizedScopes.length === 1 && normalizedScopes[0] === 'all')) {
+      normalizedScopes = ['user', 'system'];
+    }
+    // Ensure only valid scope values
+    normalizedScopes = normalizedScopes.filter(scope => scope === 'user' || scope === 'system');
+    
+    setSelectedScopes(normalizedScopes);
     setSelectedKinds(state.selectedKinds);
     setSelectedSubflow(state.selectedSubflow || 'all');
     setSelectedInitialExecution(state.selectedInitialExecution);
