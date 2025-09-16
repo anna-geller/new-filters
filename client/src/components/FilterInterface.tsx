@@ -213,46 +213,66 @@ export default function FilterInterface({
       )
     );
     
-    // Auto-open editors when filters are enabled
+    // Auto-open editors when filters are enabled, clear values when disabled
+    const filterOption = filterOptions.find(option => option.id === filterId);
+    
     if (filterId === 'state') {
-      const filterOption = filterOptions.find(option => option.id === 'state');
       if (filterOption && !filterOption.enabled) {
         setStateFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear state filter values when disabling
+        onSelectedStatesChange([]);
       }
     } else if (filterId === 'labels') {
-      const filterOption = filterOptions.find(option => option.id === 'labels');
       if (filterOption && !filterOption.enabled) {
         setLabelsFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear labels filter values when disabling
+        onLabelsSelectionChange([]);
+        onLabelsOperatorChange('in');
+        onLabelsCustomValueChange('');
       }
     } else if (filterId === 'namespace') {
-      const filterOption = filterOptions.find(option => option.id === 'namespace');
       if (filterOption && !filterOption.enabled) {
         setNamespaceFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear namespace filter values when disabling
+        onNamespacesSelectionChange([]);
       }
     } else if (filterId === 'flow') {
-      const filterOption = filterOptions.find(option => option.id === 'flow');
       if (filterOption && !filterOption.enabled) {
         setFlowFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear flow filter values when disabling
+        onFlowsSelectionChange([]);
       }
     } else if (filterId === 'scope') {
-      const filterOption = filterOptions.find(option => option.id === 'scope');
       if (filterOption && !filterOption.enabled) {
         setScopeFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear scope filter values when disabling, reset to default
+        onScopesSelectionChange(['user']);
       }
     } else if (filterId === 'kind') {
-      const filterOption = filterOptions.find(option => option.id === 'kind');
       if (filterOption && !filterOption.enabled) {
         setKindFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear kind filter values when disabling, reset to default
+        onKindsSelectionChange(['default']);
       }
     } else if (filterId === 'subflow') {
-      const filterOption = filterOptions.find(option => option.id === 'subflow');
       if (filterOption && !filterOption.enabled) {
         setSubflowFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear subflow filter values when disabling
+        onSubflowsSelectionChange([]);
       }
     } else if (filterId === 'initial-execution') {
-      const filterOption = filterOptions.find(option => option.id === 'initial-execution');
       if (filterOption && !filterOption.enabled) {
         setInitialExecutionFilterOpen(true);
+      } else if (filterOption && filterOption.enabled) {
+        // Clear initial execution filter values when disabling
+        onInitialExecutionSelectionChange('');
       }
     }
   };
