@@ -17,62 +17,62 @@ const operatorOptions = [
 
 const labelOptions = [
   { 
-    id: 'dev-production', 
-    label: 'dev-production', 
+    id: 'env:production', 
+    label: 'env:production', 
     color: 'bg-blue-500',
-    description: 'Development production environment'
+    description: 'Production environment'
   },
   { 
-    id: 'team-backend', 
-    label: 'team-backend', 
+    id: 'team:backend', 
+    label: 'team:backend', 
     color: 'bg-green-500',
     description: 'Backend team assignments'
   },
   { 
-    id: 'team-frontend', 
-    label: 'team-frontend', 
+    id: 'team:frontend', 
+    label: 'team:frontend', 
     color: 'bg-purple-500',
     description: 'Frontend team assignments'
   },
   { 
-    id: 'team-analytics', 
-    label: 'team-analytics', 
+    id: 'team:analytics', 
+    label: 'team:analytics', 
     color: 'bg-orange-500',
     description: 'Analytics team assignments'
   },
   { 
-    id: 'security-scan', 
-    label: 'security-scan', 
+    id: 'action:cvescan', 
+    label: 'action:cvescan', 
     color: 'bg-red-500',
     description: 'Security scanning processes'
   },
   { 
-    id: 'team-security', 
-    label: 'team-security', 
+    id: 'team:security', 
+    label: 'team:security', 
     color: 'bg-yellow-500',
     description: 'Security team assignments'
   },
   { 
-    id: 'automated-test', 
-    label: 'automated-test', 
+    id: 'action:test', 
+    label: 'action:test', 
     color: 'bg-cyan-500',
     description: 'Automated testing processes'
   },
   { 
-    id: 'critical-path', 
-    label: 'critical-path', 
+    id: 'priority:critical', 
+    label: 'priority:critical', 
     color: 'bg-pink-500',
     description: 'Critical path executions'
   },
   { 
-    id: 'user-facing', 
-    label: 'user-facing', 
+    id: 'type:user-facing', 
+    label: 'type:user-facing', 
     color: 'bg-indigo-500',
     description: 'User-facing features'
   },
   { 
-    id: 'internal-tool', 
-    label: 'internal-tool', 
+    id: 'type:internal', 
+    label: 'type:internal', 
     color: 'bg-teal-500',
     description: 'Internal tooling processes'
   },
