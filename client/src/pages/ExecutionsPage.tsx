@@ -163,8 +163,8 @@ export default function ExecutionsPage() {
     const stateFilter = {
       id: 'state',
       label: 'State',
-      value: `${operatorLabels[statesOperator as keyof typeof operatorLabels]} ${selectedStates.length}`,
-      operator: statesOperator
+      value: `${selectedStates.length}`,
+      operator: operatorLabels[statesOperator as keyof typeof operatorLabels]
     };
     dynamicFilters.push(stateFilter);
   }
