@@ -503,8 +503,8 @@ export default function FilterInterface({
   return (
     <div className="relative">
       
-      {/* First Row */}
-      <div className="flex items-center gap-3 p-4">
+      {/* First Row: Controls */}
+      <div className="flex items-center gap-3 p-4 pb-2">
         {/* Left Section: Control buttons and search */}
         <div className="flex items-center gap-3 flex-shrink-0">
           {/* Customize Filters Button */}
@@ -541,9 +541,61 @@ export default function FilterInterface({
           />
         </div>
 
-        {/* Middle Section: Filter Badges with guaranteed space */}
-        <div className="flex-1 min-w-0 pr-8">
-          <div className="flex items-center gap-2 flex-wrap">
+        {/* Right Section: Action buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+          {/* Save Filter Button */}
+          <SaveFilterButton
+            onClick={() => setSaveFilterDialogOpen(true)}
+          />
+
+          {/* Saved Filters Dropdown */}
+          <SavedFiltersDropdown
+            savedFilters={savedFilters}
+            onLoadFilter={onLoadFilter}
+            onEditFilter={handleEditSavedFilter}
+            onDeleteFilter={onDeleteFilter}
+          />
+
+          {/* Table options with popover */}
+          <Popover open={tableOptionsOpen} onOpenChange={handleTableOptionsToggle}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs px-3 py-1 h-7 bg-background border-border text-foreground hover:bg-muted"
+                data-testid="table-options-button"
+              >
+                <Settings className="h-4 w-4 mr-1" />
+                Table options
+                {tableOptionsOpen ? (
+                  <ChevronUp className="h-3 w-3 ml-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              side="bottom" 
+              align="end" 
+              className="w-80 p-0"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <TablePropertiesPanel
+                columns={columns}
+                onColumnToggle={handleColumnToggle}
+                onColumnReorder={handleColumnReorder}
+                isSubPanelOpen={tablePropertiesOpen}
+                onSubPanelToggle={setTablePropertiesOpen}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Second Row: Filter Badges */}
+      {allFiltersForDisplay.length > 0 && (
+        <div className="px-4 pb-4">
+          <div className="flex flex-wrap gap-2">
             {allFiltersForDisplay.map((filter) => {
             // State Filter with Popover
             if (filter.id === 'state') {
@@ -799,35 +851,7 @@ export default function FilterInterface({
           })}
           </div>
         </div>
-
-        {/* Right Section: Save Filter, Saved Filters, and Table Options - Protected from overlap */}
-        <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
-          {/* Save Filter Button */}
-          <SaveFilterButton
-            onClick={handleSaveFilterClick}
-          />
-
-          {/* Saved Filters Dropdown */}
-          <SavedFiltersDropdown
-            savedFilters={savedFilters}
-            onLoadFilter={onLoadFilter}
-            onDeleteFilter={onDeleteFilter}
-            onEditFilter={handleEditSavedFilter}
-          />
-          
-          {/* Table Options Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleTableOptionsToggle}
-            className="flex items-center gap-2 text-muted-foreground hover-elevate"
-            data-testid="button-toggle-table-options"
-          >
-            {tableOptionsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            Table options
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* Table Options Panel */}
       {tableOptionsOpen && (
