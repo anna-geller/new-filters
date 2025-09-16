@@ -149,16 +149,20 @@ export default function StateFilterEditor({
   const allVisible = filteredStates.every(state => selectedStates.includes(state.id));
   const noneVisible = filteredStates.every(state => !selectedStates.includes(state.id));
 
+  const selectedOperatorObj = operatorOptions.find(op => op.id === statesOperator);
+
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with operator and search */}
       <div className="p-4 border-b border-border">
         {/* Operator Selection */}
         <div className="mb-3">
-          <label className="text-sm font-medium text-foreground mb-2 block">Filter Type</label>
+          <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
           <Select value={statesOperator} onValueChange={onOperatorChange} data-testid="select-states-operator">
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select filter type..." />
+              <SelectValue placeholder="Select operator...">
+                {selectedOperatorObj?.label || "Select operator..."}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {operatorOptions.map((option) => (
