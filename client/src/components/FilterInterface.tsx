@@ -214,7 +214,17 @@ export default function FilterInterface({
     );
     
     // Auto-open editors when filters are enabled
-    if (filterId === 'namespace') {
+    if (filterId === 'state') {
+      const filterOption = filterOptions.find(option => option.id === 'state');
+      if (filterOption && !filterOption.enabled) {
+        setStateFilterOpen(true);
+      }
+    } else if (filterId === 'labels') {
+      const filterOption = filterOptions.find(option => option.id === 'labels');
+      if (filterOption && !filterOption.enabled) {
+        setLabelsFilterOpen(true);
+      }
+    } else if (filterId === 'namespace') {
       const filterOption = filterOptions.find(option => option.id === 'namespace');
       if (filterOption && !filterOption.enabled) {
         setNamespaceFilterOpen(true);
