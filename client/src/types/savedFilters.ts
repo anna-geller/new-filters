@@ -17,7 +17,7 @@ export interface SavedFilter {
     selectedFlows: string[];
     selectedScopes: string[];
     selectedKinds: string[];
-    selectedSubflows: string[];
+    selectedSubflow: string;
     selectedInitialExecution: string;
   };
 }

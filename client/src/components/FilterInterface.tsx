@@ -75,8 +75,8 @@ interface FilterInterfaceProps {
   onScopesSelectionChange: (scopes: string[]) => void;
   selectedKinds: string[];
   onKindsSelectionChange: (kinds: string[]) => void;
-  selectedSubflows: string[];
-  onSubflowsSelectionChange: (subflows: string[]) => void;
+  selectedSubflow: string;
+  onSubflowSelectionChange: (subflow: string) => void;
   selectedInitialExecution: string;
   onInitialExecutionSelectionChange: (value: string) => void;
   savedFilters: SavedFilter[];
@@ -93,7 +93,7 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 4 },
   { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
   { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
-  { id: 'subflow', label: 'Subflow', description: 'Filter by subflow name', enabled: false, order: 7 },
+  { id: 'subflow', label: 'Subflow', description: 'Filter by execution type', enabled: false, order: 7 },
   { id: 'initial-execution', label: 'Parent Execution ID', description: 'Filter by parent execution ID', enabled: false, order: 8 },
   { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 9 },
 ];
@@ -132,8 +132,8 @@ export default function FilterInterface({
   onScopesSelectionChange,
   selectedKinds,
   onKindsSelectionChange,
-  selectedSubflows,
-  onSubflowsSelectionChange,
+  selectedSubflow,
+  onSubflowSelectionChange,
   selectedInitialExecution,
   onInitialExecutionSelectionChange,
   savedFilters,
@@ -265,7 +265,7 @@ export default function FilterInterface({
         setSubflowFilterOpen(true);
       } else if (filterOption && filterOption.enabled) {
         // Clear subflow filter values when disabling
-        onSubflowsSelectionChange([]);
+        onSubflowSelectionChange('all');
       }
     } else if (filterId === 'initial-execution') {
       if (filterOption && !filterOption.enabled) {
@@ -359,8 +359,8 @@ export default function FilterInterface({
     onKindsSelectionChange(kinds);
   };
 
-  const handleSubflowsSelectionChange = (subflows: string[]) => {
-    onSubflowsSelectionChange(subflows);
+  const handleSubflowSelectionChange = (subflow: string) => {
+    onSubflowSelectionChange(subflow);
   };
 
   const handleInitialExecutionSelectionChange = (value: string) => {
@@ -757,8 +757,8 @@ export default function FilterInterface({
                   </PopoverTrigger>
                   <PopoverContent side="bottom" align="start" className="w-80 p-0">
                     <SubflowFilterEditor
-                      selectedSubflows={selectedSubflows}
-                      onSelectionChange={handleSubflowsSelectionChange}
+                      selectedSubflow={selectedSubflow}
+                      onSelectionChange={handleSubflowSelectionChange}
                       onClose={handleCloseSubflowFilter}
                     />
                   </PopoverContent>
@@ -1040,8 +1040,8 @@ export default function FilterInterface({
                     </PopoverTrigger>
                     <PopoverContent side="bottom" align="start" className="w-80 p-0">
                       <SubflowFilterEditor
-                        selectedSubflows={selectedSubflows}
-                        onSelectionChange={handleSubflowsSelectionChange}
+                        selectedSubflow={selectedSubflow}
+                        onSelectionChange={handleSubflowSelectionChange}
                         onClose={handleCloseSubflowFilter}
                       />
                     </PopoverContent>

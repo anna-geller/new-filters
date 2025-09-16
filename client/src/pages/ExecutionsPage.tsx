@@ -118,7 +118,7 @@ export default function ExecutionsPage() {
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
   const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
-  const [selectedSubflows, setSelectedSubflows] = useState<string[]>([]);
+  const [selectedSubflow, setSelectedSubflow] = useState<string>('all');
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
@@ -240,13 +240,17 @@ export default function ExecutionsPage() {
     dynamicFilters.push(kindFilter);
   }
 
-  // Add subflow filter if subflows are selected
-  if (selectedSubflows.length > 0) {
+  // Add subflow filter if a specific subflow type is selected (not 'all')
+  if (selectedSubflow && selectedSubflow !== 'all') {
+    const subflowLabels = {
+      'child': 'Child Executions',
+      'parent': 'Parent Executions'
+    };
     const subflowFilter = {
       id: 'subflow',
       label: 'Subflow',
-      value: `${selectedSubflows.length}`,
-      operator: 'in'
+      value: subflowLabels[selectedSubflow as keyof typeof subflowLabels] || selectedSubflow,
+      operator: 'is'
     };
     dynamicFilters.push(subflowFilter);
   }
@@ -288,7 +292,7 @@ export default function ExecutionsPage() {
     } else if (filterId === 'kind') {
       setSelectedKinds(['default']);
     } else if (filterId === 'subflow') {
-      setSelectedSubflows([]);
+      setSelectedSubflow('all');
     } else if (filterId === 'initial-execution') {
       setSelectedInitialExecution('');
     } else if (filterId === 'timerange') {
@@ -340,8 +344,8 @@ export default function ExecutionsPage() {
     setSelectedScopes(['user']);
     // Clear kinds
     setSelectedKinds(['default']);
-    // Clear subflows
-    setSelectedSubflows([]);
+    // Reset subflow to default
+    setSelectedSubflow('all');
     // Clear initial execution
     setSelectedInitialExecution('');
     // Clear other active filters
@@ -364,7 +368,7 @@ export default function ExecutionsPage() {
       selectedFlows,
       selectedScopes,
       selectedKinds,
-      selectedSubflows,
+      selectedSubflow,
       selectedInitialExecution,
     };
   };
@@ -429,7 +433,7 @@ export default function ExecutionsPage() {
     setSelectedFlows(state.selectedFlows);
     setSelectedScopes(state.selectedScopes);
     setSelectedKinds(state.selectedKinds);
-    setSelectedSubflows(state.selectedSubflows);
+    setSelectedSubflow(state.selectedSubflow || 'all');
     setSelectedInitialExecution(state.selectedInitialExecution);
     
     console.log('Filter loaded:', filter.name);
@@ -529,8 +533,8 @@ export default function ExecutionsPage() {
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}
           onKindsSelectionChange={setSelectedKinds}
-          selectedSubflows={selectedSubflows}
-          onSubflowsSelectionChange={setSelectedSubflows}
+          selectedSubflow={selectedSubflow}
+          onSubflowSelectionChange={setSelectedSubflow}
           selectedInitialExecution={selectedInitialExecution}
           onInitialExecutionSelectionChange={setSelectedInitialExecution}
           savedFilters={savedFilters}
