@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FilterInterface from '@/components/FilterInterface';
 import ExecutionsTable, { ColumnConfig, defaultColumns } from '@/components/ExecutionsTable';
+import ExecutionChart from '@/components/ExecutionChart';
 import { SavedFilter } from '@/types/savedFilters';
 import { savedFiltersStorage } from '@/utils/savedFiltersStorage';
 
@@ -544,6 +545,10 @@ export default function ExecutionsPage() {
           onUpdateFilter={handleUpdateFilter}
         />
 
+        {/* Chart - displayed when Show Chart toggle is enabled */}
+        {showChart && (
+          <ExecutionChart executions={mockExecutions} />
+        )}
 
         {/* Table */}
         <div className="p-4">
