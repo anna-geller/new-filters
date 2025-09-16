@@ -99,7 +99,7 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 4 },
   { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
   { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
-  { id: 'subflow', label: 'Subflow', description: 'Filter by execution type', enabled: false, order: 7 },
+  { id: 'subflow', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: false, order: 7 },
   { id: 'initial-execution', label: 'Parent Execution ID', description: 'Filter by parent execution ID', enabled: false, order: 8 },
   { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 9 },
 ];

@@ -2,21 +2,21 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Check } from "lucide-react";
 
-const subflowOptions = [
+const hierarchyOptions = [
   { 
     id: 'all', 
-    label: 'All Executions', 
-    description: 'Include all executions regardless of subflow type'
-  },
-  { 
-    id: 'child', 
-    label: 'Child Executions', 
-    description: 'Include only child/nested executions'
+    label: 'All', 
+    description: 'Show both parent and child executions'
   },
   { 
     id: 'parent', 
-    label: 'Parent Executions', 
-    description: 'Include only parent/root executions'
+    label: 'Parent', 
+    description: 'Show only top-level/root executions'
+  },
+  { 
+    id: 'child', 
+    label: 'Child', 
+    description: 'Show only nested/triggered executions'
   },
 ];
 
@@ -32,34 +32,34 @@ export default function SubflowFilterEditor({
   onClose 
 }: SubflowFilterEditorProps) {
 
-  const handleSelectSubflow = (subflowId: string) => {
-    onSelectionChange(subflowId);
+  const handleSelectHierarchy = (hierarchyId: string) => {
+    onSelectionChange(hierarchyId);
   };
 
   return (
     <Card className="w-80 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header */}
       <div className="p-4 border-b border-border">
-        <div className="font-medium text-sm mb-1">Select execution type</div>
+        <div className="font-medium text-sm mb-1">Select hierarchy level</div>
         <div className="text-xs text-muted-foreground">Choose which executions to include</div>
       </div>
 
-      {/* Subflow options - radio button style */}
-      <div data-testid="subflow-options-list">
-        {subflowOptions.map((subflow) => {
-          const isSelected = selectedSubflow === subflow.id;
+      {/* Hierarchy options - radio button style */}
+      <div data-testid="hierarchy-options-list">
+        {hierarchyOptions.map((hierarchy) => {
+          const isSelected = selectedSubflow === hierarchy.id;
           return (
             <div
-              key={subflow.id}
+              key={hierarchy.id}
               className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
-              onClick={() => handleSelectSubflow(subflow.id)}
-              data-testid={`subflow-option-${subflow.id}`}
+              onClick={() => handleSelectHierarchy(hierarchy.id)}
+              data-testid={`hierarchy-option-${hierarchy.id}`}
             >
               <div className="flex items-center gap-3 flex-1">
                 <GitBranch className="w-4 h-4 text-orange-500 flex-shrink-0" />
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{subflow.label}</div>
-                  <div className="text-xs text-muted-foreground">{subflow.description}</div>
+                  <div className="font-medium text-sm">{hierarchy.label}</div>
+                  <div className="text-xs text-muted-foreground">{hierarchy.description}</div>
                 </div>
               </div>
               <div className="flex-shrink-0">
@@ -69,7 +69,7 @@ export default function SubflowFilterEditor({
                     : 'border-input bg-background'
                 }`}>
                   {isSelected && (
-                    <Check className="w-2.5 h-2.5 text-white" data-testid={`subflow-selected-${subflow.id}`} />
+                    <Check className="w-2.5 h-2.5 text-white" data-testid={`hierarchy-selected-${hierarchy.id}`} />
                   )}
                 </div>
               </div>
@@ -82,13 +82,13 @@ export default function SubflowFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {selectedSubflow ? subflowOptions.find(s => s.id === selectedSubflow)?.label || 'None' : 'None'} selected
+            {selectedSubflow ? hierarchyOptions.find(h => h.id === selectedSubflow)?.label || 'None' : 'None'} selected
           </span>
           <Button
             variant="outline"
             size="sm"
             onClick={onClose}
-            data-testid="subflow-close-button"
+            data-testid="hierarchy-close-button"
           >
             Done
           </Button>
