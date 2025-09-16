@@ -55,7 +55,7 @@ export default function TablePropertiesPanel({
   const visibleCount = columns.filter(col => col.visible).length;
 
   return (
-    <Card className="absolute top-full right-0 mt-2 w-96 p-0 bg-popover border border-popover-border shadow-lg z-50">
+    <Card className="w-full p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
