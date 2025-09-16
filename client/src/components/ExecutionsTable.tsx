@@ -110,7 +110,17 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
                 onClick={() => onLabelClick?.(label)}
                 data-testid={`label-badge-${label}`}
               >
-                {label.startsWith('team-') ? label.replace('team-', 'team:') : label}
+                {(() => {
+                  // Transform labels to structured format
+                  if (label.startsWith('team-')) {
+                    return label.replace('team-', 'team:');
+                  } else if (label === 'dev-production') {
+                    return 'env:production';
+                  } else if (label === 'security-scan') {
+                    return 'action:cvescan';
+                  }
+                  return label;
+                })()}
               </Badge>
             ))}
             {execution.labels.length > 2 && (
