@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookmarkCheck, ChevronDown, Trash2, Edit2, Clock } from "lucide-react";
+import { BookmarkCheck, ChevronDown, Trash2, Edit2 } from "lucide-react";
 import { SavedFilter } from '../types/savedFilters';
 
 interface SavedFiltersDropdownProps {
@@ -20,14 +20,6 @@ export default function SavedFiltersDropdown({
 }: SavedFiltersDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-    });
-  };
 
   const handleLoadFilter = (filter: SavedFilter) => {
     onLoadFilter(filter);
@@ -106,10 +98,6 @@ export default function SavedFiltersDropdown({
                   </span>
                 )}
                 
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                  <Clock className="w-3 h-3" />
-                  <span>Updated {formatDate(filter.updatedAt)}</span>
-                </div>
               </DropdownMenuItem>
             ))
         )}
