@@ -24,8 +24,8 @@ interface NamespaceFilterEditorProps {
 }
 
 const operatorOptions = [
-  { value: 'in', label: 'is any of', description: 'Match any of the selected namespaces' },
-  { value: 'not-in', label: 'is not any of', description: 'Exclude any of the selected namespaces' },
+  { value: 'in', label: 'in', description: 'Match any of the selected namespaces' },
+  { value: 'not-in', label: 'not in', description: 'Exclude any of the selected namespaces' },
   { value: 'contains', label: 'contains', description: 'Namespace contains the text' },
   { value: 'starts-with', label: 'starts with', description: 'Namespace starts with the text' },
   { value: 'ends-with', label: 'ends with', description: 'Namespace ends with the text' }
@@ -83,7 +83,7 @@ export default function NamespaceFilterEditor({
       {/* Header with operator selection */}
       <div className="p-4 border-b border-border">
         <div className="mb-3">
-          <label className="text-sm font-medium mb-2 block">Filter Mode</label>
+          <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
           <Select value={namespaceOperator} onValueChange={onOperatorChange}>
             <SelectTrigger data-testid="select-namespace-operator">
               <SelectValue />
