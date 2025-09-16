@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,10 +24,21 @@ export default function SaveFilterDialog({
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string>('');
+
+  // Sync state with props when dialog opens or props change
+  useEffect(() => {
+    if (isOpen) {
+      setName(initialName);
+      setDescription(initialDescription);
+      setError('');
+    }
+  }, [isOpen, initialName, initialDescription]);
 
   const handleSave = async () => {
     if (!name.trim()) return;
     
+    setError('');
     setIsSaving(true);
     try {
       onSave(name.trim(), description.trim());
@@ -36,6 +47,7 @@ export default function SaveFilterDialog({
       setDescription('');
     } catch (error) {
       console.error('Error saving filter:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save filter');
     } finally {
       setIsSaving(false);
     }
@@ -44,6 +56,7 @@ export default function SaveFilterDialog({
   const handleClose = () => {
     setName('');
     setDescription('');
+    setError('');
     onClose();
   };
 
@@ -58,14 +71,24 @@ export default function SaveFilterDialog({
         </DialogHeader>
         
         <div className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md" data-testid="save-filter-error">
+              {error}
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label htmlFor="filter-name">Name *</Label>
             <Input
               id="filter-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (error) setError(''); // Clear error when user types
+              }}
               placeholder="Enter a name for this filter set"
               data-testid="save-filter-name-input"
+              className={error ? 'border-destructive focus:border-destructive' : ''}
             />
           </div>
           

@@ -156,6 +156,8 @@ export default function FilterInterface({
   const [initialExecutionFilterOpen, setInitialExecutionFilterOpen] = useState(false);
   const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
   const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
+  const [editFilterDialogOpen, setEditFilterDialogOpen] = useState(false);
+  const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
   
   // Dynamic wrapping state
   const [firstRowFilters, setFirstRowFilters] = useState<ActiveFilter[]>([]);
@@ -341,13 +343,37 @@ export default function FilterInterface({
   };
 
   const handleSaveFilterSubmit = (name: string, description: string) => {
+    // Check for duplicate names
+    const duplicateFilter = savedFilters.find(f => f.name.toLowerCase() === name.toLowerCase());
+    if (duplicateFilter) {
+      throw new Error('A filter with this name already exists. Please choose a different name.');
+    }
     onSaveFilter(name, description);
     setSaveFilterDialogOpen(false);
   };
 
+  const handleEditFilterSubmit = (name: string, description: string) => {
+    if (!editingFilterId) return;
+    
+    // Check for duplicate names (excluding the filter being edited)
+    const duplicateFilter = savedFilters.find(f => 
+      f.name.toLowerCase() === name.toLowerCase() && f.id !== editingFilterId
+    );
+    if (duplicateFilter) {
+      throw new Error('A filter with this name already exists. Please choose a different name.');
+    }
+    
+    onUpdateFilter(editingFilterId, name, description);
+    setEditFilterDialogOpen(false);
+    setEditingFilterId(null);
+  };
+
   const handleEditSavedFilter = (filterId: string) => {
-    // For now, we'll just log it - full edit functionality could be added later
-    console.log('Edit saved filter:', filterId);
+    const filterToEdit = savedFilters.find(f => f.id === filterId);
+    if (filterToEdit) {
+      setEditingFilterId(filterId);
+      setEditFilterDialogOpen(true);
+    }
   };
 
   const handleCloseNamespaceFilter = () => {
@@ -1129,6 +1155,19 @@ export default function FilterInterface({
         isOpen={saveFilterDialogOpen}
         onClose={() => setSaveFilterDialogOpen(false)}
         onSave={handleSaveFilterSubmit}
+      />
+
+      {/* Edit Filter Dialog */}
+      <SaveFilterDialog
+        key={`edit-${editingFilterId ?? 'none'}`}
+        isOpen={editFilterDialogOpen}
+        onClose={() => {
+          setEditFilterDialogOpen(false);
+          setEditingFilterId(null);
+        }}
+        onSave={handleEditFilterSubmit}
+        initialName={editingFilterId ? savedFilters.find(f => f.id === editingFilterId)?.name || '' : ''}
+        initialDescription={editingFilterId ? savedFilters.find(f => f.id === editingFilterId)?.description || '' : ''}
       />
 
       {/* Table Properties Panel */}
