@@ -25,6 +25,7 @@ import SavedFiltersDropdown from './SavedFiltersDropdown';
 import SaveFilterDialog from './SaveFilterDialog';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 import { SavedFilter } from '../types/savedFilters';
+import { filterCustomizationStorage } from '../utils/filterCustomizationStorage';
 
 interface FilterOption {
   id: string;
@@ -157,7 +158,11 @@ export default function FilterInterface({
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
-  const [filterOptions, setFilterOptions] = useState(defaultFilterOptions);
+  const [filterOptions, setFilterOptions] = useState(() => {
+    // Load saved filter customization or use defaults
+    const savedCustomization = filterCustomizationStorage.get();
+    return savedCustomization || defaultFilterOptions;
+  });
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
   const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
@@ -213,13 +218,15 @@ export default function FilterInterface({
   };
 
   const handleToggleFilter = (filterId: string) => {
-    setFilterOptions(prev => 
-      prev.map(option => 
-        option.id === filterId 
-          ? { ...option, enabled: !option.enabled }
-          : option
-      )
+    const updatedOptions = filterOptions.map(option => 
+      option.id === filterId 
+        ? { ...option, enabled: !option.enabled }
+        : option
     );
+    setFilterOptions(updatedOptions);
+    
+    // Save filter customization to localStorage
+    filterCustomizationStorage.save(updatedOptions);
     
     // Auto-open editors when filters are enabled, clear values when disabled
     const filterOption = filterOptions.find(option => option.id === filterId);
@@ -302,6 +309,9 @@ export default function FilterInterface({
     }));
 
     setFilterOptions(reorderedFilters);
+    
+    // Save filter customization to localStorage
+    filterCustomizationStorage.save(reorderedFilters);
   };
 
   const handleEditFilter = (filterId: string) => {
