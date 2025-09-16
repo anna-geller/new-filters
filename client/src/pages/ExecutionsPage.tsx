@@ -240,8 +240,7 @@ export default function ExecutionsPage() {
     dynamicFilters.push(flowFilter);
   }
 
-  // Add scope filter only if exactly one scope is selected (not both user and system)
-  // When both are selected, it's equivalent to no constraint
+  // Add Scope filter if scopes are selected
   const validScopes = selectedScopes.filter(scope => scope === 'user' || scope === 'system');
   if (validScopes.length === 1) {
     const scopeLabels = {
@@ -253,6 +252,15 @@ export default function ExecutionsPage() {
       label: 'Scope',
       value: scopeLabels[validScopes[0] as keyof typeof scopeLabels] || validScopes[0],
       operator: 'is'
+    };
+    dynamicFilters.push(scopeFilter);
+  } else if (validScopes.length === 2) {
+    // Show badge when both User and System are selected to match other multiselect filters
+    const scopeFilter = {
+      id: 'scope',
+      label: 'Scope',
+      value: '2',
+      operator: 'in'
     };
     dynamicFilters.push(scopeFilter);
   }
