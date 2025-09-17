@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,6 +74,20 @@ export default function IntervalFilterEditor({
   const [currentEndDate, setCurrentEndDate] = useState<Date | undefined>(endDateTime.date);
   const [currentStartTime, setCurrentStartTime] = useState(startDateTime.time);
   const [currentEndTime, setCurrentEndTime] = useState(endDateTime.time || '23:59');
+
+  // Sync local state with props when they change (important for reset functionality)
+  useEffect(() => {
+    setCurrentInterval(selectedInterval);
+  }, [selectedInterval]);
+
+  useEffect(() => {
+    const startDateTime = parseDateTimeString(startDate);
+    const endDateTime = parseDateTimeString(endDate);
+    setCurrentStartDate(startDateTime.date);
+    setCurrentEndDate(endDateTime.date);
+    setCurrentStartTime(startDateTime.time);
+    setCurrentEndTime(endDateTime.time || '23:59');
+  }, [startDate, endDate]);
   
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);

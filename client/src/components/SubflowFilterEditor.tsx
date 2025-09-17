@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -36,6 +36,11 @@ export default function HierarchyFilterEditor({
   
   // Local state to track current values vs original props
   const [currentHierarchy, setCurrentHierarchy] = useState(selectedHierarchy);
+
+  // Sync local state with props when they change (important for reset functionality)
+  useEffect(() => {
+    setCurrentHierarchy(selectedHierarchy);
+  }, [selectedHierarchy]);
 
   const handleSelectHierarchy = (hierarchyId: string) => {
     setCurrentHierarchy(hierarchyId);
