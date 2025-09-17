@@ -125,7 +125,7 @@ export default function NamespaceFilterEditor({
           <Select value={currentOperator} onValueChange={setCurrentOperator}>
             <SelectTrigger data-testid="select-namespace-operator">
               <SelectValue placeholder="Select operator...">
-                {operatorOptions.find(opt => opt.value === namespaceOperator)?.label || "Select operator..."}
+                {operatorOptions.find(opt => opt.value === currentOperator)?.label || "Select operator..."}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
