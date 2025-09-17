@@ -898,28 +898,21 @@ export default function FilterInterface({
               </Button>
 
               {/* Columns Button */}
-              <Popover open={tablePropertiesOpen} onOpenChange={setTablePropertiesOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-2 hover-elevate"
-                    data-testid="button-columns"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Columns
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent side="bottom" align="end" className="w-96 p-0">
-                  <TablePropertiesPanel
-                    isOpen={true}
-                    onClose={() => setTablePropertiesOpen(false)}
-                    columns={columns}
-                    onToggleColumn={handleColumnToggle}
-                    onReorderColumns={handleColumnReorder}
-                  />
-                </PopoverContent>
-              </Popover>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTablePropertiesOpen(!tablePropertiesOpen)}
+                className="flex items-center gap-2 hover-elevate"
+                data-testid="button-columns"
+              >
+                <Settings className="h-4 w-4" />
+                Columns
+                {tablePropertiesOpen ? (
+                  <ChevronUp className="h-3 w-3 ml-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
