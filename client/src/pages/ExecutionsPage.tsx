@@ -518,6 +518,50 @@ export default function ExecutionsPage() {
     // Normalize legacy labels operator
     const normalizedLabels = normalizeLegacyOperator(state.labelsOperator, state.labelsCustomValue || '');
     
+    // Phase 1: Determine which filters need to be visible based on saved state
+    const requiredFilters = new Set<string>();
+    
+    // Always include default filters
+    requiredFilters.add('scope');
+    requiredFilters.add('kind');
+    requiredFilters.add('hierarchy');
+    requiredFilters.add('interval');
+    
+    // Check for non-default filters that have meaningful values
+    if (state.selectedStates && state.selectedStates.length > 0) {
+      requiredFilters.add('state');
+    }
+    
+    if (state.selectedLabels && state.selectedLabels.length > 0) {
+      requiredFilters.add('labels');
+    }
+    
+    if ((normalizedLabels.customValue && normalizedLabels.customValue.trim()) || 
+        ['is-set', 'is-not-set'].includes(normalizedLabels.operator)) {
+      requiredFilters.add('labels');
+    }
+    
+    if (state.selectedNamespaces && state.selectedNamespaces.length > 0) {
+      requiredFilters.add('namespace');
+    }
+    
+    if (state.namespaceCustomValue && state.namespaceCustomValue.trim()) {
+      requiredFilters.add('namespace');
+    }
+    
+    if (state.selectedFlows && state.selectedFlows.length > 0) {
+      requiredFilters.add('flow');
+    }
+    
+    if (state.selectedInitialExecution?.trim() && state.selectedInitialExecution.trim() !== 'all') {
+      requiredFilters.add('initial-execution');
+    }
+    
+    // Phase 2: Update visible filters to include all required filters
+    const newVisibleFilters = Array.from(requiredFilters);
+    setVisibleFilters(newVisibleFilters);
+    
+    // Phase 3: Apply all saved filter values
     setSearchValue(state.searchValue);
     setSelectedStates(state.selectedStates);
     setStatesOperator(state.statesOperator || 'in');
