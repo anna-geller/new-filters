@@ -521,8 +521,8 @@ export default function FilterInterface({
               <FilterCustomizationPanel
                 isOpen={true}
                 filterOptions={filterOptions}
-                onToggleFilter={handleToggleFilter}
-                onReorderFilters={handleFilterReorder}
+                activeFilters={activeFilters}
+                onAddFilter={handleToggleFilter}
                 onClose={() => setCustomizationOpen(false)}
               />
             </PopoverContent>

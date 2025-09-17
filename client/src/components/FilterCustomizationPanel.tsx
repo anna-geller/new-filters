@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { Eye, EyeOff, GripVertical, X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 
 interface FilterOption {
   id: string;
@@ -10,49 +9,39 @@ interface FilterOption {
   order: number;
 }
 
+interface ActiveFilter {
+  id: string;
+  label: string;
+  value: string;
+  operator?: string;
+}
+
 interface FilterCustomizationPanelProps {
   isOpen: boolean;
   filterOptions: FilterOption[];
-  onToggleFilter: (filterId: string) => void;
-  onReorderFilters: (draggedId: string, targetId: string) => void;
+  activeFilters: ActiveFilter[];
+  onAddFilter: (filterId: string) => void;
   onClose: () => void;
 }
 
 export default function FilterCustomizationPanel({ 
   isOpen, 
   filterOptions, 
-  onToggleFilter, 
-  onReorderFilters,
+  activeFilters,
+  onAddFilter,
   onClose 
 }: FilterCustomizationPanelProps) {
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, filterId: string) => {
-    setDraggedItem(filterId);
-    e.dataTransfer.effectAllowed = 'move';
+  const isFilterActive = (filterId: string) => {
+    return activeFilters.some(filter => filter.id === filterId);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetFilterId: string) => {
-    e.preventDefault();
-    
-    if (!draggedItem || draggedItem === targetFilterId) {
-      setDraggedItem(null);
-      return;
+  const handleAddFilter = (filterId: string) => {
+    if (!isFilterActive(filterId)) {
+      onAddFilter(filterId);
     }
-
-    onReorderFilters(draggedItem, targetFilterId);
-    setDraggedItem(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedItem(null);
   };
 
   return (
@@ -60,8 +49,8 @@ export default function FilterCustomizationPanel({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
-          <h3 className="text-sm font-medium text-foreground">Customize Filters</h3>
-          <p className="text-xs text-muted-foreground mt-1">Drag to reorder</p>
+          <h3 className="text-sm font-medium text-foreground">Add Filters</h3>
+          <p className="text-xs text-muted-foreground mt-1">Select filters to add</p>
         </div>
         <button
           onClick={onClose}
@@ -76,52 +65,48 @@ export default function FilterCustomizationPanel({
       <div className="max-h-72 overflow-y-auto">
         {[...filterOptions]
           .sort((a, b) => a.order - b.order)
-          .map((option) => (
-          <div
-            key={option.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, option.id)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, option.id)}
-            onDragEnd={handleDragEnd}
-            className={`flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-move ${
-              draggedItem === option.id ? 'opacity-50' : ''
-            }`}
-            data-testid={`filter-item-${option.id}`}
-          >
-            {/* Drag Handle */}
-            <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          .map((option) => {
+            const isActive = isFilterActive(option.id);
+            return (
+              <div
+                key={option.id}
+                className={`flex items-center gap-3 p-3 border-b border-border/50 ${
+                  isActive 
+                    ? 'opacity-50 cursor-not-allowed bg-muted/20' 
+                    : 'hover:bg-muted/30 cursor-pointer'
+                }`}
+                onClick={() => handleAddFilter(option.id)}
+                data-testid={`filter-item-${option.id}`}
+              >
+                {/* Filter Info */}
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm font-medium ${
+                    isActive ? 'text-muted-foreground' : 'text-foreground'
+                  }`}>{option.label}</div>
+                  <div className="text-xs text-muted-foreground">{option.description}</div>
+                  {isActive && (
+                    <div className="text-xs text-muted-foreground mt-1 italic">Already added</div>
+                  )}
+                </div>
 
-            {/* Filter Info */}
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground">{option.label}</div>
-              <div className="text-xs text-muted-foreground">{option.description}</div>
-            </div>
-
-            {/* Visibility Toggle */}
-            <button
-              onClick={() => onToggleFilter(option.id)}
-              className={`p-1 rounded hover-elevate ${
-                option.enabled 
-                  ? 'text-emerald-600 dark:text-emerald-400' 
-                  : 'text-muted-foreground'
-              }`}
-              data-testid={`toggle-filter-${option.id}`}
-            >
-              {option.enabled ? (
-                <Eye className="h-4 w-4" />
-              ) : (
-                <EyeOff className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-        ))}
+                {/* Add Button */}
+                {!isActive && (
+                  <button
+                    className="p-1 rounded hover-elevate text-primary hover:text-primary/80"
+                    data-testid={`add-filter-${option.id}`}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
       </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20">
         <p className="text-xs text-muted-foreground text-center">
-          {filterOptions.filter(f => f.enabled).length} of {filterOptions.length} filters visible
+          {activeFilters.length} of {filterOptions.length} filters added
         </p>
       </div>
     </Card>
