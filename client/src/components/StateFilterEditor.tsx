@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play, XCircle, X, AlertTriangle, Pause, Ban, SkipForward, Clock, RefreshCw, Circle } from "lucide-react";
 
 const operatorOptions = [
@@ -119,18 +120,31 @@ export default function StateFilterEditor({
   onClose 
 }: StateFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentStates, setCurrentStates] = useState(selectedStates);
+  const [currentOperator, setCurrentOperator] = useState(statesOperator);
 
   const filteredStates = stateOptions.filter(state =>
     state.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleToggleState = (stateId: string) => {
-    const isSelected = selectedStates.includes(stateId);
+    const isSelected = currentStates.includes(stateId);
     if (isSelected) {
-      onSelectionChange(selectedStates.filter(id => id !== stateId));
+      setCurrentStates(currentStates.filter(id => id !== stateId));
     } else {
-      onSelectionChange([...selectedStates, stateId]);
+      setCurrentStates([...currentStates, stateId]);
     }
+  };
+
+  const handleReset = () => {
+    setCurrentStates(selectedStates);
+    setCurrentOperator(statesOperator);
+  };
+
+  const handleApply = () => {
+    onSelectionChange(currentStates);
+    onOperatorChange(currentOperator);
+    onClose();
   };
 
   const handleSelectAll = () => {
@@ -142,14 +156,14 @@ export default function StateFilterEditor({
 
   const handleDeselectAll = () => {
     const visibleStateIds = filteredStates.map(state => state.id);
-    const newSelection = selectedStates.filter(id => !visibleStateIds.includes(id));
-    onSelectionChange(newSelection);
+    const newSelection = currentStates.filter(id => !visibleStateIds.includes(id));
+    setCurrentStates(newSelection);
   };
 
-  const allVisible = filteredStates.every(state => selectedStates.includes(state.id));
-  const noneVisible = filteredStates.every(state => !selectedStates.includes(state.id));
+  const allVisible = filteredStates.every(state => currentStates.includes(state.id));
+  const noneVisible = filteredStates.every(state => !currentStates.includes(state.id));
 
-  const selectedOperatorObj = operatorOptions.find(op => op.id === statesOperator);
+  const selectedOperatorObj = operatorOptions.find(op => op.id === currentOperator);
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -158,7 +172,7 @@ export default function StateFilterEditor({
         {/* Operator Selection */}
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
-          <Select value={statesOperator} onValueChange={onOperatorChange} data-testid="select-states-operator">
+          <Select value={currentOperator} onValueChange={setCurrentOperator} data-testid="select-states-operator">
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select operator...">
                 {selectedOperatorObj?.label || "Select operator..."}
@@ -220,7 +234,7 @@ export default function StateFilterEditor({
       {/* State Options */}
       <div className="max-h-64 overflow-y-auto">
         {filteredStates.map((state) => {
-          const isSelected = selectedStates.includes(state.id);
+          const isSelected = currentStates.includes(state.id);
           const IconComponent = state.icon;
           
           return (
@@ -256,21 +270,33 @@ export default function StateFilterEditor({
       {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          {selectedStates.length} of {stateOptions.length} states selected
+          {currentStates.length} of {stateOptions.length} states selected
         </p>
         
         <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="button-reset-state-filter"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           <Button
-            variant="ghost"
             size="sm"
-            onClick={onClose}
-            data-testid="button-cancel-state-filter"
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={onClose}
+            onClick={handleApply}
+            className="flex-1"
             data-testid="button-apply-state-filter"
           >
             Apply

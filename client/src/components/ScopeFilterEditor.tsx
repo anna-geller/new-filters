@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, CheckCircle, Target } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Target, RotateCcw } from "lucide-react";
 
 const scopeOptions = [
   { 
@@ -29,6 +30,9 @@ export default function ScopeFilterEditor({
   onClose 
 }: ScopeFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Local state to track current values vs original props
+  const [currentScopes, setCurrentScopes] = useState(selectedScopes);
 
   const filteredScopes = scopeOptions.filter(scope =>
     scope.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -36,29 +40,38 @@ export default function ScopeFilterEditor({
   );
 
   const handleToggleScope = (scopeId: string) => {
-    const isSelected = selectedScopes.includes(scopeId);
+    const isSelected = currentScopes.includes(scopeId);
     if (isSelected) {
-      onSelectionChange(selectedScopes.filter(id => id !== scopeId));
+      setCurrentScopes(currentScopes.filter(id => id !== scopeId));
     } else {
-      onSelectionChange([...selectedScopes, scopeId]);
+      setCurrentScopes([...currentScopes, scopeId]);
     }
   };
 
   const handleSelectAll = () => {
     const allVisibleScopes = filteredScopes.map(scope => scope.id);
-    const combinedScopes = [...selectedScopes, ...allVisibleScopes];
+    const combinedScopes = [...currentScopes, ...allVisibleScopes];
     const newSelection = Array.from(new Set(combinedScopes));
-    onSelectionChange(newSelection);
+    setCurrentScopes(newSelection);
   };
 
   const handleDeselectAll = () => {
     const visibleScopeIds = filteredScopes.map(scope => scope.id);
-    const newSelection = selectedScopes.filter(id => !visibleScopeIds.includes(id));
-    onSelectionChange(newSelection);
+    const newSelection = currentScopes.filter(id => !visibleScopeIds.includes(id));
+    setCurrentScopes(newSelection);
   };
 
-  const allVisible = filteredScopes.every(scope => selectedScopes.includes(scope.id));
-  const noneVisible = filteredScopes.every(scope => !selectedScopes.includes(scope.id));
+  const allVisible = filteredScopes.every(scope => currentScopes.includes(scope.id));
+  const noneVisible = filteredScopes.every(scope => !currentScopes.includes(scope.id));
+  
+  const handleApply = () => {
+    onSelectionChange(currentScopes);
+    onClose();
+  };
+  
+  const handleReset = () => {
+    setCurrentScopes(selectedScopes);
+  };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -107,7 +120,7 @@ export default function ScopeFilterEditor({
           </div>
         ) : (
           filteredScopes.map((scope) => {
-            const isSelected = selectedScopes.includes(scope.id);
+            const isSelected = currentScopes.includes(scope.id);
             return (
               <div
                 key={scope.id}
@@ -139,16 +152,38 @@ export default function ScopeFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {selectedScopes.length} scope{selectedScopes.length !== 1 ? 's' : ''} selected
+            {currentScopes.length} scope{currentScopes.length !== 1 ? 's' : ''} selected
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            data-testid="scope-close-button"
-          >
-            Done
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="px-2"
+                    data-testid="button-reset-scope-filter"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset to original value</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <Button
+              size="sm"
+              onClick={handleApply}
+              className="flex-1"
+              data-testid="button-apply-scope-filter"
+            >
+              Apply
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

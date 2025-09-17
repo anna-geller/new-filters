@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, CheckCircle, Tag } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Tag, RotateCcw } from "lucide-react";
 
 const kindOptions = [
   { 
@@ -34,6 +35,9 @@ export default function KindFilterEditor({
   onClose 
 }: KindFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Local state to track current values vs original props
+  const [currentKinds, setCurrentKinds] = useState(selectedKinds);
 
   const filteredKinds = kindOptions.filter(kind =>
     kind.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,29 +45,38 @@ export default function KindFilterEditor({
   );
 
   const handleToggleKind = (kindId: string) => {
-    const isSelected = selectedKinds.includes(kindId);
+    const isSelected = currentKinds.includes(kindId);
     if (isSelected) {
-      onSelectionChange(selectedKinds.filter(id => id !== kindId));
+      setCurrentKinds(currentKinds.filter(id => id !== kindId));
     } else {
-      onSelectionChange([...selectedKinds, kindId]);
+      setCurrentKinds([...currentKinds, kindId]);
     }
   };
 
   const handleSelectAll = () => {
     const allVisibleKinds = filteredKinds.map(kind => kind.id);
-    const combinedKinds = [...selectedKinds, ...allVisibleKinds];
+    const combinedKinds = [...currentKinds, ...allVisibleKinds];
     const newSelection = Array.from(new Set(combinedKinds));
-    onSelectionChange(newSelection);
+    setCurrentKinds(newSelection);
   };
 
   const handleDeselectAll = () => {
     const visibleKindIds = filteredKinds.map(kind => kind.id);
-    const newSelection = selectedKinds.filter(id => !visibleKindIds.includes(id));
-    onSelectionChange(newSelection);
+    const newSelection = currentKinds.filter(id => !visibleKindIds.includes(id));
+    setCurrentKinds(newSelection);
   };
 
-  const allVisible = filteredKinds.every(kind => selectedKinds.includes(kind.id));
-  const noneVisible = filteredKinds.every(kind => !selectedKinds.includes(kind.id));
+  const allVisible = filteredKinds.every(kind => currentKinds.includes(kind.id));
+  const noneVisible = filteredKinds.every(kind => !currentKinds.includes(kind.id));
+  
+  const handleApply = () => {
+    onSelectionChange(currentKinds);
+    onClose();
+  };
+  
+  const handleReset = () => {
+    setCurrentKinds(selectedKinds);
+  };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -112,7 +125,7 @@ export default function KindFilterEditor({
           </div>
         ) : (
           filteredKinds.map((kind) => {
-            const isSelected = selectedKinds.includes(kind.id);
+            const isSelected = currentKinds.includes(kind.id);
             return (
               <div
                 key={kind.id}
@@ -144,16 +157,38 @@ export default function KindFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {selectedKinds.length} kind{selectedKinds.length !== 1 ? 's' : ''} selected
+            {currentKinds.length} kind{currentKinds.length !== 1 ? 's' : ''} selected
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            data-testid="kind-close-button"
-          >
-            Done
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="px-2"
+                    data-testid="button-reset-kind-filter"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset to original value</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <Button
+              size="sm"
+              onClick={handleApply}
+              className="flex-1"
+              data-testid="button-apply-kind-filter"
+            >
+              Apply
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

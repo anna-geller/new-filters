@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, CheckCircle, Workflow } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Workflow, RotateCcw } from "lucide-react";
 
 const flowOptions = [
   { 
@@ -69,6 +70,9 @@ export default function FlowFilterEditor({
   onClose 
 }: FlowFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Local state to track current values vs original props
+  const [currentFlows, setCurrentFlows] = useState(selectedFlows);
 
   const filteredFlows = flowOptions.filter(flow =>
     flow.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,29 +80,38 @@ export default function FlowFilterEditor({
   );
 
   const handleToggleFlow = (flowId: string) => {
-    const isSelected = selectedFlows.includes(flowId);
+    const isSelected = currentFlows.includes(flowId);
     if (isSelected) {
-      onSelectionChange(selectedFlows.filter(id => id !== flowId));
+      setCurrentFlows(currentFlows.filter(id => id !== flowId));
     } else {
-      onSelectionChange([...selectedFlows, flowId]);
+      setCurrentFlows([...currentFlows, flowId]);
     }
   };
 
   const handleSelectAll = () => {
     const allVisibleFlows = filteredFlows.map(flow => flow.id);
-    const combinedFlows = [...selectedFlows, ...allVisibleFlows];
+    const combinedFlows = [...currentFlows, ...allVisibleFlows];
     const newSelection = Array.from(new Set(combinedFlows));
-    onSelectionChange(newSelection);
+    setCurrentFlows(newSelection);
   };
 
   const handleDeselectAll = () => {
     const visibleFlowIds = filteredFlows.map(flow => flow.id);
-    const newSelection = selectedFlows.filter(id => !visibleFlowIds.includes(id));
-    onSelectionChange(newSelection);
+    const newSelection = currentFlows.filter(id => !visibleFlowIds.includes(id));
+    setCurrentFlows(newSelection);
   };
 
-  const allVisible = filteredFlows.every(flow => selectedFlows.includes(flow.id));
-  const noneVisible = filteredFlows.every(flow => !selectedFlows.includes(flow.id));
+  const allVisible = filteredFlows.every(flow => currentFlows.includes(flow.id));
+  const noneVisible = filteredFlows.every(flow => !currentFlows.includes(flow.id));
+  
+  const handleApply = () => {
+    onSelectionChange(currentFlows);
+    onClose();
+  };
+  
+  const handleReset = () => {
+    setCurrentFlows(selectedFlows);
+  };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -147,7 +160,7 @@ export default function FlowFilterEditor({
           </div>
         ) : (
           filteredFlows.map((flow) => {
-            const isSelected = selectedFlows.includes(flow.id);
+            const isSelected = currentFlows.includes(flow.id);
             return (
               <div
                 key={flow.id}
@@ -179,16 +192,38 @@ export default function FlowFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {selectedFlows.length} flow{selectedFlows.length !== 1 ? 's' : ''} selected
+            {currentFlows.length} flow{currentFlows.length !== 1 ? 's' : ''} selected
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            data-testid="flow-close-button"
-          >
-            Done
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="px-2"
+                    data-testid="button-reset-flow-filter"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset to original value</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <Button
+              size="sm"
+              onClick={handleApply}
+              className="flex-1"
+              data-testid="button-apply-flow-filter"
+            >
+              Apply
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

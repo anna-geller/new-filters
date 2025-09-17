@@ -276,8 +276,8 @@ export default function ExecutionsPage() {
     dynamicFilters.push(kindFilter);
   }
 
-  // Add subflow filter (always included since it's enabled by default)
-  if (selectedSubflow) {
+  // Add subflow filter (only when a value is selected)
+  if (selectedSubflow && selectedSubflow.trim() !== '') {
     const subflowLabels = {
       'all': 'All',
       'child': 'Child',
@@ -330,12 +330,13 @@ export default function ExecutionsPage() {
     } else if (filterId === 'scope') {
       setSelectedScopes([]);
     } else if (filterId === 'kind') {
-      setSelectedKinds(['default']);
+      setSelectedKinds([]); // Empty array to remove filter completely
     } else if (filterId === 'subflow') {
-      setSelectedSubflow('all');
+      setSelectedSubflow(''); // Empty string to remove filter completely
     } else if (filterId === 'initial-execution') {
       setSelectedInitialExecution('');
     } else if (filterId === 'timerange') {
+      // For time range, we'll keep it but reset to default
       setSelectedTimeRange('last-7-days');
       setTimeRangeStartDate(undefined);
       setTimeRangeEndDate(undefined);

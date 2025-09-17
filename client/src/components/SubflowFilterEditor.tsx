@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GitBranch, Check } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { GitBranch, Check, RotateCcw } from "lucide-react";
 
 const hierarchyOptions = [
   { 
@@ -31,9 +33,21 @@ export default function SubflowFilterEditor({
   onSelectionChange, 
   onClose 
 }: SubflowFilterEditorProps) {
+  
+  // Local state to track current values vs original props
+  const [currentSubflow, setCurrentSubflow] = useState(selectedSubflow);
 
   const handleSelectHierarchy = (hierarchyId: string) => {
-    onSelectionChange(hierarchyId);
+    setCurrentSubflow(hierarchyId);
+  };
+  
+  const handleApply = () => {
+    onSelectionChange(currentSubflow);
+    onClose();
+  };
+  
+  const handleReset = () => {
+    setCurrentSubflow(selectedSubflow);
   };
 
   return (
@@ -47,7 +61,7 @@ export default function SubflowFilterEditor({
       {/* Hierarchy options - radio button style */}
       <div data-testid="hierarchy-options-list">
         {hierarchyOptions.map((hierarchy) => {
-          const isSelected = selectedSubflow === hierarchy.id;
+          const isSelected = currentSubflow === hierarchy.id;
           return (
             <div
               key={hierarchy.id}
@@ -82,16 +96,38 @@ export default function SubflowFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {selectedSubflow ? hierarchyOptions.find(h => h.id === selectedSubflow)?.label || 'None' : 'None'} selected
+            {currentSubflow ? hierarchyOptions.find(h => h.id === currentSubflow)?.label || 'None' : 'None'} selected
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            data-testid="hierarchy-close-button"
-          >
-            Done
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="px-2"
+                    data-testid="button-reset-subflow-filter"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset to original value</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <Button
+              size="sm"
+              onClick={handleApply}
+              className="flex-1"
+              data-testid="button-apply-subflow-filter"
+            >
+              Apply
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

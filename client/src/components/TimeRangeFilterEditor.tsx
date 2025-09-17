@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, Clock, CalendarIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Calendar, Clock, CalendarIcon, RotateCcw } from "lucide-react";
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 
@@ -119,6 +120,16 @@ export default function TimeRangeFilterEditor({
       onTimeRangeChange(currentTimeRange);
     }
     onClose();
+  };
+
+  const handleReset = () => {
+    setCurrentTimeRange(selectedTimeRange);
+    const originalStartDateTime = parseDateTimeString(startDate);
+    const originalEndDateTime = parseDateTimeString(endDate);
+    setCurrentStartDate(originalStartDateTime.date);
+    setCurrentEndDate(originalEndDateTime.date);
+    setCurrentStartTime(originalStartDateTime.time);
+    setCurrentEndTime(originalEndDateTime.time || '23:59');
   };
 
   const isCustomRange = currentTimeRange === 'custom-range';
@@ -304,18 +315,30 @@ export default function TimeRangeFilterEditor({
         </p>
         
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            data-testid="button-cancel-timerange-filter"
-          >
-            Cancel
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="button-reset-timerange-filter"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           <Button
             size="sm"
             onClick={handleApply}
             disabled={isCustomRange && (!currentStartDate || !currentEndDate || !isValidRange())}
+            className="flex-1"
             data-testid="button-apply-timerange-filter"
           >
             Apply

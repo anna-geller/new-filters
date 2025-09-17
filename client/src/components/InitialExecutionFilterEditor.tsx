@@ -43,7 +43,7 @@ export default function InitialExecutionFilterEditor({
         
         <div className="flex gap-2 mb-3">
           <Input
-            placeholder="Enter parent execution ID..."
+            placeholder="Enter parent ID..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             className="flex-1"

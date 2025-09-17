@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckSquare, Square, CheckCircle, Link2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Link2, RotateCcw } from "lucide-react";
 
 const operatorOptions = [
   { id: 'has-any-of', label: 'has any of', description: 'Matches at least one of the selected labels (OR)' },
@@ -98,40 +99,58 @@ export default function LabelsFilterEditor({
   onClose 
 }: LabelsFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Local state to track current values vs original props
+  const [currentLabels, setCurrentLabels] = useState(selectedLabels);
+  const [currentOperator, setCurrentOperator] = useState(selectedOperator);
+  const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
 
   const filteredLabels = labelOptions.filter(label =>
     label.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleToggleLabel = (labelId: string) => {
-    const isSelected = selectedLabels.includes(labelId);
+    const isSelected = currentLabels.includes(labelId);
     if (isSelected) {
-      onSelectionChange(selectedLabels.filter(id => id !== labelId));
+      setCurrentLabels(currentLabels.filter(id => id !== labelId));
     } else {
-      onSelectionChange([...selectedLabels, labelId]);
+      setCurrentLabels([...currentLabels, labelId]);
     }
   };
 
   const handleSelectAll = () => {
     const allVisibleLabels = filteredLabels.map(label => label.id);
-    const combinedLabels = [...selectedLabels, ...allVisibleLabels];
+    const combinedLabels = [...currentLabels, ...allVisibleLabels];
     const newSelection = Array.from(new Set(combinedLabels));
-    onSelectionChange(newSelection);
+    setCurrentLabels(newSelection);
   };
 
   const handleDeselectAll = () => {
     const visibleLabelIds = filteredLabels.map(label => label.id);
-    const newSelection = selectedLabels.filter(id => !visibleLabelIds.includes(id));
-    onSelectionChange(newSelection);
+    const newSelection = currentLabels.filter(id => !visibleLabelIds.includes(id));
+    setCurrentLabels(newSelection);
   };
 
-  const allVisible = filteredLabels.every(label => selectedLabels.includes(label.id));
-  const noneVisible = filteredLabels.every(label => !selectedLabels.includes(label.id));
+  const allVisible = filteredLabels.every(label => currentLabels.includes(label.id));
+  const noneVisible = filteredLabels.every(label => !currentLabels.includes(label.id));
   
-  const selectedOperatorObj = operatorOptions.find(op => op.id === selectedOperator);
-  const isTextBasedOperator = ['contains', 'does-not-contain'].includes(selectedOperator);
-  const isNoInputOperator = ['is-set', 'is-not-set'].includes(selectedOperator);
-  const isSelectionBasedOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(selectedOperator);
+  const selectedOperatorObj = operatorOptions.find(op => op.id === currentOperator);
+  const isTextBasedOperator = ['contains', 'does-not-contain'].includes(currentOperator);
+  const isNoInputOperator = ['is-set', 'is-not-set'].includes(currentOperator);
+  const isSelectionBasedOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(currentOperator);
+  
+  const handleApply = () => {
+    onSelectionChange(currentLabels);
+    onOperatorChange(currentOperator);
+    onCustomValueChange(currentCustomValue);
+    onClose();
+  };
+  
+  const handleReset = () => {
+    setCurrentLabels(selectedLabels);
+    setCurrentOperator(selectedOperator);
+    setCurrentCustomValue(customValue);
+  };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -142,7 +161,7 @@ export default function LabelsFilterEditor({
           <label className="text-xs font-medium text-muted-foreground mb-2 block">
             Filter Operator
           </label>
-          <Select value={selectedOperator} onValueChange={onOperatorChange}>
+          <Select value={currentOperator} onValueChange={setCurrentOperator}>
             <SelectTrigger data-testid="select-labels-operator">
               <SelectValue placeholder="Select operator...">
                 {selectedOperatorObj?.label || "Select operator..."}
@@ -169,8 +188,8 @@ export default function LabelsFilterEditor({
             </label>
             <Input
               placeholder={`Enter text that labels should ${selectedOperatorObj?.label || 'match'}...`}
-              value={customValue}
-              onChange={(e) => onCustomValueChange(e.target.value)}
+              value={currentCustomValue}
+              onChange={(e) => setCurrentCustomValue(e.target.value)}
               className="text-sm"
               data-testid="input-labels-custom-value"
             />
@@ -246,7 +265,7 @@ export default function LabelsFilterEditor({
       {isSelectionBasedOperator && (
         <div className="max-h-64 overflow-y-auto">
           {filteredLabels.map((label) => {
-            const isSelected = selectedLabels.includes(label.id);
+            const isSelected = currentLabels.includes(label.id);
             
             return (
               <div
@@ -288,22 +307,34 @@ export default function LabelsFilterEditor({
             ? `Operator: ${selectedOperatorObj?.label || 'None'}`
             : isNoInputOperator
             ? `Operator: ${selectedOperatorObj?.label || 'None'}`
-            : `${selectedLabels.length} of ${labelOptions.length} labels selected`
+            : `${currentLabels.length} of ${labelOptions.length} labels selected`
           }
         </p>
         
         <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="button-reset-labels-filter"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           <Button
-            variant="ghost"
             size="sm"
-            onClick={onClose}
-            data-testid="button-cancel-labels-filter"
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={onClose}
+            onClick={handleApply}
+            className="flex-1"
             data-testid="button-apply-labels-filter"
           >
             Apply

@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckSquare, Square, CheckCircle, Building2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Building2, RotateCcw } from "lucide-react";
 
 const namespaceOptions = [
   'company',
@@ -41,37 +42,55 @@ export default function NamespaceFilterEditor({
   onClose 
 }: NamespaceFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Local state to track current values vs original props
+  const [currentNamespaces, setCurrentNamespaces] = useState(selectedNamespaces);
+  const [currentOperator, setCurrentOperator] = useState(namespaceOperator);
+  const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
 
   // Check if current operator uses text input instead of multi-select
-  const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
+  const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(currentOperator);
 
   const filteredNamespaces = namespaceOptions.filter(namespace =>
     namespace.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleToggleNamespace = (namespace: string) => {
-    const isSelected = selectedNamespaces.includes(namespace);
+    const isSelected = currentNamespaces.includes(namespace);
     if (isSelected) {
-      onSelectionChange(selectedNamespaces.filter(ns => ns !== namespace));
+      setCurrentNamespaces(currentNamespaces.filter(ns => ns !== namespace));
     } else {
-      onSelectionChange([...selectedNamespaces, namespace]);
+      setCurrentNamespaces([...currentNamespaces, namespace]);
     }
   };
 
   const handleSelectAll = () => {
     const allVisibleNamespaces = [...filteredNamespaces];
-    const combinedNamespaces = [...selectedNamespaces, ...allVisibleNamespaces];
+    const combinedNamespaces = [...currentNamespaces, ...allVisibleNamespaces];
     const newSelection = Array.from(new Set(combinedNamespaces));
-    onSelectionChange(newSelection);
+    setCurrentNamespaces(newSelection);
   };
 
   const handleDeselectAll = () => {
-    const newSelection = selectedNamespaces.filter(namespace => !filteredNamespaces.includes(namespace));
-    onSelectionChange(newSelection);
+    const newSelection = currentNamespaces.filter(namespace => !filteredNamespaces.includes(namespace));
+    setCurrentNamespaces(newSelection);
   };
 
-  const allVisible = filteredNamespaces.every(namespace => selectedNamespaces.includes(namespace));
-  const noneVisible = filteredNamespaces.every(namespace => !selectedNamespaces.includes(namespace));
+  const allVisible = filteredNamespaces.every(namespace => currentNamespaces.includes(namespace));
+  const noneVisible = filteredNamespaces.every(namespace => !currentNamespaces.includes(namespace));
+  
+  const handleApply = () => {
+    onSelectionChange(currentNamespaces);
+    onOperatorChange(currentOperator);
+    onCustomValueChange(currentCustomValue);
+    onClose();
+  };
+  
+  const handleReset = () => {
+    setCurrentNamespaces(selectedNamespaces);
+    setCurrentOperator(namespaceOperator);
+    setCurrentCustomValue(customValue);
+  };
 
   // Helper function to get namespace depth level for visual indentation
   const getNamespaceLevel = (namespace: string) => {
@@ -84,7 +103,7 @@ export default function NamespaceFilterEditor({
       <div className="p-4 border-b border-border">
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
-          <Select value={namespaceOperator} onValueChange={onOperatorChange}>
+          <Select value={currentOperator} onValueChange={setCurrentOperator}>
             <SelectTrigger data-testid="select-namespace-operator">
               <SelectValue placeholder="Select operator...">
                 {operatorOptions.find(opt => opt.value === namespaceOperator)?.label || "Select operator..."}
@@ -106,8 +125,8 @@ export default function NamespaceFilterEditor({
         {isTextBasedOperator ? (
           <Input
             placeholder="Enter text..."
-            value={customValue}
-            onChange={(e) => onCustomValueChange(e.target.value)}
+            value={currentCustomValue}
+            onChange={(e) => setCurrentCustomValue(e.target.value)}
             data-testid="input-namespace-text"
           />
         ) : (
@@ -157,7 +176,7 @@ export default function NamespaceFilterEditor({
       {!isTextBasedOperator && (
         <div className="max-h-64 overflow-y-auto">
           {filteredNamespaces.map((namespace) => {
-            const isSelected = selectedNamespaces.includes(namespace);
+            const isSelected = currentNamespaces.includes(namespace);
             
             return (
               <div
@@ -187,25 +206,37 @@ export default function NamespaceFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {isTextBasedOperator 
-            ? customValue.trim() 
-              ? `Text: "${customValue}"` 
+            ? currentCustomValue.trim() 
+              ? `Text: "${currentCustomValue}"` 
               : "Enter text to filter"
-            : `${selectedNamespaces.length} of ${namespaceOptions.length} namespaces selected`
+            : `${currentNamespaces.length} of ${namespaceOptions.length} namespaces selected`
           }
         </p>
         
         <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="button-reset-namespace-filter"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           <Button
-            variant="ghost"
             size="sm"
-            onClick={onClose}
-            data-testid="button-cancel-namespace-filter"
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={onClose}
+            onClick={handleApply}
+            className="flex-1"
             data-testid="button-apply-namespace-filter"
           >
             Apply
