@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button";
 import { PlayCircle, RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface InitialExecutionFilterEditorProps {
+interface ParentFilterEditorProps {
   selectedInitialExecution: string;
   onSelectionChange: (value: string) => void;
   onClose: () => void;
+  onReset?: () => void;
 }
 
-export default function InitialExecutionFilterEditor({ 
+export default function ParentFilterEditor({ 
   selectedInitialExecution, 
   onSelectionChange, 
-  onClose 
-}: InitialExecutionFilterEditorProps) {
+  onClose,
+  onReset 
+}: ParentFilterEditorProps) {
   const [inputValue, setInputValue] = useState(selectedInitialExecution || '');
 
   const handleApply = () => {
@@ -24,7 +26,11 @@ export default function InitialExecutionFilterEditor({
   };
 
   const handleReset = () => {
-    setInputValue(''); // Reset to default empty value
+    if (onReset) {
+      onReset(); // Call the parent's reset function for proper integration
+    } else {
+      setInputValue(''); // Fallback to local reset
+    }
   };
 
   return (

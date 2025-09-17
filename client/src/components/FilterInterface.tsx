@@ -18,7 +18,7 @@ import FlowFilterEditor from './FlowFilterEditor';
 import ScopeFilterEditor from './ScopeFilterEditor';
 import KindFilterEditor from './KindFilterEditor';
 import HierarchyFilterEditor from './SubflowFilterEditor';
-import InitialExecutionFilterEditor from './InitialExecutionFilterEditor';
+import ParentFilterEditor from './ParentFilterEditor';
 import IntervalFilterEditor from './TimeRangeFilterEditor';
 import SaveFilterButton from './SaveFilterButton';
 import SavedFiltersDropdown from './SavedFiltersDropdown';
@@ -176,7 +176,7 @@ export default function FilterInterface({
   const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
   const [kindFilterOpen, setKindFilterOpen] = useState(false);
   const [hierarchyFilterOpen, setHierarchyFilterOpen] = useState(false);
-  const [initialExecutionFilterOpen, setInitialExecutionFilterOpen] = useState(false);
+  const [parentFilterOpen, setParentFilterOpen] = useState(false);
   const [intervalFilterOpen, setIntervalFilterOpen] = useState(false);
   const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
   const [editFilterDialogOpen, setEditFilterDialogOpen] = useState(false);
@@ -293,7 +293,7 @@ export default function FilterInterface({
       }
     } else if (filterId === 'initial-execution') {
       if (!currentlyVisible) {
-        setInitialExecutionFilterOpen(true);
+        setParentFilterOpen(true);
       } else {
         // Clear initial execution filter values when disabling
         onInitialExecutionSelectionChange('');
@@ -330,7 +330,7 @@ export default function FilterInterface({
     } else if (filterId === 'subflow') {
       setHierarchyFilterOpen(true);
     } else if (filterId === 'initial-execution') {
-      setInitialExecutionFilterOpen(true);
+      setParentFilterOpen(true);
     } else if (filterId === 'timerange') {
       setIntervalFilterOpen(true);
     }
@@ -464,8 +464,8 @@ export default function FilterInterface({
     setHierarchyFilterOpen(false);
   };
 
-  const handleCloseInitialExecutionFilter = () => {
-    setInitialExecutionFilterOpen(false);
+  const handleCloseParentFilter = () => {
+    setParentFilterOpen(false);
   };
 
   // Get all filters that have data OR are enabled for display
@@ -768,7 +768,7 @@ export default function FilterInterface({
             // Initial Execution Filter with Popover
             else if (filter.id === 'initial-execution') {
               return (
-                <Popover key={filter.id} open={initialExecutionFilterOpen} onOpenChange={setInitialExecutionFilterOpen}>
+                <Popover key={filter.id} open={parentFilterOpen} onOpenChange={setParentFilterOpen}>
                   <PopoverTrigger asChild>
                     <div className="flex-shrink-0">
                       <FilterBadge
@@ -781,10 +781,10 @@ export default function FilterInterface({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent side="bottom" align="start" className="w-80 p-0">
-                    <InitialExecutionFilterEditor
+                    <ParentFilterEditor
                       selectedInitialExecution={selectedInitialExecution}
                       onSelectionChange={handleInitialExecutionSelectionChange}
-                      onClose={handleCloseInitialExecutionFilter}
+                      onClose={handleCloseParentFilter}
                     />
                   </PopoverContent>
                 </Popover>
