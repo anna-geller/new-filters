@@ -747,7 +747,7 @@ export default function FilterInterface({
               );
             }
             // Subflow Filter with Popover
-            else if (filter.id === 'subflow') {
+            else if (filter.id === 'hierarchy') {
               return (
                 <Popover key={filter.id} open={hierarchyFilterOpen} onOpenChange={setHierarchyFilterOpen}>
                   <PopoverTrigger asChild>
@@ -798,7 +798,7 @@ export default function FilterInterface({
               );
             }
             // Time Range Filter with Popover
-            else if (filter.id === 'timerange') {
+            else if (filter.id === 'interval') {
               return (
                 <Popover key={filter.id} open={intervalFilterOpen} onOpenChange={setIntervalFilterOpen}>
                   <PopoverTrigger asChild>
