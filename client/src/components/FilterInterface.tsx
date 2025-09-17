@@ -329,11 +329,11 @@ export default function FilterInterface({
       setScopeFilterOpen(true);
     } else if (filterId === 'kind') {
       setKindFilterOpen(true);
-    } else if (filterId === 'subflow') {
+    } else if (filterId === 'hierarchy') {
       setHierarchyFilterOpen(true);
     } else if (filterId === 'initial-execution') {
       setParentFilterOpen(true);
-    } else if (filterId === 'timerange') {
+    } else if (filterId === 'interval') {
       setIntervalFilterOpen(true);
     }
     onEditFilter(filterId);
