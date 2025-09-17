@@ -12,8 +12,8 @@ const operatorOptions = [
   { id: 'has-all-of', label: 'has all of', description: 'Matches all of the selected labels (AND)' },
   { id: 'contains', label: 'contains', description: 'Label contains the specified text (LIKE)' },
   { id: 'does-not-contain', label: 'does not contain', description: 'Label does not contain the specified text (NOT LIKE)' },
-  { id: 'is-set', label: 'is set', description: 'Has any labels (regardless of value) (EXISTS)' },
-  { id: 'is-not-set', label: 'is not set', description: 'Has no labels at all (NOT EXISTS)' },
+  { id: 'is-set', label: 'is set', description: 'Key exists with any value (IS NOT NULL)' },
+  { id: 'is-not-set', label: 'is not set', description: 'Key does not exist (IS NULL)' },
 ];
 
 const labelOptions = [
@@ -151,7 +151,8 @@ export default function LabelsFilterEditor({
   
   const selectedOperatorObj = operatorOptions.find(op => op.id === currentOperator);
   const isTextBasedOperator = ['contains', 'does-not-contain'].includes(currentOperator);
-  const isNoInputOperator = ['is-set', 'is-not-set'].includes(currentOperator);
+  const isKeyBasedOperator = ['is-set', 'is-not-set'].includes(currentOperator);
+  const isNoInputOperator = false; // No operators currently need no input
   const isSelectionBasedOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(currentOperator);
   
   const handleApply = () => {
@@ -211,6 +212,22 @@ export default function LabelsFilterEditor({
               onChange={(e) => setCurrentCustomValue(e.target.value)}
               className="text-sm"
               data-testid="input-labels-custom-value"
+            />
+          </div>
+        )}
+
+        {/* Label Key Input for key-based operators */}
+        {isKeyBasedOperator && (
+          <div className="mb-3">
+            <label className="text-xs font-medium text-muted-foreground mb-2 block">
+              Label Key
+            </label>
+            <Input
+              placeholder="Enter label key (e.g. env, team, action)..."
+              value={currentCustomValue}
+              onChange={(e) => setCurrentCustomValue(e.target.value)}
+              className="text-sm"
+              data-testid="input-labels-key-value"
             />
           </div>
         )}
