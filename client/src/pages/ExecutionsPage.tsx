@@ -265,7 +265,7 @@ export default function ExecutionsPage() {
         value: isTextBasedLabelsOperator 
           ? labelsCustomValue 
           : isNoInputLabelsOperator 
-          ? (labelsOperator === 'is-set' ? 'any' : 'none')
+          ? labelsCustomValue || (labelsOperator === 'is-set' ? 'any' : 'none')
           : `${selectedLabels.length}`,
         operator: getOperatorDisplayLabel(labelsOperator)
       };
