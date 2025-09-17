@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
 import { 
   Home, 
   Eye, 
@@ -231,17 +231,52 @@ export function AppSidebar() {
   const [location] = useLocation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
-  const toggleExpanded = (itemTitle: string) => {
+  // Generate unique key for each navigation item
+  const generateNodeKey = (item: any, parentKey: string = ""): string => {
+    const key = item.url || item.title;
+    return parentKey ? `${parentKey}/${key}` : key;
+  };
+
+  const toggleExpanded = (nodeKey: string) => {
     setExpandedItems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(itemTitle)) {
-        newSet.delete(itemTitle);
+      if (newSet.has(nodeKey)) {
+        newSet.delete(nodeKey);
       } else {
-        newSet.add(itemTitle);
+        newSet.add(nodeKey);
       }
       return newSet;
     });
   };
+
+  // Auto-expand ancestors of active route
+  useEffect(() => {
+    const findActiveItemPath = (items: any[], parentKey: string = ""): string[] => {
+      for (const item of items) {
+        const nodeKey = generateNodeKey(item, parentKey);
+        if (item.url && location === item.url) {
+          return [nodeKey];
+        }
+        if (item.children) {
+          const childPath = findActiveItemPath(item.children, nodeKey);
+          if (childPath.length > 0) {
+            return [nodeKey, ...childPath];
+          }
+        }
+      }
+      return [];
+    };
+
+    const activePath = findActiveItemPath(navigationItems);
+    if (activePath.length > 0) {
+      setExpandedItems(prev => {
+        const newSet = new Set(prev);
+        // Expand all ancestors of the active item
+        activePath.slice(0, -1).forEach(key => newSet.add(key));
+        return newSet;
+      });
+    }
+  }, [location]);
 
   const isItemActive = (item: any): boolean => {
     if (item.url && location === item.url) return true;
@@ -251,21 +286,23 @@ export function AppSidebar() {
     return false;
   };
 
-  const renderMenuItem = (item: any, level: number = 0) => {
+  const renderMenuItem = (item: any, level: number = 0, parentKey: string = "") => {
+    const nodeKey = generateNodeKey(item, parentKey);
     const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedItems.has(item.title);
+    const isExpanded = expandedItems.has(nodeKey);
     const isActive = isItemActive(item);
+    const testId = `nav-${nodeKey.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
     if (level === 0) {
       // Top-level items
       return (
-        <SidebarMenuItem key={item.title}>
+        <SidebarMenuItem key={nodeKey}>
           {hasChildren ? (
             <>
               <SidebarMenuButton
-                onClick={() => toggleExpanded(item.title)}
+                onClick={() => toggleExpanded(nodeKey)}
                 isActive={isActive}
-                data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                data-testid={testId}
               >
                 <item.icon />
                 <span>{item.title}</span>
@@ -273,7 +310,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
               {isExpanded && (
                 <SidebarMenuSub>
-                  {item.children.map((child: any) => renderMenuItem(child, level + 1))}
+                  {item.children.map((child: any) => renderMenuItem(child, level + 1, nodeKey))}
                 </SidebarMenuSub>
               )}
             </>
@@ -281,12 +318,12 @@ export function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={isActive}
-              data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+              data-testid={testId}
             >
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           )}
         </SidebarMenuItem>
@@ -294,13 +331,13 @@ export function AppSidebar() {
     } else if (level === 1) {
       // Second-level items
       return (
-        <SidebarMenuSubItem key={item.title}>
+        <SidebarMenuSubItem key={nodeKey}>
           {hasChildren ? (
             <>
               <SidebarMenuSubButton
-                onClick={() => toggleExpanded(item.title)}
+                onClick={() => toggleExpanded(nodeKey)}
                 isActive={isActive}
-                data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                data-testid={testId}
               >
                 {item.icon && <item.icon className="h-4 w-4" />}
                 <span>{item.title}</span>
@@ -308,7 +345,7 @@ export function AppSidebar() {
               </SidebarMenuSubButton>
               {isExpanded && (
                 <SidebarMenuSub>
-                  {item.children.map((child: any) => renderMenuItem(child, level + 1))}
+                  {item.children.map((child: any) => renderMenuItem(child, level + 1, nodeKey))}
                 </SidebarMenuSub>
               )}
             </>
@@ -316,12 +353,12 @@ export function AppSidebar() {
             <SidebarMenuSubButton
               asChild
               isActive={isActive}
-              data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+              data-testid={testId}
             >
-              <a href={item.url}>
+              <Link href={item.url}>
                 {item.icon && <item.icon className="h-4 w-4" />}
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuSubButton>
           )}
         </SidebarMenuSubItem>
@@ -329,15 +366,15 @@ export function AppSidebar() {
     } else {
       // Third-level items (deepest nesting)
       return (
-        <SidebarMenuSubItem key={item.title}>
+        <SidebarMenuSubItem key={nodeKey}>
           <SidebarMenuSubButton
             asChild
             isActive={location === item.url}
-            data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+            data-testid={testId}
           >
-            <a href={item.url} className="pl-4">
+            <Link href={item.url} className="pl-4">
               <span>{item.title}</span>
-            </a>
+            </Link>
           </SidebarMenuSubButton>
         </SidebarMenuSubItem>
       );
