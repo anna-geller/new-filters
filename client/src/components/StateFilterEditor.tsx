@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -124,6 +124,15 @@ export default function StateFilterEditor({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentStates, setCurrentStates] = useState(selectedStates);
   const [currentOperator, setCurrentOperator] = useState(statesOperator);
+
+  // Sync local state with props when they change (important for reset functionality)
+  useEffect(() => {
+    setCurrentStates(selectedStates);
+  }, [selectedStates]);
+
+  useEffect(() => {
+    setCurrentOperator(statesOperator);
+  }, [statesOperator]);
 
   const filteredStates = stateOptions.filter(state =>
     state.label.toLowerCase().includes(searchTerm.toLowerCase())

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,11 @@ export default function FlowFilterEditor({
   
   // Local state to track current values vs original props
   const [currentFlows, setCurrentFlows] = useState(selectedFlows);
+
+  // Sync local state with props when they change (important for reset functionality)
+  useEffect(() => {
+    setCurrentFlows(selectedFlows);
+  }, [selectedFlows]);
 
   const filteredFlows = flowOptions.filter(flow =>
     flow.label.toLowerCase().includes(searchTerm.toLowerCase()) ||

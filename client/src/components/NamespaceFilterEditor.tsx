@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,19 @@ export default function NamespaceFilterEditor({
   const [currentNamespaces, setCurrentNamespaces] = useState(selectedNamespaces);
   const [currentOperator, setCurrentOperator] = useState(namespaceOperator);
   const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
+
+  // Sync local state with props when they change (important for reset functionality)
+  useEffect(() => {
+    setCurrentNamespaces(selectedNamespaces);
+  }, [selectedNamespaces]);
+
+  useEffect(() => {
+    setCurrentOperator(namespaceOperator);
+  }, [namespaceOperator]);
+
+  useEffect(() => {
+    setCurrentCustomValue(customValue);
+  }, [customValue]);
 
   // Check if current operator uses text input instead of multi-select
   const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(currentOperator);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -106,6 +106,19 @@ export default function LabelsFilterEditor({
   const [currentLabels, setCurrentLabels] = useState(selectedLabels);
   const [currentOperator, setCurrentOperator] = useState(selectedOperator);
   const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
+
+  // Sync local state with props when they change (important for reset functionality)
+  useEffect(() => {
+    setCurrentLabels(selectedLabels);
+  }, [selectedLabels]);
+
+  useEffect(() => {
+    setCurrentOperator(selectedOperator);
+  }, [selectedOperator]);
+
+  useEffect(() => {
+    setCurrentCustomValue(customValue);
+  }, [customValue]);
 
   const filteredLabels = labelOptions.filter(label =>
     label.label.toLowerCase().includes(searchTerm.toLowerCase())
