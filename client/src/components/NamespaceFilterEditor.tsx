@@ -159,34 +159,29 @@ export default function NamespaceFilterEditor({
         
         {/* Select All / Deselect All - only for multi-select operators */}
         {!isTextBasedOperator && (
-          <div className="flex items-center gap-4 mt-3">
-            <button
+          <div className="flex items-center gap-2 mt-3">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleSelectAll}
               disabled={allVisible}
-              className={`flex items-center gap-2 text-sm hover-elevate px-3 py-2 rounded-md ${
-                allVisible 
-                  ? 'text-blue-400 cursor-not-allowed' 
-                  : 'text-blue-500 hover:text-blue-400'
-              }`}
+              className="flex-1"
               data-testid="button-select-all-namespaces"
             >
-              <CheckSquare className="h-4 w-4" />
+              <CheckSquare className="w-3 h-3 mr-1" />
               Select All
-            </button>
-            
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleDeselectAll}
               disabled={noneVisible}
-              className={`flex items-center gap-2 text-sm hover-elevate px-3 py-2 rounded-md ${
-                noneVisible 
-                  ? 'text-muted-foreground cursor-not-allowed' 
-                  : 'text-foreground hover:text-muted-foreground'
-              }`}
+              className="flex-1"
               data-testid="button-deselect-all-namespaces"
             >
-              <Square className="h-4 w-4" />
+              <Square className="w-3 h-3 mr-1" />
               Deselect All
-            </button>
+            </Button>
           </div>
         )}
       </div>
