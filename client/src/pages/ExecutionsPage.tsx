@@ -381,32 +381,72 @@ export default function ExecutionsPage() {
   const handleResetFilters = () => {
     // Reset search to empty
     setSearchValue('');
-    // Reset time range to default (7 days)
+    // Reset visible filters to default 4 (restore initial page load state)
+    setVisibleFilters(['scope', 'kind', 'hierarchy', 'interval']);
+    
+    // Reset default filters to their default values
+    setSelectedScopes(['user']);
+    setSelectedKinds(['default']);
+    setSelectedHierarchy('all');
     setSelectedInterval('last-7-days');
     setIntervalStartDate(undefined);
     setIntervalEndDate(undefined);
-    // Clear selected states
+    
+    // Clear non-default filters (they will be hidden anyway)
     setSelectedStates([]);
     setStatesOperator('in');
-    // Clear labels
     setSelectedLabels([]);
     setLabelsOperator('has-any-of');
     setLabelsCustomValue('');
-    // Clear namespaces
     setSelectedNamespaces([]);
     setNamespaceOperator('in');
     setNamespaceCustomValue('');
-    // Clear flows
     setSelectedFlows([]);
-    // Reset scopes to default
-    setSelectedScopes(['user']);
-    // Clear kinds
-    setSelectedKinds(['default']);
-    // Reset subflow to default
-    setSelectedHierarchy('all');
-    // Clear initial execution
     setSelectedInitialExecution('');
-    console.log('All filters reset to default values');
+    
+    console.log('All filters reset to initial page load state');
+  };
+
+  // Individual filter reset function - different behavior for default vs non-default filters
+  const handleResetFilter = (filterId: string) => {
+    const defaultFilters = ['scope', 'kind', 'hierarchy', 'interval'];
+    
+    if (defaultFilters.includes(filterId)) {
+      // Default filters: reset to default values
+      if (filterId === 'scope') {
+        setSelectedScopes(['user']);
+      } else if (filterId === 'kind') {
+        setSelectedKinds(['default']);
+      } else if (filterId === 'hierarchy') {
+        setSelectedHierarchy('all');
+      } else if (filterId === 'interval') {
+        setSelectedInterval('last-7-days');
+        setIntervalStartDate(undefined);
+        setIntervalEndDate(undefined);
+      }
+      console.log(`Reset default filter ${filterId} to default value`);
+    } else {
+      // Non-default filters: clear values and hide filter
+      setVisibleFilters(prev => prev.filter(id => id !== filterId));
+      
+      if (filterId === 'state') {
+        setSelectedStates([]);
+        setStatesOperator('in');
+      } else if (filterId === 'labels') {
+        setSelectedLabels([]);
+        setLabelsCustomValue('');
+        setLabelsOperator('has-any-of');
+      } else if (filterId === 'namespace') {
+        setSelectedNamespaces([]);
+        setNamespaceOperator('in');
+        setNamespaceCustomValue('');
+      } else if (filterId === 'flow') {
+        setSelectedFlows([]);
+      } else if (filterId === 'initial-execution') {
+        setSelectedInitialExecution('');
+      }
+      console.log(`Reset non-default filter ${filterId} and removed from visible filters`);
+    }
   };
 
   // Get current filter state for saving
