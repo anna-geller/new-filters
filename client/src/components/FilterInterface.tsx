@@ -93,6 +93,7 @@ interface FilterInterfaceProps {
   onUpdateFilter: (filterId: string, name: string, description: string) => void;
   visibleFilters: string[];
   onVisibleFiltersChange: (filters: string[]) => void;
+  onResetFilter: (filterId: string) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -157,7 +158,8 @@ export default function FilterInterface({
   onDeleteFilter,
   onUpdateFilter,
   visibleFilters,
-  onVisibleFiltersChange
+  onVisibleFiltersChange,
+  onResetFilter
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
@@ -602,6 +604,7 @@ export default function FilterInterface({
                       onSelectionChange={handleStateSelectionChange}
                       onOperatorChange={handleStatesOperatorChange}
                       onClose={handleCloseStateFilter}
+                      onReset={() => onResetFilter('state')}
                     />
                   </PopoverContent>
                 </Popover>
@@ -629,6 +632,7 @@ export default function FilterInterface({
                       customValue={labelsCustomValue}
                       onSelectionChange={handleLabelsSelectionChange}
                       onOperatorChange={handleLabelsOperatorChange}
+                      onReset={() => onResetFilter('labels')}
                       onCustomValueChange={handleLabelsCustomValueChange}
                       onClose={handleCloseLabelsFilter}
                     />
@@ -658,6 +662,7 @@ export default function FilterInterface({
                       customValue={namespaceCustomValue}
                       onSelectionChange={handleNamespacesSelectionChange}
                       onOperatorChange={handleNamespaceOperatorChange}
+                      onReset={() => onResetFilter('namespace')}
                       onCustomValueChange={handleNamespaceCustomValueChange}
                       onClose={handleCloseNamespaceFilter}
                     />
@@ -685,6 +690,7 @@ export default function FilterInterface({
                       selectedFlows={selectedFlows}
                       onSelectionChange={handleFlowsSelectionChange}
                       onClose={handleCloseFlowFilter}
+                      onReset={() => onResetFilter('flow')}
                     />
                   </PopoverContent>
                 </Popover>
@@ -785,6 +791,7 @@ export default function FilterInterface({
                       selectedInitialExecution={selectedInitialExecution}
                       onSelectionChange={handleInitialExecutionSelectionChange}
                       onClose={handleCloseParentFilter}
+                      onReset={() => onResetFilter('initial-execution')}
                     />
                   </PopoverContent>
                 </Popover>

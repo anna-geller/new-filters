@@ -110,6 +110,7 @@ interface StateFilterEditorProps {
   onSelectionChange: (states: string[]) => void;
   onOperatorChange: (operator: string) => void;
   onClose: () => void;
+  onReset?: () => void;
 }
 
 export default function StateFilterEditor({ 
@@ -117,7 +118,8 @@ export default function StateFilterEditor({
   statesOperator,
   onSelectionChange, 
   onOperatorChange,
-  onClose 
+  onClose,
+  onReset
 }: StateFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentStates, setCurrentStates] = useState(selectedStates);
@@ -137,8 +139,12 @@ export default function StateFilterEditor({
   };
 
   const handleReset = () => {
-    setCurrentStates(selectedStates);
-    setCurrentOperator(statesOperator);
+    if (onReset) {
+      onReset();
+    } else {
+      setCurrentStates(selectedStates);
+      setCurrentOperator(statesOperator);
+    }
   };
 
   const handleApply = () => {

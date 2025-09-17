@@ -661,6 +661,7 @@ export default function ExecutionsPage() {
           onUpdateFilter={handleUpdateFilter}
           visibleFilters={visibleFilters}
           onVisibleFiltersChange={setVisibleFilters}
+          onResetFilter={handleResetFilter}
         />
 
         {/* Chart - displayed when Show Chart toggle is enabled */}

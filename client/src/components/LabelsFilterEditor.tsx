@@ -87,6 +87,7 @@ interface LabelsFilterEditorProps {
   onOperatorChange: (operator: string) => void;
   onCustomValueChange: (value: string) => void;
   onClose: () => void;
+  onReset?: () => void;
 }
 
 export default function LabelsFilterEditor({ 
@@ -96,7 +97,8 @@ export default function LabelsFilterEditor({
   onSelectionChange, 
   onOperatorChange,
   onCustomValueChange,
-  onClose 
+  onClose,
+  onReset
 }: LabelsFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -147,9 +149,13 @@ export default function LabelsFilterEditor({
   };
   
   const handleReset = () => {
-    setCurrentLabels(selectedLabels);
-    setCurrentOperator(selectedOperator);
-    setCurrentCustomValue(customValue);
+    if (onReset) {
+      onReset();
+    } else {
+      setCurrentLabels(selectedLabels);
+      setCurrentOperator(selectedOperator);
+      setCurrentCustomValue(customValue);
+    }
   };
 
   return (

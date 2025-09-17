@@ -22,6 +22,7 @@ interface NamespaceFilterEditorProps {
   onOperatorChange: (operator: string) => void;
   onCustomValueChange: (value: string) => void;
   onClose: () => void;
+  onReset?: () => void;
 }
 
 const operatorOptions = [
@@ -39,7 +40,8 @@ export default function NamespaceFilterEditor({
   onSelectionChange,
   onOperatorChange,
   onCustomValueChange,
-  onClose 
+  onClose,
+  onReset
 }: NamespaceFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -87,9 +89,13 @@ export default function NamespaceFilterEditor({
   };
   
   const handleReset = () => {
-    setCurrentNamespaces(selectedNamespaces);
-    setCurrentOperator(namespaceOperator);
-    setCurrentCustomValue(customValue);
+    if (onReset) {
+      onReset();
+    } else {
+      setCurrentNamespaces(selectedNamespaces);
+      setCurrentOperator(namespaceOperator);
+      setCurrentCustomValue(customValue);
+    }
   };
 
   // Helper function to get namespace depth level for visual indentation

@@ -62,12 +62,14 @@ interface FlowFilterEditorProps {
   selectedFlows: string[];
   onSelectionChange: (flows: string[]) => void;
   onClose: () => void;
+  onReset?: () => void;
 }
 
 export default function FlowFilterEditor({ 
   selectedFlows, 
   onSelectionChange, 
-  onClose 
+  onClose,
+  onReset
 }: FlowFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -110,7 +112,11 @@ export default function FlowFilterEditor({
   };
   
   const handleReset = () => {
-    setCurrentFlows(selectedFlows);
+    if (onReset) {
+      onReset();
+    } else {
+      setCurrentFlows(selectedFlows);
+    }
   };
 
   return (
