@@ -84,6 +84,9 @@ export default function FilterCustomizationPanel({
                     isActive ? 'text-muted-foreground' : 'text-foreground'
                   }`}>{option.label}</div>
                   <div className="text-xs text-muted-foreground">{option.description}</div>
+                  {isActive && (
+                    <div className="text-xs text-muted-foreground mt-1 italic">Already added</div>
+                  )}
                 </div>
 
                 {/* Add Button */}

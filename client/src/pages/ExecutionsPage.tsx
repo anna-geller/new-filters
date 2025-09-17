@@ -296,7 +296,7 @@ export default function ExecutionsPage() {
   if (selectedInitialExecution.trim() !== '') {
     const parentExecutionFilter = {
       id: 'initial-execution',
-      label: 'Parent',
+      label: 'Parent Execution ID',
       value: selectedInitialExecution.trim(),
       operator: 'equals'
     };
@@ -306,7 +306,7 @@ export default function ExecutionsPage() {
   // Add time range filter - always show since default is set
   const timeRangeFilter = {
     id: 'timerange',
-    label: 'Interval',
+    label: 'Time range',
     value: getTimeRangeDisplayValue(),
     operator: 'in'
   };

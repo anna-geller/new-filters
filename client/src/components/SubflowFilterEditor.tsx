@@ -1,8 +1,6 @@
-import { useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GitBranch, Check, RotateCcw } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { GitBranch, Check } from "lucide-react";
 
 const hierarchyOptions = [
   { 
@@ -33,47 +31,17 @@ export default function SubflowFilterEditor({
   onSelectionChange, 
   onClose 
 }: SubflowFilterEditorProps) {
-  // Store original values for reset functionality
-  const originalValues = useRef({
-    selectedSubflow: selectedSubflow
-  });
 
   const handleSelectHierarchy = (hierarchyId: string) => {
     onSelectionChange(hierarchyId);
-  };
-
-  const handleReset = () => {
-    onSelectionChange(originalValues.current.selectedSubflow);
   };
 
   return (
     <Card className="w-80 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header */}
       <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="font-medium text-sm mb-1">Select hierarchy level</div>
-            <div className="text-xs text-muted-foreground">Choose which executions to include</div>
-          </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReset}
-                  className="px-2"
-                  data-testid="subflow-reset-button"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Reset to original value</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        <div className="font-medium text-sm mb-1">Select hierarchy level</div>
+        <div className="text-xs text-muted-foreground">Choose which executions to include</div>
       </div>
 
       {/* Hierarchy options - radio button style */}

@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, CheckCircle, Workflow, RotateCcw } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Workflow } from "lucide-react";
 
 const flowOptions = [
   { 
@@ -70,11 +69,6 @@ export default function FlowFilterEditor({
   onClose 
 }: FlowFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Store original values for reset functionality
-  const originalValues = useRef({
-    selectedFlows: selectedFlows
-  });
 
   const filteredFlows = flowOptions.filter(flow =>
     flow.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,35 +100,10 @@ export default function FlowFilterEditor({
   const allVisible = filteredFlows.every(flow => selectedFlows.includes(flow.id));
   const noneVisible = filteredFlows.every(flow => !selectedFlows.includes(flow.id));
 
-  const handleReset = () => {
-    onSelectionChange(originalValues.current.selectedFlows);
-  };
-
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with search */}
       <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium">Flow Filter</h3>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReset}
-                  className="px-2"
-                  data-testid="flow-reset-button"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Reset to original value</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
         <Input
           placeholder="Search flows..."
           value={searchTerm}

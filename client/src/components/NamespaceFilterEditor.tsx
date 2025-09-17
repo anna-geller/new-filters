@@ -1,10 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckSquare, Square, CheckCircle, Building2, RotateCcw } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckSquare, Square, CheckCircle, Building2 } from "lucide-react";
 
 const namespaceOptions = [
   'company',
@@ -42,13 +41,6 @@ export default function NamespaceFilterEditor({
   onClose 
 }: NamespaceFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Store original values for reset functionality
-  const originalValues = useRef({
-    selectedNamespaces: selectedNamespaces,
-    namespaceOperator: namespaceOperator,
-    customValue: customValue
-  });
 
   // Check if current operator uses text input instead of multi-select
   const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
@@ -86,37 +78,10 @@ export default function NamespaceFilterEditor({
     return namespace.split('.').length - 1;
   };
 
-  const handleReset = () => {
-    onSelectionChange(originalValues.current.selectedNamespaces);
-    onOperatorChange(originalValues.current.namespaceOperator);
-    onCustomValueChange(originalValues.current.customValue);
-  };
-
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with operator selection */}
       <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium">Namespace Filter</h3>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReset}
-                  className="px-2"
-                  data-testid="namespace-reset-button"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Reset to original value</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
           <Select value={namespaceOperator} onValueChange={onOperatorChange}>
