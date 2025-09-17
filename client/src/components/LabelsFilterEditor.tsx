@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckSquare, Square, CheckCircle, Link2 } from "lucide-react";
+import { CheckSquare, Square, CheckCircle, Link2, RotateCcw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const operatorOptions = [
   { id: 'has-any-of', label: 'has any of', description: 'Matches at least one of the selected labels (OR)' },
@@ -98,6 +99,13 @@ export default function LabelsFilterEditor({
   onClose 
 }: LabelsFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Store original values for reset functionality
+  const originalValues = useRef({
+    selectedLabels: selectedLabels,
+    selectedOperator: selectedOperator,
+    customValue: customValue
+  });
 
   const filteredLabels = labelOptions.filter(label =>
     label.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -119,6 +127,12 @@ export default function LabelsFilterEditor({
     onSelectionChange(newSelection);
   };
 
+  const handleReset = () => {
+    onSelectionChange(originalValues.current.selectedLabels);
+    onOperatorChange(originalValues.current.selectedOperator);
+    onCustomValueChange(originalValues.current.customValue);
+  };
+
   const handleDeselectAll = () => {
     const visibleLabelIds = filteredLabels.map(label => label.id);
     const newSelection = selectedLabels.filter(id => !visibleLabelIds.includes(id));
@@ -137,6 +151,27 @@ export default function LabelsFilterEditor({
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with operator and search */}
       <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">Labels Filter</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="labels-reset-button"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         {/* Operator Selection */}
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">

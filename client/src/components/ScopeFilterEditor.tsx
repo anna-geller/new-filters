@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, CheckCircle, Target } from "lucide-react";
+import { CheckSquare, Square, CheckCircle, Target, RotateCcw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const scopeOptions = [
   { 
@@ -29,6 +30,11 @@ export default function ScopeFilterEditor({
   onClose 
 }: ScopeFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Store original values for reset functionality
+  const originalValues = useRef({
+    selectedScopes: selectedScopes
+  });
 
   const filteredScopes = scopeOptions.filter(scope =>
     scope.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,10 +66,35 @@ export default function ScopeFilterEditor({
   const allVisible = filteredScopes.every(scope => selectedScopes.includes(scope.id));
   const noneVisible = filteredScopes.every(scope => !selectedScopes.includes(scope.id));
 
+  const handleReset = () => {
+    onSelectionChange(originalValues.current.selectedScopes);
+  };
+
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with search */}
       <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">Scope Filter</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="scope-reset-button"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <Input
           placeholder="Search scopes..."
           value={searchTerm}

@@ -156,7 +156,6 @@ export default function FilterInterface({
   onUpdateFilter
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
-  const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState(() => {
     // Load saved filter customization or use defaults
@@ -208,14 +207,6 @@ export default function FilterInterface({
     onColumnsChange(reorderedColumns);
   };
 
-  // Close table properties panel when table options collapse
-  const handleTableOptionsToggle = () => {
-    const newState = !tableOptionsOpen;
-    setTableOptionsOpen(newState);
-    if (!newState) {
-      setTablePropertiesOpen(false);
-    }
-  };
 
   const handleToggleFilter = (filterId: string) => {
     const updatedOptions = filterOptions.map(option => 
@@ -556,39 +547,30 @@ export default function FilterInterface({
             onDeleteFilter={onDeleteFilter}
           />
 
-          {/* Table options with popover */}
-          <Popover open={tableOptionsOpen} onOpenChange={handleTableOptionsToggle}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs px-3 py-1 h-7 bg-background border-border text-foreground hover:bg-muted"
-                data-testid="table-options-button"
-              >
-                <Settings className="h-4 w-4 mr-1" />
-                Table options
-                {tableOptionsOpen ? (
-                  <ChevronUp className="h-3 w-3 ml-1" />
-                ) : (
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent 
-              side="bottom" 
-              align="end" 
-              className="w-80 p-0"
-              onOpenAutoFocus={(e) => e.preventDefault()}
-            >
-              <TablePropertiesPanel
-                columns={columns}
-                onToggleColumn={handleColumnToggle}
-                onReorderColumns={handleColumnReorder}
-                isOpen={tablePropertiesOpen}
-                onClose={() => setTablePropertiesOpen(false)}
-              />
-            </PopoverContent>
-          </Popover>
+          {/* Show Chart Toggle */}
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-chart"
+              checked={showChart}
+              onCheckedChange={onToggleShowChart}
+              data-testid="switch-show-chart"
+            />
+            <Label htmlFor="show-chart" className="text-sm cursor-pointer">
+              Show Chart
+            </Label>
+          </div>
+
+          {/* Columns Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTablePropertiesOpen(!tablePropertiesOpen)}
+            className="text-xs px-3 py-1 h-7 bg-background border-border text-foreground hover:bg-muted"
+            data-testid="button-columns"
+          >
+            <Settings className="h-4 w-4 mr-1" />
+            Columns
+          </Button>
         </div>
       </div>
 
@@ -853,68 +835,16 @@ export default function FilterInterface({
         </div>
       )}
 
-      {/* Table Options Panel */}
-      {tableOptionsOpen && (
-        <div className="px-4 py-3 border-b border-border bg-card/30">
-          <div className="flex items-center justify-between">
-            {/* Show Chart - Left side */}
-            <div className="flex items-center gap-2">
-              <Switch
-                id="show-chart"
-                checked={showChart}
-                onCheckedChange={onToggleShowChart}
-                data-testid="switch-show-chart"
-              />
-              <Label htmlFor="show-chart" className="text-sm cursor-pointer">
-                Show Chart
-              </Label>
-            </div>
-
-            {/* Right side controls */}
-            <div className="flex items-center gap-6">
-              {/* Periodic Refresh */}
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="periodic-refresh"
-                  checked={periodicRefresh}
-                  onCheckedChange={onTogglePeriodicRefresh}
-                  data-testid="switch-periodic-refresh"
-                />
-                <Label htmlFor="periodic-refresh" className="text-sm cursor-pointer">
-                  Periodic refresh
-                </Label>
-              </div>
-
-              {/* Refresh Data Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onRefreshData}
-                className="flex items-center gap-2 hover-elevate"
-                data-testid="button-refresh-data"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Refresh data
-              </Button>
-
-              {/* Columns Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTablePropertiesOpen(!tablePropertiesOpen)}
-                className="flex items-center gap-2 hover-elevate"
-                data-testid="button-columns"
-              >
-                <Settings className="h-4 w-4" />
-                Columns
-                {tablePropertiesOpen ? (
-                  <ChevronUp className="h-3 w-3 ml-1" />
-                ) : (
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                )}
-              </Button>
-            </div>
-          </div>
+      {/* Table Properties Panel */}
+      {tablePropertiesOpen && (
+        <div className="border-b border-border">
+          <TablePropertiesPanel
+            columns={columns}
+            onToggleColumn={handleColumnToggle}
+            onReorderColumns={handleColumnReorder}
+            isOpen={tablePropertiesOpen}
+            onClose={() => setTablePropertiesOpen(false)}
+          />
         </div>
       )}
 

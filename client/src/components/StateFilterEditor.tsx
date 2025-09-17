@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play, XCircle, X, AlertTriangle, Pause, Ban, SkipForward, Clock, RefreshCw, Circle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const operatorOptions = [
   { id: 'in', label: 'is any of', description: 'Execution state is one of the selected states' },
@@ -119,6 +120,12 @@ export default function StateFilterEditor({
   onClose 
 }: StateFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Store original values for reset functionality
+  const originalValues = useRef({
+    selectedStates: selectedStates,
+    statesOperator: statesOperator
+  });
 
   const filteredStates = stateOptions.filter(state =>
     state.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -151,10 +158,36 @@ export default function StateFilterEditor({
 
   const selectedOperatorObj = operatorOptions.find(op => op.id === statesOperator);
 
+  const handleReset = () => {
+    onSelectionChange(originalValues.current.selectedStates);
+    onOperatorChange(originalValues.current.statesOperator);
+  };
+
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with operator and search */}
       <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">State Filter</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="state-reset-button"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         {/* Operator Selection */}
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
