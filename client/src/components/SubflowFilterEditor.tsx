@@ -22,32 +22,32 @@ const hierarchyOptions = [
   },
 ];
 
-interface SubflowFilterEditorProps {
-  selectedSubflow: string;
-  onSelectionChange: (subflow: string) => void;
+interface HierarchyFilterEditorProps {
+  selectedHierarchy: string;
+  onSelectionChange: (hierarchy: string) => void;
   onClose: () => void;
 }
 
-export default function SubflowFilterEditor({ 
-  selectedSubflow, 
+export default function HierarchyFilterEditor({ 
+  selectedHierarchy, 
   onSelectionChange, 
   onClose 
-}: SubflowFilterEditorProps) {
+}: HierarchyFilterEditorProps) {
   
   // Local state to track current values vs original props
-  const [currentSubflow, setCurrentSubflow] = useState(selectedSubflow);
+  const [currentHierarchy, setCurrentHierarchy] = useState(selectedHierarchy);
 
   const handleSelectHierarchy = (hierarchyId: string) => {
-    setCurrentSubflow(hierarchyId);
+    setCurrentHierarchy(hierarchyId);
   };
   
   const handleApply = () => {
-    onSelectionChange(currentSubflow);
+    onSelectionChange(currentHierarchy);
     onClose();
   };
   
   const handleReset = () => {
-    setCurrentSubflow('all'); // Reset to default value
+    setCurrentHierarchy('all'); // Reset to default value
   };
 
   return (
@@ -61,7 +61,7 @@ export default function SubflowFilterEditor({
       {/* Hierarchy options - radio button style */}
       <div data-testid="hierarchy-options-list">
         {hierarchyOptions.map((hierarchy) => {
-          const isSelected = currentSubflow === hierarchy.id;
+          const isSelected = currentHierarchy === hierarchy.id;
           return (
             <div
               key={hierarchy.id}
@@ -96,7 +96,7 @@ export default function SubflowFilterEditor({
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {currentSubflow ? hierarchyOptions.find(h => h.id === currentSubflow)?.label || 'None' : 'None'} selected
+            {currentHierarchy ? hierarchyOptions.find(h => h.id === currentHierarchy)?.label || 'None' : 'None'} selected
           </span>
           
           <div className="flex items-center gap-2">

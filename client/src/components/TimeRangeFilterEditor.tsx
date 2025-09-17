@@ -21,11 +21,11 @@ const timeRangeOptions = [
   { value: 'custom-range', label: 'Custom range' },
 ];
 
-interface TimeRangeFilterEditorProps {
-  selectedTimeRange: string;
+interface IntervalFilterEditorProps {
+  selectedInterval: string;
   startDate?: string;
   endDate?: string;
-  onTimeRangeChange: (timeRange: string, startDate?: string, endDate?: string) => void;
+  onIntervalChange: (interval: string, startDate?: string, endDate?: string) => void;
   onClose: () => void;
 }
 
@@ -57,14 +57,14 @@ function combineDateAndTime(date: Date, time: string): string {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
-export default function TimeRangeFilterEditor({ 
-  selectedTimeRange, 
+export default function IntervalFilterEditor({ 
+  selectedInterval, 
   startDate,
   endDate,
-  onTimeRangeChange, 
+  onIntervalChange, 
   onClose 
-}: TimeRangeFilterEditorProps) {
-  const [currentTimeRange, setCurrentTimeRange] = useState(selectedTimeRange);
+}: IntervalFilterEditorProps) {
+  const [currentInterval, setCurrentInterval] = useState(selectedInterval);
   
   // Parse initial dates and times
   const startDateTime = parseDateTimeString(startDate);
@@ -79,7 +79,7 @@ export default function TimeRangeFilterEditor({
   const [endDateOpen, setEndDateOpen] = useState(false);
 
   const handleTimeRangeChange = (value: string) => {
-    setCurrentTimeRange(value);
+    setCurrentInterval(value);
     if (value !== 'custom-range') {
       // Clear custom dates when switching to predefined range
       setCurrentStartDate(undefined);
@@ -110,27 +110,27 @@ export default function TimeRangeFilterEditor({
   };
 
   const handleApply = () => {
-    if (currentTimeRange === 'custom-range') {
+    if (currentInterval === 'custom-range') {
       if (currentStartDate && currentEndDate) {
         const startDateString = combineDateAndTime(currentStartDate, currentStartTime);
         const endDateString = combineDateAndTime(currentEndDate, currentEndTime);
-        onTimeRangeChange(currentTimeRange, startDateString, endDateString);
+        onIntervalChange(currentInterval, startDateString, endDateString);
       }
     } else {
-      onTimeRangeChange(currentTimeRange);
+      onIntervalChange(currentInterval);
     }
     onClose();
   };
 
   const handleReset = () => {
-    setCurrentTimeRange('last-7-days'); // Reset to default value
+    setCurrentInterval('last-7-days'); // Reset to default value
     setCurrentStartDate(undefined);
     setCurrentEndDate(undefined);
     setCurrentStartTime('00:00');
     setCurrentEndTime('23:59');
   };
 
-  const isCustomRange = currentTimeRange === 'custom-range';
+  const isCustomRange = currentInterval === 'custom-range';
   
   // Validation: check if end date+time is after start date+time
   const isValidRange = () => {
@@ -175,7 +175,7 @@ export default function TimeRangeFilterEditor({
           <h3 className="text-sm font-medium">Interval</h3>
         </div>
         
-        <Select value={currentTimeRange} onValueChange={handleTimeRangeChange}>
+        <Select value={currentInterval} onValueChange={handleTimeRangeChange}>
           <SelectTrigger data-testid="select-time-range">
             <SelectValue placeholder="Select time range" />
           </SelectTrigger>
@@ -308,7 +308,7 @@ export default function TimeRangeFilterEditor({
         <p className="text-xs text-muted-foreground">
           {isCustomRange && currentStartDate && currentEndDate 
             ? formatCustomRangeSummary()
-            : timeRangeOptions.find(opt => opt.value === currentTimeRange)?.label || 'Select a time range'
+            : timeRangeOptions.find(opt => opt.value === currentInterval)?.label || 'Select a time range'
           }
         </p>
         

@@ -110,9 +110,9 @@ export default function ExecutionsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [statesOperator, setStatesOperator] = useState<string>('in');
-  const [selectedTimeRange, setSelectedTimeRange] = useState('last-7-days');
-  const [timeRangeStartDate, setTimeRangeStartDate] = useState<string>();
-  const [timeRangeEndDate, setTimeRangeEndDate] = useState<string>();
+  const [selectedInterval, setSelectedInterval] = useState('last-7-days');
+  const [intervalStartDate, setIntervalStartDate] = useState<string>();
+  const [intervalEndDate, setIntervalEndDate] = useState<string>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const [labelsOperator, setLabelsOperator] = useState('has-any-of');
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
@@ -122,7 +122,7 @@ export default function ExecutionsPage() {
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
   const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
-  const [selectedSubflow, setSelectedSubflow] = useState<string>('all');
+  const [selectedHierarchy, setSelectedHierarchy] = useState<string>('all');
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
@@ -137,13 +137,13 @@ export default function ExecutionsPage() {
     setSavedFilters(loadedFilters);
   }, []);
   
-  // Helper function to get display value for time range
-  const getTimeRangeDisplayValue = () => {
-    if (selectedTimeRange === 'custom-range' && timeRangeStartDate && timeRangeEndDate) {
-      return `${new Date(timeRangeStartDate).toLocaleDateString()} - ${new Date(timeRangeEndDate).toLocaleDateString()}`;
+  // Helper function to get display value for interval
+  const getIntervalDisplayValue = () => {
+    if (selectedInterval === 'custom-range' && intervalStartDate && intervalEndDate) {
+      return `${new Date(intervalStartDate).toLocaleDateString()} - ${new Date(intervalEndDate).toLocaleDateString()}`;
     }
     // Convert kebab-case to readable format
-    return selectedTimeRange.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return selectedInterval.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
   
   // Dynamically compute active filters from current state
@@ -182,30 +182,30 @@ export default function ExecutionsPage() {
       value: kindDisplayValue
     });
 
-    // Hierarchy filter (subflow)
-    const hierarchyDisplayValue = selectedSubflow === 'all'
+    // Hierarchy filter
+    const hierarchyDisplayValue = selectedHierarchy === 'all'
       ? 'All'
-      : selectedSubflow === 'top-level'
+      : selectedHierarchy === 'top-level'
       ? 'Top Level'
-      : selectedSubflow === 'child'
+      : selectedHierarchy === 'child'
       ? 'Child'
-      : selectedSubflow;
+      : selectedHierarchy;
     
     filters.push({
-      id: 'subflow',
+      id: 'hierarchy',
       label: 'Hierarchy',
       value: hierarchyDisplayValue
     });
 
-    // Interval filter (time range)
+    // Interval filter
     filters.push({
-      id: 'timerange',
+      id: 'interval',
       label: 'Interval',
-      value: getTimeRangeDisplayValue()
+      value: getIntervalDisplayValue()
     });
 
     return filters;
-  }, [selectedScopes, selectedKinds, selectedSubflow, selectedTimeRange, timeRangeStartDate, timeRangeEndDate]);
+  }, [selectedScopes, selectedKinds, selectedHierarchy, selectedInterval, intervalStartDate, intervalEndDate]);
   
   // Helper function to get short operator label for display
   const getOperatorDisplayLabel = (operatorId: string) => {
@@ -332,14 +332,14 @@ export default function ExecutionsPage() {
     } else if (filterId === 'kind') {
       setSelectedKinds(['default']); // Reset to default
     } else if (filterId === 'subflow') {
-      setSelectedSubflow('all'); // Reset to default
+      setSelectedHierarchy('all'); // Reset to default
     } else if (filterId === 'initial-execution') {
       setSelectedInitialExecution('');
     } else if (filterId === 'timerange') {
-      // For time range, we'll keep it but reset to default
-      setSelectedTimeRange('last-7-days');
-      setTimeRangeStartDate(undefined);
-      setTimeRangeEndDate(undefined);
+      // For interval, we'll keep it but reset to default
+      setSelectedInterval('last-7-days');
+      setIntervalStartDate(undefined);
+      setIntervalEndDate(undefined);
     }
     
     console.log(`Cleared filter: ${filterId}`);
@@ -357,19 +357,19 @@ export default function ExecutionsPage() {
     setColumns(newColumns);
   };
 
-  const handleTimeRangeChange = (timeRange: string, startDate?: string, endDate?: string) => {
-    setSelectedTimeRange(timeRange);
-    setTimeRangeStartDate(startDate);
-    setTimeRangeEndDate(endDate);
+  const handleIntervalChange = (interval: string, startDate?: string, endDate?: string) => {
+    setSelectedInterval(interval);
+    setIntervalStartDate(startDate);
+    setIntervalEndDate(endDate);
   };
 
   const handleResetFilters = () => {
     // Reset search to empty
     setSearchValue('');
     // Reset time range to default (7 days)
-    setSelectedTimeRange('last-7-days');
-    setTimeRangeStartDate(undefined);
-    setTimeRangeEndDate(undefined);
+    setSelectedInterval('last-7-days');
+    setIntervalStartDate(undefined);
+    setIntervalEndDate(undefined);
     // Clear selected states
     setSelectedStates([]);
     setStatesOperator('in');
@@ -388,7 +388,7 @@ export default function ExecutionsPage() {
     // Clear kinds
     setSelectedKinds(['default']);
     // Reset subflow to default
-    setSelectedSubflow('all');
+    setSelectedHierarchy('all');
     // Clear initial execution
     setSelectedInitialExecution('');
     console.log('All filters reset to default values');
@@ -400,9 +400,9 @@ export default function ExecutionsPage() {
       searchValue,
       selectedStates,
       statesOperator,
-      selectedTimeRange,
-      timeRangeStartDate,
-      timeRangeEndDate,
+      selectedInterval,
+      intervalStartDate,
+      intervalEndDate,
       selectedLabels,
       labelsOperator,
       labelsCustomValue,
@@ -412,7 +412,7 @@ export default function ExecutionsPage() {
       selectedFlows,
       selectedScopes,
       selectedKinds,
-      selectedSubflow,
+      selectedHierarchy,
       selectedInitialExecution,
     };
   };
@@ -468,9 +468,9 @@ export default function ExecutionsPage() {
     setSearchValue(state.searchValue);
     setSelectedStates(state.selectedStates);
     setStatesOperator(state.statesOperator || 'in');
-    setSelectedTimeRange(state.selectedTimeRange);
-    setTimeRangeStartDate(state.timeRangeStartDate);
-    setTimeRangeEndDate(state.timeRangeEndDate);
+    setSelectedInterval(state.selectedInterval);
+    setIntervalStartDate(state.intervalStartDate);
+    setIntervalEndDate(state.intervalEndDate);
     setSelectedLabels(state.selectedLabels);
     setLabelsOperator(normalizedLabels.operator);
     setLabelsCustomValue(normalizedLabels.customValue);
@@ -489,7 +489,7 @@ export default function ExecutionsPage() {
     
     setSelectedScopes(normalizedScopes);
     setSelectedKinds(state.selectedKinds);
-    setSelectedSubflow(state.selectedSubflow || 'all');
+    setSelectedHierarchy(state.selectedHierarchy || 'all');
     setSelectedInitialExecution(state.selectedInitialExecution);
     
     console.log('Filter loaded:', filter.name);
@@ -573,10 +573,10 @@ export default function ExecutionsPage() {
           statesOperator={statesOperator}
           onSelectedStatesChange={setSelectedStates}
           onStatesOperatorChange={setStatesOperator}
-          selectedTimeRange={selectedTimeRange}
-          timeRangeStartDate={timeRangeStartDate}
-          timeRangeEndDate={timeRangeEndDate}
-          onTimeRangeChange={handleTimeRangeChange}
+          selectedInterval={selectedInterval}
+          intervalStartDate={intervalStartDate}
+          intervalEndDate={intervalEndDate}
+          onIntervalChange={handleIntervalChange}
           selectedLabels={selectedLabels}
           labelsOperator={labelsOperator}
           labelsCustomValue={labelsCustomValue}
@@ -595,8 +595,8 @@ export default function ExecutionsPage() {
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}
           onKindsSelectionChange={setSelectedKinds}
-          selectedSubflow={selectedSubflow}
-          onSubflowSelectionChange={setSelectedSubflow}
+          selectedHierarchy={selectedHierarchy}
+          onSubflowSelectionChange={setSelectedHierarchy}
           selectedInitialExecution={selectedInitialExecution}
           onInitialExecutionSelectionChange={setSelectedInitialExecution}
           savedFilters={savedFilters}

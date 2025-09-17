@@ -8,9 +8,9 @@ export interface SavedFilter {
     searchValue: string;
     selectedStates: string[];
     statesOperator: string;
-    selectedTimeRange: string;
-    timeRangeStartDate?: string;
-    timeRangeEndDate?: string;
+    selectedInterval: string;
+    intervalStartDate?: string;
+    intervalEndDate?: string;
     selectedLabels: string[];
     labelsOperator: string;
     labelsCustomValue: string;
@@ -20,7 +20,7 @@ export interface SavedFilter {
     selectedFlows: string[];
     selectedScopes: string[];
     selectedKinds: string[];
-    selectedSubflow: string;
+    selectedHierarchy: string;
     selectedInitialExecution: string;
   };
 }

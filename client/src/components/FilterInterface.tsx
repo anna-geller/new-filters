@@ -17,9 +17,9 @@ import NamespaceFilterEditor from './NamespaceFilterEditor';
 import FlowFilterEditor from './FlowFilterEditor';
 import ScopeFilterEditor from './ScopeFilterEditor';
 import KindFilterEditor from './KindFilterEditor';
-import SubflowFilterEditor from './SubflowFilterEditor';
+import HierarchyFilterEditor from './SubflowFilterEditor';
 import InitialExecutionFilterEditor from './InitialExecutionFilterEditor';
-import TimeRangeFilterEditor from './TimeRangeFilterEditor';
+import IntervalFilterEditor from './TimeRangeFilterEditor';
 import SaveFilterButton from './SaveFilterButton';
 import SavedFiltersDropdown from './SavedFiltersDropdown';
 import SaveFilterDialog from './SaveFilterDialog';
@@ -60,10 +60,10 @@ interface FilterInterfaceProps {
   statesOperator: string;
   onSelectedStatesChange: (states: string[]) => void;
   onStatesOperatorChange: (operator: string) => void;
-  selectedTimeRange: string;
-  timeRangeStartDate?: string;
-  timeRangeEndDate?: string;
-  onTimeRangeChange: (timeRange: string, startDate?: string, endDate?: string) => void;
+  selectedInterval: string;
+  intervalStartDate?: string;
+  intervalEndDate?: string;
+  onIntervalChange: (interval: string, startDate?: string, endDate?: string) => void;
   selectedLabels: string[];
   labelsOperator: string;
   labelsCustomValue: string;
@@ -82,8 +82,8 @@ interface FilterInterfaceProps {
   onScopesSelectionChange: (scopes: string[]) => void;
   selectedKinds: string[];
   onKindsSelectionChange: (kinds: string[]) => void;
-  selectedSubflow: string;
-  onSubflowSelectionChange: (subflow: string) => void;
+  selectedHierarchy: string;
+  onHierarchySelectionChange: (hierarchy: string) => void;
   selectedInitialExecution: string;
   onInitialExecutionSelectionChange: (value: string) => void;
   savedFilters: SavedFilter[];
@@ -100,9 +100,9 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 4 },
   { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
   { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
-  { id: 'subflow', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: true, order: 7 },
+  { id: 'hierarchy', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: true, order: 7 },
   { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 8 },
-  { id: 'timerange', label: 'Interval', description: 'Filter by execution time', enabled: true, order: 9 },
+  { id: 'interval', label: 'Interval', description: 'Filter by execution time', enabled: true, order: 9 },
 ];
 
 export default function FilterInterface({
@@ -123,10 +123,10 @@ export default function FilterInterface({
   statesOperator,
   onSelectedStatesChange,
   onStatesOperatorChange,
-  selectedTimeRange,
-  timeRangeStartDate,
-  timeRangeEndDate,
-  onTimeRangeChange,
+  selectedInterval,
+  intervalStartDate,
+  intervalEndDate,
+  onIntervalChange,
   selectedLabels,
   labelsOperator,
   labelsCustomValue,
@@ -145,8 +145,8 @@ export default function FilterInterface({
   onScopesSelectionChange,
   selectedKinds,
   onKindsSelectionChange,
-  selectedSubflow,
-  onSubflowSelectionChange,
+  selectedHierarchy,
+  onHierarchySelectionChange,
   selectedInitialExecution,
   onInitialExecutionSelectionChange,
   savedFilters,
@@ -169,9 +169,9 @@ export default function FilterInterface({
   const [flowFilterOpen, setFlowFilterOpen] = useState(false);
   const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
   const [kindFilterOpen, setKindFilterOpen] = useState(false);
-  const [subflowFilterOpen, setSubflowFilterOpen] = useState(false);
+  const [hierarchyFilterOpen, setHierarchyFilterOpen] = useState(false);
   const [initialExecutionFilterOpen, setInitialExecutionFilterOpen] = useState(false);
-  const [timeRangeFilterOpen, setTimeRangeFilterOpen] = useState(false);
+  const [intervalFilterOpen, setIntervalFilterOpen] = useState(false);
   const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
   const [editFilterDialogOpen, setEditFilterDialogOpen] = useState(false);
   const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
@@ -277,10 +277,10 @@ export default function FilterInterface({
       }
     } else if (filterId === 'subflow') {
       if (filterOption && !filterOption.enabled) {
-        setSubflowFilterOpen(true);
+        setHierarchyFilterOpen(true);
       } else if (filterOption && filterOption.enabled) {
         // Clear subflow filter values when disabling
-        onSubflowSelectionChange('all');
+        onHierarchySelectionChange('all');
       }
     } else if (filterId === 'initial-execution') {
       if (filterOption && !filterOption.enabled) {
@@ -328,11 +328,11 @@ export default function FilterInterface({
     } else if (filterId === 'kind') {
       setKindFilterOpen(true);
     } else if (filterId === 'subflow') {
-      setSubflowFilterOpen(true);
+      setHierarchyFilterOpen(true);
     } else if (filterId === 'initial-execution') {
       setInitialExecutionFilterOpen(true);
     } else if (filterId === 'timerange') {
-      setTimeRangeFilterOpen(true);
+      setIntervalFilterOpen(true);
     }
     onEditFilter(filterId);
   };
@@ -390,7 +390,7 @@ export default function FilterInterface({
   };
 
   const handleSubflowSelectionChange = (subflow: string) => {
-    onSubflowSelectionChange(subflow);
+    onHierarchySelectionChange(subflow);
   };
 
   const handleInitialExecutionSelectionChange = (value: string) => {
@@ -440,12 +440,12 @@ export default function FilterInterface({
     setNamespaceFilterOpen(false);
   };
 
-  const handleTimeRangeChange = (timeRange: string, startDate?: string, endDate?: string) => {
-    onTimeRangeChange(timeRange, startDate, endDate);
+  const handleIntervalChange = (timeRange: string, startDate?: string, endDate?: string) => {
+    onIntervalChange(timeRange, startDate, endDate);
   };
 
   const handleCloseTimeRangeFilter = () => {
-    setTimeRangeFilterOpen(false);
+    setIntervalFilterOpen(false);
   };
 
   const handleCloseFlowFilter = () => {
@@ -461,7 +461,7 @@ export default function FilterInterface({
   };
 
   const handleCloseSubflowFilter = () => {
-    setSubflowFilterOpen(false);
+    setHierarchyFilterOpen(false);
   };
 
   const handleCloseInitialExecutionFilter = () => {
@@ -743,7 +743,7 @@ export default function FilterInterface({
             // Subflow Filter with Popover
             else if (filter.id === 'subflow') {
               return (
-                <Popover key={filter.id} open={subflowFilterOpen} onOpenChange={setSubflowFilterOpen}>
+                <Popover key={filter.id} open={hierarchyFilterOpen} onOpenChange={setHierarchyFilterOpen}>
                   <PopoverTrigger asChild>
                     <div className="flex-shrink-0">
                       <FilterBadge
@@ -756,8 +756,8 @@ export default function FilterInterface({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent side="bottom" align="start" className="w-80 p-0">
-                    <SubflowFilterEditor
-                      selectedSubflow={selectedSubflow}
+                    <HierarchyFilterEditor
+                      selectedHierarchy={selectedHierarchy}
                       onSelectionChange={handleSubflowSelectionChange}
                       onClose={handleCloseSubflowFilter}
                     />
@@ -793,7 +793,7 @@ export default function FilterInterface({
             // Time Range Filter with Popover
             else if (filter.id === 'timerange') {
               return (
-                <Popover key={filter.id} open={timeRangeFilterOpen} onOpenChange={setTimeRangeFilterOpen}>
+                <Popover key={filter.id} open={intervalFilterOpen} onOpenChange={setIntervalFilterOpen}>
                   <PopoverTrigger asChild>
                     <div className="flex-shrink-0">
                       <FilterBadge
@@ -806,11 +806,11 @@ export default function FilterInterface({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent side="bottom" align="start" className="w-80 p-0">
-                    <TimeRangeFilterEditor
-                      selectedTimeRange={selectedTimeRange}
-                      startDate={timeRangeStartDate}
-                      endDate={timeRangeEndDate}
-                      onTimeRangeChange={handleTimeRangeChange}
+                    <IntervalFilterEditor
+                      selectedInterval={selectedInterval}
+                      startDate={intervalStartDate}
+                      endDate={intervalEndDate}
+                      onIntervalChange={handleIntervalChange}
                       onClose={handleCloseTimeRangeFilter}
                     />
                   </PopoverContent>
