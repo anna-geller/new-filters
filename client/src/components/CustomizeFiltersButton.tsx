@@ -16,7 +16,7 @@ export default function CustomizeFiltersButton({ onClick, isOpen }: CustomizeFil
       data-testid="button-customize-filters"
     >
       <Filter className="h-4 w-4" />
-      Customize filters
+      Add filters
     </Button>
   );
 }

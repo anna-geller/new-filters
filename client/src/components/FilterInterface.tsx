@@ -101,8 +101,8 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
   { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
   { id: 'subflow', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: false, order: 7 },
-  { id: 'initial-execution', label: 'Parent Execution ID', description: 'Filter by parent execution ID', enabled: false, order: 8 },
-  { id: 'timerange', label: 'Time range', description: 'Filter by execution time', enabled: true, order: 9 },
+  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution ID', enabled: false, order: 8 },
+  { id: 'timerange', label: 'Interval', description: 'Filter by execution time', enabled: true, order: 9 },
 ];
 
 export default function FilterInterface({
@@ -582,8 +582,8 @@ export default function FilterInterface({
             >
               <TablePropertiesPanel
                 columns={columns}
-                onColumnToggle={handleColumnToggle}
-                onColumnReorder={handleColumnReorder}
+                onToggleColumn={handleColumnToggle}
+                onReorderColumns={handleColumnReorder}
                 isSubPanelOpen={tablePropertiesOpen}
                 onSubPanelToggle={setTablePropertiesOpen}
               />

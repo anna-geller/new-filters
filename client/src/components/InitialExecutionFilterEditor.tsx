@@ -33,7 +33,7 @@ export default function InitialExecutionFilterEditor({
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2 mb-3">
           <PlayCircle className="h-4 w-4 text-primary" />
-          <h3 className="font-medium text-sm">Parent Execution ID</h3>
+          <h3 className="font-medium text-sm">Parent</h3>
         </div>
         
         <Input
