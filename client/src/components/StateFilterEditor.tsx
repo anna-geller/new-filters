@@ -164,9 +164,9 @@ export default function StateFilterEditor({
 
   const handleSelectAll = () => {
     const allVisibleStates = filteredStates.map(state => state.id);
-    const combinedStates = [...selectedStates, ...allVisibleStates];
+    const combinedStates = [...currentStates, ...allVisibleStates];
     const newSelection = Array.from(new Set(combinedStates));
-    onSelectionChange(newSelection);
+    setCurrentStates(newSelection);
   };
 
   const handleDeselectAll = () => {

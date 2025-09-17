@@ -193,8 +193,8 @@ export default function ExecutionsPage() {
     if (visibleFilters.includes('hierarchy')) {
       const hierarchyDisplayValue = selectedHierarchy === 'all'
         ? 'All'
-        : selectedHierarchy === 'top-level'
-        ? 'Top Level'
+        : selectedHierarchy === 'parent'
+        ? 'Parent'
         : selectedHierarchy === 'child'
         ? 'Child'
         : selectedHierarchy;
