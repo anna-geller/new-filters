@@ -163,7 +163,7 @@ export default function TimeRangeFilterEditor({
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2 mb-3">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-medium">Time range</h3>
+          <h3 className="text-sm font-medium">Interval</h3>
         </div>
         
         <Select value={currentTimeRange} onValueChange={handleTimeRangeChange}>
