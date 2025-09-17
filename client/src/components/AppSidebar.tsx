@@ -229,6 +229,120 @@ const navigationItems = [
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (itemTitle: string) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemTitle)) {
+        newSet.delete(itemTitle);
+      } else {
+        newSet.add(itemTitle);
+      }
+      return newSet;
+    });
+  };
+
+  const isItemActive = (item: any): boolean => {
+    if (item.url && location === item.url) return true;
+    if (item.children) {
+      return item.children.some((child: any) => isItemActive(child));
+    }
+    return false;
+  };
+
+  const renderMenuItem = (item: any, level: number = 0) => {
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedItems.has(item.title);
+    const isActive = isItemActive(item);
+
+    if (level === 0) {
+      // Top-level items
+      return (
+        <SidebarMenuItem key={item.title}>
+          {hasChildren ? (
+            <>
+              <SidebarMenuButton
+                onClick={() => toggleExpanded(item.title)}
+                isActive={isActive}
+                data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <item.icon />
+                <span>{item.title}</span>
+                {isExpanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
+              </SidebarMenuButton>
+              {isExpanded && (
+                <SidebarMenuSub>
+                  {item.children.map((child: any) => renderMenuItem(child, level + 1))}
+                </SidebarMenuSub>
+              )}
+            </>
+          ) : (
+            <SidebarMenuButton
+              asChild
+              isActive={isActive}
+              data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <a href={item.url}>
+                <item.icon />
+                <span>{item.title}</span>
+              </a>
+            </SidebarMenuButton>
+          )}
+        </SidebarMenuItem>
+      );
+    } else if (level === 1) {
+      // Second-level items
+      return (
+        <SidebarMenuSubItem key={item.title}>
+          {hasChildren ? (
+            <>
+              <SidebarMenuSubButton
+                onClick={() => toggleExpanded(item.title)}
+                isActive={isActive}
+                data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                <span>{item.title}</span>
+                {isExpanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
+              </SidebarMenuSubButton>
+              {isExpanded && (
+                <SidebarMenuSub>
+                  {item.children.map((child: any) => renderMenuItem(child, level + 1))}
+                </SidebarMenuSub>
+              )}
+            </>
+          ) : (
+            <SidebarMenuSubButton
+              asChild
+              isActive={isActive}
+              data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              <a href={item.url}>
+                {item.icon && <item.icon className="h-4 w-4" />}
+                <span>{item.title}</span>
+              </a>
+            </SidebarMenuSubButton>
+          )}
+        </SidebarMenuSubItem>
+      );
+    } else {
+      // Third-level items (deepest nesting)
+      return (
+        <SidebarMenuSubItem key={item.title}>
+          <SidebarMenuSubButton
+            asChild
+            isActive={location === item.url}
+            data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            <a href={item.url} className="pl-4">
+              <span>{item.title}</span>
+            </a>
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+      );
+    }
+  };
 
   return (
     <Sidebar>
@@ -237,20 +351,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    isActive={location === item.url}
-                    data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navigationItems.map((item) => renderMenuItem(item))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
