@@ -7,8 +7,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play, XCircle, X, AlertTriangle, Pause, Ban, SkipForward, Clock, RefreshCw, Circle } from "lucide-react";
 
 const operatorOptions = [
-  { id: 'in', label: 'is any of', description: 'Execution state is one of the selected states' },
-  { id: 'not-in', label: 'is not any of', description: 'Execution state is not one of the selected states' },
+  { id: 'in', label: 'in', description: 'Execution state is one of the selected states' },
+  { id: 'not-in', label: 'not in', description: 'Execution state is not one of the selected states' },
 ];
 
 const stateOptions = [
