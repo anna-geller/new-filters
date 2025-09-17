@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { 
   Home, 
@@ -12,7 +13,23 @@ import {
   Lock, 
   Package, 
   Puzzle, 
-  Settings 
+  Settings,
+  ChevronDown,
+  ChevronRight,
+  BarChart3,
+  Users,
+  Shield,
+  UserCheck,
+  UsersRound,
+  Key,
+  Mail,
+  Activity,
+  Server,
+  Monitor,
+  Cpu,
+  HardDrive,
+  Megaphone,
+  Zap
 } from "lucide-react";
 
 import {
@@ -24,19 +41,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
-// Navigation items matching the screenshot
+// Hierarchical navigation structure
 const navigationItems = [
   {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Overview",
-    url: "/overview",
-    icon: Eye,
+    title: "Dashboards",
+    url: "/dashboards",
+    icon: BarChart3,
   },
   {
     title: "Flows",
@@ -50,7 +65,7 @@ const navigationItems = [
   },
   {
     title: "Executions",
-    url: "/",
+    url: "/executions",
     icon: Play,
   },
   {
@@ -69,29 +84,146 @@ const navigationItems = [
     icon: FolderOpen,
   },
   {
-    title: "KV Store",
-    url: "/kv-store",
-    icon: Database,
-  },
-  {
-    title: "Secrets",
-    url: "/secrets",
-    icon: Lock,
-  },
-  {
-    title: "Blueprints",
-    url: "/blueprints",
-    icon: Package,
-  },
-  {
     title: "Plugins",
     url: "/plugins",
     icon: Puzzle,
   },
   {
-    title: "Administration",
-    url: "/administration",
+    title: "Blueprints",
+    icon: Package,
+    children: [
+      {
+        title: "Custom Blueprints",
+        url: "/blueprints/custom",
+      },
+      {
+        title: "Flow Blueprints",
+        url: "/blueprints/flow",
+      },
+      {
+        title: "Apps Blueprints",
+        url: "/blueprints/apps",
+      },
+      {
+        title: "Dashboard Blueprints",
+        url: "/blueprints/dashboard",
+      },
+    ],
+  },
+  {
+    title: "Tenant Administration",
     icon: Settings,
+    children: [
+      {
+        title: "KV Store",
+        url: "/tenant-admin/kv-store",
+        icon: Database,
+      },
+      {
+        title: "Secrets",
+        url: "/tenant-admin/secrets",
+        icon: Lock,
+      },
+      {
+        title: "Triggers",
+        url: "/tenant-admin/triggers",
+        icon: Zap,
+      },
+      {
+        title: "Audit Logs",
+        url: "/tenant-admin/audit-logs",
+        icon: FileText,
+      },
+      {
+        title: "IAM",
+        icon: Shield,
+        children: [
+          {
+            title: "Users",
+            url: "/tenant-admin/iam/users",
+          },
+          {
+            title: "Service Accounts",
+            url: "/tenant-admin/iam/service-accounts",
+          },
+          {
+            title: "Groups",
+            url: "/tenant-admin/iam/groups",
+          },
+          {
+            title: "Access",
+            url: "/tenant-admin/iam/access",
+          },
+          {
+            title: "Roles",
+            url: "/tenant-admin/iam/roles",
+          },
+          {
+            title: "Invitations",
+            url: "/tenant-admin/iam/invitations",
+          },
+          {
+            title: "SCIM Provisioning",
+            url: "/tenant-admin/iam/scim",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Instance Administration",
+    icon: Server,
+    children: [
+      {
+        title: "Services",
+        url: "/instance-admin/services",
+        icon: Activity,
+      },
+      {
+        title: "System Overview",
+        url: "/instance-admin/system-overview",
+        icon: Monitor,
+      },
+      {
+        title: "Audit Logs",
+        url: "/instance-admin/audit-logs",
+        icon: FileText,
+      },
+      {
+        title: "IAM",
+        icon: Shield,
+        children: [
+          {
+            title: "Users",
+            url: "/instance-admin/iam/users",
+          },
+          {
+            title: "Service Accounts",
+            url: "/instance-admin/iam/service-accounts",
+          },
+        ],
+      },
+      {
+        title: "Versioned Plugins",
+        url: "/instance-admin/versioned-plugins",
+        icon: Puzzle,
+      },
+      {
+        title: "Tenants",
+        url: "/instance-admin/tenants",
+        icon: UsersRound,
+      },
+      {
+        title: "Worker Groups",
+        url: "/instance-admin/worker-groups",
+        icon: Cpu,
+      },
+      {
+        title: "Announcements",
+        url: "/instance-admin/announcements",
+        icon: Megaphone,
+      },
+    ],
   },
 ];
 
