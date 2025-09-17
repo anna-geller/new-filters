@@ -276,9 +276,10 @@ export default function ExecutionsPage() {
     dynamicFilters.push(kindFilter);
   }
 
-  // Add subflow filter if a specific subflow type is selected
-  if (selectedSubflow && selectedSubflow !== 'all') {
+  // Add subflow filter (always included since it's enabled by default)
+  if (selectedSubflow) {
     const subflowLabels = {
+      'all': 'All',
       'child': 'Child',
       'parent': 'Parent'
     };
@@ -286,7 +287,7 @@ export default function ExecutionsPage() {
       id: 'subflow',
       label: 'Hierarchy',
       value: subflowLabels[selectedSubflow as keyof typeof subflowLabels] || selectedSubflow,
-      operator: 'is'
+      operator: 'in'
     };
     dynamicFilters.push(subflowFilter);
   }
