@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PlayCircle } from "lucide-react";
+import { PlayCircle, RotateCcw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface InitialExecutionFilterEditorProps {
   selectedInitialExecution: string;
@@ -27,6 +28,10 @@ export default function InitialExecutionFilterEditor({
     onSelectionChange('');
   };
 
+  const handleReset = () => {
+    setInputValue(selectedInitialExecution || '');
+  };
+
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header */}
@@ -36,13 +41,34 @@ export default function InitialExecutionFilterEditor({
           <h3 className="font-medium text-sm">Parent</h3>
         </div>
         
-        <Input
-          placeholder="Enter parent execution ID..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          className="mb-3"
-          data-testid="parent-execution-id-input"
-        />
+        <div className="flex gap-2 mb-3">
+          <Input
+            placeholder="Enter parent execution ID..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="flex-1"
+            data-testid="parent-execution-id-input"
+          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  disabled={inputValue === selectedInitialExecution}
+                  className="px-2"
+                  data-testid="parent-execution-reset-button"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to original value</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         
         {/* Action buttons */}
         <div className="flex gap-2">

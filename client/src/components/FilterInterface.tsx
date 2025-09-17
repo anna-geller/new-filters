@@ -584,8 +584,8 @@ export default function FilterInterface({
                 columns={columns}
                 onToggleColumn={handleColumnToggle}
                 onReorderColumns={handleColumnReorder}
-                isSubPanelOpen={tablePropertiesOpen}
-                onSubPanelToggle={setTablePropertiesOpen}
+                isOpen={tablePropertiesOpen}
+                onClose={() => setTablePropertiesOpen(false)}
               />
             </PopoverContent>
           </Popover>
