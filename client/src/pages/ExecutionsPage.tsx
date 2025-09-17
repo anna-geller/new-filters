@@ -131,6 +131,9 @@ export default function ExecutionsPage() {
   // Saved filters state
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
 
+  // Visible filters state - tracks which filters should be displayed
+  const [visibleFilters, setVisibleFilters] = useState<string[]>(['scope', 'kind', 'hierarchy', 'interval']);
+
   // Load saved filters on component mount
   useEffect(() => {
     const loadedFilters = savedFiltersStorage.getAll();
@@ -150,62 +153,70 @@ export default function ExecutionsPage() {
   const activeFilters = useMemo(() => {
     const filters: ActiveFilter[] = [];
 
-    // Always include default filters with current values
+    // Only include filters that are in visibleFilters array
     
-    // Scope filter
-    const scopeDisplayValue = selectedScopes.length === 2 && selectedScopes.includes('user') && selectedScopes.includes('system')
-      ? 'All'
-      : selectedScopes.length === 1
-      ? selectedScopes[0] === 'user' ? 'User' : 'System'
-      : selectedScopes.length > 0
-      ? `${selectedScopes.length} selected`
-      : 'None';
-    
-    filters.push({
-      id: 'scope',
-      label: 'Scope',
-      value: scopeDisplayValue
-    });
+    // Scope filter (if visible)
+    if (visibleFilters.includes('scope')) {
+      const scopeDisplayValue = selectedScopes.length === 2 && selectedScopes.includes('user') && selectedScopes.includes('system')
+        ? 'All'
+        : selectedScopes.length === 1
+        ? selectedScopes[0] === 'user' ? 'User' : 'System'
+        : selectedScopes.length > 0
+        ? `${selectedScopes.length} selected`
+        : 'None';
+      
+      filters.push({
+        id: 'scope',
+        label: 'Scope',
+        value: scopeDisplayValue
+      });
+    }
 
-    // Kind filter
-    const kindDisplayValue = selectedKinds.length === 1 && selectedKinds[0] === 'default'
-      ? 'Default'
-      : selectedKinds.length === 1
-      ? selectedKinds[0].charAt(0).toUpperCase() + selectedKinds[0].slice(1)
-      : selectedKinds.length > 0
-      ? `${selectedKinds.length} selected`
-      : 'None';
-    
-    filters.push({
-      id: 'kind',
-      label: 'Kind',
-      value: kindDisplayValue
-    });
+    // Kind filter (if visible)
+    if (visibleFilters.includes('kind')) {
+      const kindDisplayValue = selectedKinds.length === 1 && selectedKinds[0] === 'default'
+        ? 'Default'
+        : selectedKinds.length === 1
+        ? selectedKinds[0].charAt(0).toUpperCase() + selectedKinds[0].slice(1)
+        : selectedKinds.length > 0
+        ? `${selectedKinds.length} selected`
+        : 'None';
+      
+      filters.push({
+        id: 'kind',
+        label: 'Kind',
+        value: kindDisplayValue
+      });
+    }
 
-    // Hierarchy filter
-    const hierarchyDisplayValue = selectedHierarchy === 'all'
-      ? 'All'
-      : selectedHierarchy === 'top-level'
-      ? 'Top Level'
-      : selectedHierarchy === 'child'
-      ? 'Child'
-      : selectedHierarchy;
-    
-    filters.push({
-      id: 'hierarchy',
-      label: 'Hierarchy',
-      value: hierarchyDisplayValue
-    });
+    // Hierarchy filter (if visible)
+    if (visibleFilters.includes('hierarchy')) {
+      const hierarchyDisplayValue = selectedHierarchy === 'all'
+        ? 'All'
+        : selectedHierarchy === 'top-level'
+        ? 'Top Level'
+        : selectedHierarchy === 'child'
+        ? 'Child'
+        : selectedHierarchy;
+      
+      filters.push({
+        id: 'hierarchy',
+        label: 'Hierarchy',
+        value: hierarchyDisplayValue
+      });
+    }
 
-    // Interval filter
-    filters.push({
-      id: 'interval',
-      label: 'Interval',
-      value: getIntervalDisplayValue()
-    });
+    // Interval filter (if visible)
+    if (visibleFilters.includes('interval')) {
+      filters.push({
+        id: 'interval',
+        label: 'Interval',
+        value: getIntervalDisplayValue()
+      });
+    }
 
     return filters;
-  }, [selectedScopes, selectedKinds, selectedHierarchy, selectedInterval, intervalStartDate, intervalEndDate]);
+  }, [visibleFilters, selectedScopes, selectedKinds, selectedHierarchy, selectedInterval, intervalStartDate, intervalEndDate]);
   
   // Helper function to get short operator label for display
   const getOperatorDisplayLabel = (operatorId: string) => {
@@ -221,12 +232,12 @@ export default function ExecutionsPage() {
     return operatorMap[operatorId as keyof typeof operatorMap] || operatorId;
   };
 
-  // Build additional filters from current state (beyond the default ones)
+  // Build additional filters from current state (only if visible)
   const additionalFilters = useMemo(() => {
     const filters: ActiveFilter[] = [];
   
-    // Add state filter if states are selected
-    if (selectedStates.length > 0) {
+    // Add state filter if states are selected AND visible
+    if (visibleFilters.includes('state') && selectedStates.length > 0) {
       const operatorLabels = {
         'in': 'in',
         'not-in': 'not in'
@@ -240,14 +251,14 @@ export default function ExecutionsPage() {
       filters.push(stateFilter);
     }
 
-    // Add labels filter if labels are selected, custom value is set, or no-input operator is used
+    // Add labels filter if labels are selected, custom value is set, or no-input operator is used AND visible
     const isTextBasedLabelsOperator = ['contains', 'does-not-contain'].includes(labelsOperator);
     const isNoInputLabelsOperator = ['is-set', 'is-not-set'].includes(labelsOperator);
     const isSelectionBasedLabelsOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(labelsOperator);
     
-    if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || 
+    if (visibleFilters.includes('labels') && ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || 
         (isSelectionBasedLabelsOperator && selectedLabels.length > 0) || 
-        isNoInputLabelsOperator) {
+        isNoInputLabelsOperator)) {
       const labelsFilter = {
         id: 'labels',
         label: 'Labels',
@@ -261,12 +272,12 @@ export default function ExecutionsPage() {
       filters.push(labelsFilter);
     }
 
-    // Add namespace filter if namespaces are selected or text value is provided
+    // Add namespace filter if namespaces are selected or text value is provided AND visible
     const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
     const hasTextValue = isTextBasedOperator && namespaceCustomValue.trim();
     const hasSelectedNamespaces = selectedNamespaces.length > 0;
     
-    if (hasSelectedNamespaces || hasTextValue) {
+    if (visibleFilters.includes('namespace') && (hasSelectedNamespaces || hasTextValue)) {
       const operatorLabels = {
         'in': 'in',
         'not-in': 'not in', 
@@ -286,8 +297,8 @@ export default function ExecutionsPage() {
       filters.push(namespaceFilter);
     }
 
-    // Add flow filter if flows are selected
-    if (selectedFlows.length > 0) {
+    // Add flow filter if flows are selected AND visible
+    if (visibleFilters.includes('flow') && selectedFlows.length > 0) {
       const flowFilter = {
         id: 'flow',
         label: 'Flow',
@@ -297,8 +308,8 @@ export default function ExecutionsPage() {
       filters.push(flowFilter);
     }
 
-    // Add parent execution filter if value is entered
-    if (selectedInitialExecution.trim() !== '') {
+    // Add parent execution filter if value is entered AND visible
+    if (visibleFilters.includes('initial-execution') && selectedInitialExecution.trim() !== '') {
       const parentExecutionFilter = {
         id: 'initial-execution',
         label: 'Parent',
@@ -309,12 +320,16 @@ export default function ExecutionsPage() {
     }
 
     return filters;
-  }, [selectedStates, statesOperator, selectedLabels, labelsOperator, labelsCustomValue, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedFlows, selectedInitialExecution]);
+  }, [visibleFilters, selectedStates, statesOperator, selectedLabels, labelsOperator, labelsCustomValue, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedFlows, selectedInitialExecution]);
   
   // Combine all active filters
   const allActiveFilters = [...additionalFilters, ...activeFilters];
 
   const handleClearFilter = (filterId: string) => {
+    // Remove filter from visibleFilters array to hide it completely
+    setVisibleFilters(prev => prev.filter(id => id !== filterId));
+    
+    // Also reset the filter's values for consistency
     if (filterId === 'state') {
       setSelectedStates([]);
       setStatesOperator('in');
@@ -331,18 +346,18 @@ export default function ExecutionsPage() {
       setSelectedScopes(['user']); // Reset to default
     } else if (filterId === 'kind') {
       setSelectedKinds(['default']); // Reset to default
-    } else if (filterId === 'subflow') {
+    } else if (filterId === 'hierarchy') {
       setSelectedHierarchy('all'); // Reset to default
     } else if (filterId === 'initial-execution') {
       setSelectedInitialExecution('');
-    } else if (filterId === 'timerange') {
-      // For interval, we'll keep it but reset to default
+    } else if (filterId === 'interval') {
+      // For interval, reset to default
       setSelectedInterval('last-7-days');
       setIntervalStartDate(undefined);
       setIntervalEndDate(undefined);
     }
     
-    console.log(`Cleared filter: ${filterId}`);
+    console.log(`Removed filter from visible filters: ${filterId}`);
   };
 
   const handleEditFilter = (filterId: string) => {
@@ -596,7 +611,7 @@ export default function ExecutionsPage() {
           selectedKinds={selectedKinds}
           onKindsSelectionChange={setSelectedKinds}
           selectedHierarchy={selectedHierarchy}
-          onSubflowSelectionChange={setSelectedHierarchy}
+          onHierarchySelectionChange={setSelectedHierarchy}
           selectedInitialExecution={selectedInitialExecution}
           onInitialExecutionSelectionChange={setSelectedInitialExecution}
           savedFilters={savedFilters}
@@ -604,6 +619,8 @@ export default function ExecutionsPage() {
           onLoadFilter={handleLoadFilter}
           onDeleteFilter={handleDeleteFilter}
           onUpdateFilter={handleUpdateFilter}
+          visibleFilters={visibleFilters}
+          onVisibleFiltersChange={setVisibleFilters}
         />
 
         {/* Chart - displayed when Show Chart toggle is enabled */}

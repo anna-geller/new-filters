@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -91,6 +91,8 @@ interface FilterInterfaceProps {
   onLoadFilter: (filter: SavedFilter) => void;
   onDeleteFilter: (filterId: string) => void;
   onUpdateFilter: (filterId: string, name: string, description: string) => void;
+  visibleFilters: string[];
+  onVisibleFiltersChange: (filters: string[]) => void;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -153,16 +155,20 @@ export default function FilterInterface({
   onSaveFilter,
   onLoadFilter,
   onDeleteFilter,
-  onUpdateFilter
+  onUpdateFilter,
+  visibleFilters,
+  onVisibleFiltersChange
 }: FilterInterfaceProps) {
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
-  const [filterOptions, setFilterOptions] = useState(() => {
-    // Load saved filter customization or use defaults
-    const savedCustomization = filterCustomizationStorage.get();
-    return savedCustomization || defaultFilterOptions;
-  });
+  // Derive available filters from visibleFilters instead of maintaining separate state
+  const availableFilters = useMemo(() => {
+    return defaultFilterOptions.map(option => ({
+      ...option,
+      enabled: visibleFilters.includes(option.id)
+    }));
+  }, [visibleFilters]);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
   const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
@@ -218,74 +224,77 @@ export default function FilterInterface({
   };
 
   const handleToggleFilter = (filterId: string) => {
-    const updatedOptions = filterOptions.map(option => 
-      option.id === filterId 
-        ? { ...option, enabled: !option.enabled }
-        : option
-    );
-    setFilterOptions(updatedOptions);
+    const currentlyVisible = visibleFilters.includes(filterId);
+    let updatedFilters: string[];
     
-    // Save filter customization to localStorage
-    filterCustomizationStorage.save(updatedOptions);
+    if (currentlyVisible) {
+      // Remove filter from visible filters
+      updatedFilters = visibleFilters.filter(id => id !== filterId);
+    } else {
+      // Add filter to visible filters
+      updatedFilters = [...visibleFilters, filterId];
+    }
+    
+    onVisibleFiltersChange(updatedFilters);
     
     // Auto-open editors when filters are enabled, clear values when disabled
-    const filterOption = filterOptions.find(option => option.id === filterId);
+    const filterOption = availableFilters.find(option => option.id === filterId);
     
     if (filterId === 'state') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setStateFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear state filter values when disabling
         onSelectedStatesChange([]);
       }
     } else if (filterId === 'labels') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setLabelsFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear labels filter values when disabling
         onLabelsSelectionChange([]);
         onLabelsOperatorChange('has-any-of');
         onLabelsCustomValueChange('');
       }
     } else if (filterId === 'namespace') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setNamespaceFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear namespace filter values when disabling
         onNamespacesSelectionChange([]);
       }
     } else if (filterId === 'flow') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setFlowFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear flow filter values when disabling
         onFlowsSelectionChange([]);
       }
     } else if (filterId === 'scope') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setScopeFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear scope filter values when disabling, reset to default
         onScopesSelectionChange(['user']);
       }
     } else if (filterId === 'kind') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setKindFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear kind filter values when disabling, reset to default
         onKindsSelectionChange(['default']);
       }
     } else if (filterId === 'subflow') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setHierarchyFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear subflow filter values when disabling
         onHierarchySelectionChange('all');
       }
     } else if (filterId === 'initial-execution') {
-      if (filterOption && !filterOption.enabled) {
+      if (!currentlyVisible) {
         setInitialExecutionFilterOpen(true);
-      } else if (filterOption && filterOption.enabled) {
+      } else {
         // Clear initial execution filter values when disabling
         onInitialExecutionSelectionChange('');
       }
@@ -293,25 +302,16 @@ export default function FilterInterface({
   };
 
   const handleFilterReorder = (draggedId: string, targetId: string) => {
-    const draggedIndex = filterOptions.findIndex(option => option.id === draggedId);
-    const targetIndex = filterOptions.findIndex(option => option.id === targetId);
+    const draggedIndex = visibleFilters.indexOf(draggedId);
+    const targetIndex = visibleFilters.indexOf(targetId);
     
     if (draggedIndex === -1 || targetIndex === -1) return;
 
-    const newFilterOptions = [...filterOptions];
-    const [draggedFilter] = newFilterOptions.splice(draggedIndex, 1);
-    newFilterOptions.splice(targetIndex, 0, draggedFilter);
+    const reorderedFilters = [...visibleFilters];
+    const [draggedFilter] = reorderedFilters.splice(draggedIndex, 1);
+    reorderedFilters.splice(targetIndex, 0, draggedFilter);
 
-    // Update order numbers
-    const reorderedFilters = newFilterOptions.map((option, index) => ({
-      ...option,
-      order: index + 1
-    }));
-
-    setFilterOptions(reorderedFilters);
-    
-    // Save filter customization to localStorage
-    filterCustomizationStorage.save(reorderedFilters);
+    onVisibleFiltersChange(reorderedFilters);
   };
 
   const handleEditFilter = (filterId: string) => {
@@ -472,7 +472,7 @@ export default function FilterInterface({
   const allAvailableFilters = [...activeFilters];
   
   // Add placeholder filters for enabled options that don't have data yet
-  filterOptions
+  availableFilters
     .filter(option => option.enabled)
     .forEach(option => {
       if (!activeFilters.find(filter => filter.id === option.id)) {
@@ -488,8 +488,8 @@ export default function FilterInterface({
   
   const enabledFilters = allAvailableFilters
     .sort((a, b) => {
-      const aOption = filterOptions.find(opt => opt.id === a.id);
-      const bOption = filterOptions.find(opt => opt.id === b.id);
+      const aOption = availableFilters.find(opt => opt.id === a.id);
+      const bOption = availableFilters.find(opt => opt.id === b.id);
       return (aOption?.order || 999) - (bOption?.order || 999);
     });
 
@@ -520,7 +520,7 @@ export default function FilterInterface({
             <PopoverContent side="bottom" align="start" className="w-80 p-0">
               <FilterCustomizationPanel
                 isOpen={true}
-                filterOptions={filterOptions}
+                filterOptions={availableFilters}
                 activeFilters={activeFilters}
                 onAddFilter={handleToggleFilter}
                 onClose={() => setCustomizationOpen(false)}
