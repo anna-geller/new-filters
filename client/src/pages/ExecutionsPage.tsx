@@ -426,9 +426,7 @@ export default function ExecutionsPage() {
       }
       console.log(`Reset default filter ${filterId} to default value`);
     } else {
-      // Non-default filters: clear values and hide filter
-      setVisibleFilters(prev => prev.filter(id => id !== filterId));
-      
+      // Non-default filters: clear values but keep filter visible
       if (filterId === 'state') {
         setSelectedStates([]);
         setStatesOperator('in');
@@ -445,7 +443,7 @@ export default function ExecutionsPage() {
       } else if (filterId === 'initial-execution') {
         setSelectedInitialExecution('');
       }
-      console.log(`Reset non-default filter ${filterId} and removed from visible filters`);
+      console.log(`Reset non-default filter ${filterId} to empty state but kept visible`);
     }
   };
 
@@ -568,13 +566,28 @@ export default function ExecutionsPage() {
 
   // Handle label click from table - add to Labels filter with 'has-all-of' operator using logical AND
   const handleLabelClick = (clickedLabel: string) => {
+    // Transform clicked label to match LabelsFilterEditor format
+    let transformedLabel = clickedLabel;
+    if (clickedLabel.startsWith('team-')) {
+      transformedLabel = clickedLabel.replace('team-', 'team:');
+    } else if (clickedLabel === 'dev-production') {
+      transformedLabel = 'env:production';
+    } else if (clickedLabel === 'security-scan') {
+      transformedLabel = 'action:cvescan';
+    }
+    
+    // Make sure Labels filter is visible
+    if (!visibleFilters.includes('labels')) {
+      setVisibleFilters(prev => [...prev, 'labels']);
+    }
+    
     // Set operator to 'has-all-of' as specified in requirements
     setLabelsOperator('has-all-of');
     
     // Use logical AND - add to existing selectedLabels (don't replace)
     setSelectedLabels(prevLabels => {
-      if (!prevLabels.includes(clickedLabel)) {
-        return [...prevLabels, clickedLabel];
+      if (!prevLabels.includes(transformedLabel)) {
+        return [...prevLabels, transformedLabel];
       }
       return prevLabels; // Don't add duplicates
     });
@@ -582,7 +595,7 @@ export default function ExecutionsPage() {
     // Clear custom value since we're using selection-based operator
     setLabelsCustomValue('');
     
-    console.log('Label clicked:', clickedLabel, '- added to Labels filter with has-all-of operator');
+    console.log('Label clicked:', clickedLabel, '-> transformed to:', transformedLabel, '- added to Labels filter with has-all-of operator');
   };
 
   return (
