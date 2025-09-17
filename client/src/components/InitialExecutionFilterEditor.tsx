@@ -23,13 +23,8 @@ export default function InitialExecutionFilterEditor({
     onClose();
   };
 
-  const handleClear = () => {
-    setInputValue('');
-    onSelectionChange('');
-  };
-
   const handleReset = () => {
-    setInputValue(selectedInitialExecution || '');
+    setInputValue(''); // Reset to default empty value
   };
 
   return (
@@ -56,7 +51,7 @@ export default function InitialExecutionFilterEditor({
                   variant="outline"
                   size="sm"
                   onClick={handleReset}
-                  disabled={inputValue === selectedInitialExecution}
+                  disabled={inputValue === ''}
                   className="px-2"
                   data-testid="parent-execution-reset-button"
                 >
@@ -64,7 +59,7 @@ export default function InitialExecutionFilterEditor({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Reset to original value</p>
+                <p>Reset to default</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -73,20 +68,9 @@ export default function InitialExecutionFilterEditor({
         {/* Action buttons */}
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClear}
-            disabled={!inputValue}
-            className="flex-1"
-            data-testid="parent-execution-clear-button"
-          >
-            Clear
-          </Button>
-          
-          <Button
             size="sm"
             onClick={handleApply}
-            disabled={!inputValue.trim()}
+            disabled={false}
             className="flex-1"
             data-testid="parent-execution-apply-button"
           >

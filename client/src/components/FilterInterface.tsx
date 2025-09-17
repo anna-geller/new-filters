@@ -101,7 +101,7 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
   { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
   { id: 'subflow', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: true, order: 7 },
-  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution ID', enabled: false, order: 8 },
+  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 8 },
   { id: 'timerange', label: 'Interval', description: 'Filter by execution time', enabled: true, order: 9 },
 ];
 
@@ -891,11 +891,6 @@ export default function FilterInterface({
                   >
                     <Settings className="h-4 w-4" />
                     Columns
-                    {tablePropertiesOpen ? (
-                      <ChevronUp className="h-3 w-3 ml-1" />
-                    ) : (
-                      <ChevronDown className="h-3 w-3 ml-1" />
-                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent 

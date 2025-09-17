@@ -123,13 +123,11 @@ export default function TimeRangeFilterEditor({
   };
 
   const handleReset = () => {
-    setCurrentTimeRange(selectedTimeRange);
-    const originalStartDateTime = parseDateTimeString(startDate);
-    const originalEndDateTime = parseDateTimeString(endDate);
-    setCurrentStartDate(originalStartDateTime.date);
-    setCurrentEndDate(originalEndDateTime.date);
-    setCurrentStartTime(originalStartDateTime.time);
-    setCurrentEndTime(originalEndDateTime.time || '23:59');
+    setCurrentTimeRange('last-7-days'); // Reset to default value
+    setCurrentStartDate(undefined);
+    setCurrentEndDate(undefined);
+    setCurrentStartTime('00:00');
+    setCurrentEndTime('23:59');
   };
 
   const isCustomRange = currentTimeRange === 'custom-range';

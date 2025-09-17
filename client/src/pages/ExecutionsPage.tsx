@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import FilterInterface from '@/components/FilterInterface';
 import ExecutionsTable, { ColumnConfig, defaultColumns } from '@/components/ExecutionsTable';
 import ExecutionChart from '@/components/ExecutionChart';
@@ -146,29 +146,67 @@ export default function ExecutionsPage() {
     return selectedTimeRange.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
   
-  // Derive active filters from state
-  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
-  
-  // Build active filters array
-  const dynamicFilters = [];
-  
-  // Building dynamic filters from current state
-  
-  // Add state filter if states are selected
-  if (selectedStates.length > 0) {
-    const operatorLabels = {
-      'in': 'in',
-      'not-in': 'not in'
-    };
-    const stateFilter = {
-      id: 'state',
-      label: 'State',
-      value: `${selectedStates.length}`,
-      operator: operatorLabels[statesOperator as keyof typeof operatorLabels]
-    };
-    dynamicFilters.push(stateFilter);
-  }
+  // Dynamically compute active filters from current state
+  const activeFilters = useMemo(() => {
+    const filters: ActiveFilter[] = [];
 
+    // Always include default filters with current values
+    
+    // Scope filter
+    const scopeDisplayValue = selectedScopes.length === 2 && selectedScopes.includes('user') && selectedScopes.includes('system')
+      ? 'All'
+      : selectedScopes.length === 1
+      ? selectedScopes[0] === 'user' ? 'User' : 'System'
+      : selectedScopes.length > 0
+      ? `${selectedScopes.length} selected`
+      : 'None';
+    
+    filters.push({
+      id: 'scope',
+      label: 'Scope',
+      value: scopeDisplayValue
+    });
+
+    // Kind filter
+    const kindDisplayValue = selectedKinds.length === 1 && selectedKinds[0] === 'default'
+      ? 'Default'
+      : selectedKinds.length === 1
+      ? selectedKinds[0].charAt(0).toUpperCase() + selectedKinds[0].slice(1)
+      : selectedKinds.length > 0
+      ? `${selectedKinds.length} selected`
+      : 'None';
+    
+    filters.push({
+      id: 'kind',
+      label: 'Kind',
+      value: kindDisplayValue
+    });
+
+    // Hierarchy filter (subflow)
+    const hierarchyDisplayValue = selectedSubflow === 'all'
+      ? 'All'
+      : selectedSubflow === 'top-level'
+      ? 'Top Level'
+      : selectedSubflow === 'child'
+      ? 'Child'
+      : selectedSubflow;
+    
+    filters.push({
+      id: 'subflow',
+      label: 'Hierarchy',
+      value: hierarchyDisplayValue
+    });
+
+    // Interval filter (time range)
+    filters.push({
+      id: 'timerange',
+      label: 'Interval',
+      value: getTimeRangeDisplayValue()
+    });
+
+    return filters;
+  }, [selectedScopes, selectedKinds, selectedSubflow, selectedTimeRange, timeRangeStartDate, timeRangeEndDate]);
+  
   // Helper function to get short operator label for display
   const getOperatorDisplayLabel = (operatorId: string) => {
     const operatorMap = {
@@ -183,136 +221,98 @@ export default function ExecutionsPage() {
     return operatorMap[operatorId as keyof typeof operatorMap] || operatorId;
   };
 
-  // Add labels filter if labels are selected, custom value is set, or no-input operator is used
-  const isTextBasedLabelsOperator = ['contains', 'does-not-contain'].includes(labelsOperator);
-  const isNoInputLabelsOperator = ['is-set', 'is-not-set'].includes(labelsOperator);
-  const isSelectionBasedLabelsOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(labelsOperator);
+  // Build additional filters from current state (beyond the default ones)
+  const additionalFilters = useMemo(() => {
+    const filters: ActiveFilter[] = [];
   
-  if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || 
-      (isSelectionBasedLabelsOperator && selectedLabels.length > 0) || 
-      isNoInputLabelsOperator) {
-    const labelsFilter = {
-      id: 'labels',
-      label: 'Labels',
-      value: isTextBasedLabelsOperator 
-        ? labelsCustomValue 
-        : isNoInputLabelsOperator 
-        ? (labelsOperator === 'is-set' ? 'any' : 'none')
-        : `${selectedLabels.length}`,
-      operator: getOperatorDisplayLabel(labelsOperator)
-    };
-    dynamicFilters.push(labelsFilter);
-  }
+    // Add state filter if states are selected
+    if (selectedStates.length > 0) {
+      const operatorLabels = {
+        'in': 'in',
+        'not-in': 'not in'
+      };
+      const stateFilter = {
+        id: 'state',
+        label: 'State',
+        value: `${selectedStates.length}`,
+        operator: operatorLabels[statesOperator as keyof typeof operatorLabels]
+      };
+      filters.push(stateFilter);
+    }
 
-  // Add namespace filter if namespaces are selected or text value is provided
-  const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
-  const hasTextValue = isTextBasedOperator && namespaceCustomValue.trim();
-  const hasSelectedNamespaces = selectedNamespaces.length > 0;
-  
-  if (hasSelectedNamespaces || hasTextValue) {
-    const operatorLabels = {
-      'in': 'in',
-      'not-in': 'not in', 
-      'contains': 'contains',
-      'starts-with': 'starts with',
-      'ends-with': 'ends with'
-    };
+    // Add labels filter if labels are selected, custom value is set, or no-input operator is used
+    const isTextBasedLabelsOperator = ['contains', 'does-not-contain'].includes(labelsOperator);
+    const isNoInputLabelsOperator = ['is-set', 'is-not-set'].includes(labelsOperator);
+    const isSelectionBasedLabelsOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(labelsOperator);
     
-    const namespaceFilter = {
-      id: 'namespace',
-      label: 'Namespace',
-      value: isTextBasedOperator 
-        ? `"${namespaceCustomValue}"` 
-        : `${selectedNamespaces.length}`,
-      operator: operatorLabels[namespaceOperator as keyof typeof operatorLabels] || namespaceOperator
-    };
-    dynamicFilters.push(namespaceFilter);
-  }
+    if ((isTextBasedLabelsOperator && labelsCustomValue.trim()) || 
+        (isSelectionBasedLabelsOperator && selectedLabels.length > 0) || 
+        isNoInputLabelsOperator) {
+      const labelsFilter = {
+        id: 'labels',
+        label: 'Labels',
+        value: isTextBasedLabelsOperator 
+          ? labelsCustomValue 
+          : isNoInputLabelsOperator 
+          ? (labelsOperator === 'is-set' ? 'any' : 'none')
+          : `${selectedLabels.length}`,
+        operator: getOperatorDisplayLabel(labelsOperator)
+      };
+      filters.push(labelsFilter);
+    }
 
-  // Add flow filter if flows are selected
-  if (selectedFlows.length > 0) {
-    const flowFilter = {
-      id: 'flow',
-      label: 'Flow',
-      value: `${selectedFlows.length}`,
-      operator: 'in'
-    };
-    dynamicFilters.push(flowFilter);
-  }
+    // Add namespace filter if namespaces are selected or text value is provided
+    const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
+    const hasTextValue = isTextBasedOperator && namespaceCustomValue.trim();
+    const hasSelectedNamespaces = selectedNamespaces.length > 0;
+    
+    if (hasSelectedNamespaces || hasTextValue) {
+      const operatorLabels = {
+        'in': 'in',
+        'not-in': 'not in', 
+        'contains': 'contains',
+        'starts-with': 'starts with',
+        'ends-with': 'ends with'
+      };
+      
+      const namespaceFilter = {
+        id: 'namespace',
+        label: 'Namespace',
+        value: isTextBasedOperator 
+          ? `"${namespaceCustomValue}"` 
+          : `${selectedNamespaces.length}`,
+        operator: operatorLabels[namespaceOperator as keyof typeof operatorLabels] || namespaceOperator
+      };
+      filters.push(namespaceFilter);
+    }
 
-  // Add Scope filter if scopes are selected
-  const validScopes = selectedScopes.filter(scope => scope === 'user' || scope === 'system');
-  if (validScopes.length === 1) {
-    const scopeLabels = {
-      'user': 'User',
-      'system': 'System'
-    };
-    const scopeFilter = {
-      id: 'scope',
-      label: 'Scope',
-      value: scopeLabels[validScopes[0] as keyof typeof scopeLabels] || validScopes[0],
-      operator: 'is'
-    };
-    dynamicFilters.push(scopeFilter);
-  } else if (validScopes.length === 2) {
-    // Show badge when both User and System are selected to match other multiselect filters
-    const scopeFilter = {
-      id: 'scope',
-      label: 'Scope',
-      value: '2',
-      operator: 'in'
-    };
-    dynamicFilters.push(scopeFilter);
-  }
+    // Add flow filter if flows are selected
+    if (selectedFlows.length > 0) {
+      const flowFilter = {
+        id: 'flow',
+        label: 'Flow',
+        value: `${selectedFlows.length}`,
+        operator: 'in'
+      };
+      filters.push(flowFilter);
+    }
 
-  // Add kind filter if kinds are selected
-  if (selectedKinds.length > 0) {
-    const kindFilter = {
-      id: 'kind',
-      label: 'Kind',
-      value: `${selectedKinds.length}`,
-      operator: 'in'
-    };
-    dynamicFilters.push(kindFilter);
-  }
+    // Add parent execution filter if value is entered
+    if (selectedInitialExecution.trim() !== '') {
+      const parentExecutionFilter = {
+        id: 'initial-execution',
+        label: 'Parent',
+        value: selectedInitialExecution.trim(),
+        operator: 'equals'
+      };
+      filters.push(parentExecutionFilter);
+    }
 
-  // Add subflow filter (only when a value is selected)
-  if (selectedSubflow && selectedSubflow.trim() !== '') {
-    const subflowLabels = {
-      'all': 'All',
-      'child': 'Child',
-      'parent': 'Parent'
-    };
-    const subflowFilter = {
-      id: 'subflow',
-      label: 'Hierarchy',
-      value: subflowLabels[selectedSubflow as keyof typeof subflowLabels] || selectedSubflow,
-      operator: 'in'
-    };
-    dynamicFilters.push(subflowFilter);
-  }
-
-  // Add parent execution filter if value is entered
-  if (selectedInitialExecution.trim() !== '') {
-    const parentExecutionFilter = {
-      id: 'initial-execution',
-      label: 'Parent',
-      value: selectedInitialExecution.trim(),
-      operator: 'equals'
-    };
-    dynamicFilters.push(parentExecutionFilter);
-  }
-
-  // Add time range filter - always show since default is set
-  const timeRangeFilter = {
-    id: 'timerange',
-    label: 'Interval',
-    value: getTimeRangeDisplayValue(),
-    operator: 'in'
-  };
-  dynamicFilters.push(timeRangeFilter);
+    return filters;
+  }, [selectedStates, statesOperator, selectedLabels, labelsOperator, labelsCustomValue, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedFlows, selectedInitialExecution]);
   
-  const allActiveFilters = [...dynamicFilters, ...activeFilters];
+  // Combine all active filters
+  const allActiveFilters = [...additionalFilters, ...activeFilters];
 
   const handleClearFilter = (filterId: string) => {
     if (filterId === 'state') {
@@ -328,11 +328,11 @@ export default function ExecutionsPage() {
     } else if (filterId === 'flow') {
       setSelectedFlows([]);
     } else if (filterId === 'scope') {
-      setSelectedScopes([]);
+      setSelectedScopes(['user']); // Reset to default
     } else if (filterId === 'kind') {
-      setSelectedKinds([]); // Empty array to remove filter completely
+      setSelectedKinds(['default']); // Reset to default
     } else if (filterId === 'subflow') {
-      setSelectedSubflow(''); // Empty string to remove filter completely
+      setSelectedSubflow('all'); // Reset to default
     } else if (filterId === 'initial-execution') {
       setSelectedInitialExecution('');
     } else if (filterId === 'timerange') {
@@ -340,9 +340,8 @@ export default function ExecutionsPage() {
       setSelectedTimeRange('last-7-days');
       setTimeRangeStartDate(undefined);
       setTimeRangeEndDate(undefined);
-    } else {
-      setActiveFilters(prev => prev.filter(f => f.id !== filterId));
     }
+    
     console.log(`Cleared filter: ${filterId}`);
   };
 
@@ -392,8 +391,6 @@ export default function ExecutionsPage() {
     setSelectedSubflow('all');
     // Clear initial execution
     setSelectedInitialExecution('');
-    // Clear other active filters
-    setActiveFilters([]);
     console.log('All filters reset to default values');
   };
 

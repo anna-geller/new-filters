@@ -70,7 +70,7 @@ export default function ScopeFilterEditor({
   };
   
   const handleReset = () => {
-    setCurrentScopes(selectedScopes);
+    setCurrentScopes(['user']); // Reset to default value
   };
 
   return (
