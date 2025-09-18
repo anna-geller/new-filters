@@ -14,7 +14,11 @@ export default function FilterBadge({ label, value, operator = "in", onClear, on
   return (
     <Badge 
       variant="secondary" 
-      className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary-foreground hover-elevate"
+      className="flex items-center gap-2 px-3 py-1 text-primary-foreground hover-elevate"
+      style={{
+        background: 'var(--ks-button-background-secondary, #2F3342)',
+        border: '1px solid var(--ks-border-primary, #404559)'
+      }}
       data-testid={`badge-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <button
