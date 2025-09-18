@@ -98,15 +98,15 @@ interface FilterInterfaceProps {
 }
 
 const defaultFilterOptions: FilterOption[] = [
-  { id: 'state', label: 'State', description: 'Filter by execution state', enabled: false, order: 1 },
-  { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 2 },
-  { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 3 },
-  { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 4 },
-  { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 5 },
-  { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 6 },
-  { id: 'hierarchy', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: true, order: 7 },
-  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 8 },
-  { id: 'interval', label: 'Interval', description: 'Filter by execution time', enabled: true, order: 9 },
+  { id: 'interval', label: 'Interval', description: 'Filter by execution time', enabled: true, order: 1 },
+  { id: 'scope', label: 'Scope', description: 'Filter by execution scope', enabled: true, order: 2 },
+  { id: 'kind', label: 'Kind', description: 'Filter by execution type', enabled: true, order: 3 },
+  { id: 'hierarchy', label: 'Hierarchy', description: 'Filter by execution hierarchy', enabled: true, order: 4 },
+  { id: 'state', label: 'State', description: 'Filter by execution state', enabled: false, order: 5 },
+  { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 6 },
+  { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 7 },
+  { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 8 },
+  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 9 },
 ];
 
 export default function FilterInterface({
