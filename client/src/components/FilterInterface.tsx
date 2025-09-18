@@ -500,112 +500,27 @@ export default function FilterInterface({
   const [allFiltersForDisplay, setAllFiltersForDisplay] = useState<ActiveFilter[]>([]);
   const [firstRowBadges, setFirstRowBadges] = useState<ActiveFilter[]>([]);
   const [overflowBadges, setOverflowBadges] = useState<ActiveFilter[]>([]);
-  const [availableWidth, setAvailableWidth] = useState(0);
-  
-  // Refs for measurement
-  const containerRef = useRef<HTMLDivElement>(null);
-  const measurementRef = useRef<HTMLDivElement>(null);
-  
-  // Measure real badge widths by rendering them in a hidden container
-  const measureBadgeWidths = useCallback((filters: ActiveFilter[]) => {
-    if (!measurementRef.current) return [];
-    
-    // Clear measurement container
-    measurementRef.current.innerHTML = '';
-    
-    const widths: number[] = [];
-    filters.forEach((filter, index) => {
-      // Create temporary badge element with actual content
-      const tempBadge = document.createElement('div');
-      tempBadge.className = 'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-md border';
-      tempBadge.innerHTML = `${filter.label}: ${filter.value}`;
-      
-      measurementRef.current!.appendChild(tempBadge);
-      const width = tempBadge.getBoundingClientRect().width + 8; // +8 for gap
-      widths.push(width);
-      measurementRef.current!.removeChild(tempBadge);
-    });
-    
-    return widths;
-  }, []);
-  
-  // Smart badge splitting logic using actual measurements
-  const calculateBadgeSplit = useCallback(() => {
-    if (!availableWidth || !enabledFilters.length) {
-      setFirstRowBadges([]);
-      setOverflowBadges(enabledFilters);
-      return;
-    }
-    
-    const badgeWidths = measureBadgeWidths(enabledFilters);
-    let currentWidth = 0;
-    let splitIndex = 0;
-    
-    // Find how many badges can fit in available width
-    for (let i = 0; i < badgeWidths.length; i++) {
-      if (currentWidth + badgeWidths[i] <= availableWidth) {
-        currentWidth += badgeWidths[i];
-        splitIndex = i + 1;
-      } else {
-        break;
-      }
-    }
-    
-    // Ensure at least one badge goes to overflow if not all fit
-    // This prevents partial badge display
-    if (splitIndex === enabledFilters.length && currentWidth > availableWidth * 0.95) {
-      splitIndex = Math.max(0, splitIndex - 1);
-    }
-    
-    setFirstRowBadges(enabledFilters.slice(0, splitIndex));
-    setOverflowBadges(enabledFilters.slice(splitIndex));
-  }, [availableWidth, enabledFilters, measureBadgeWidths]);
-  
-  // ResizeObserver to detect when the container size changes
-  useEffect(() => {
-    if (!containerRef.current) return;
-    
-    const resizeObserver = new ResizeObserver((entries) => {
-      const container = entries[0];
-      if (container) {
-        // Measure actual available space for badges
-        const containerElement = container.target as HTMLElement;
-        const leftControls = containerElement.querySelector('[data-section="left"]') as HTMLElement;
-        const rightControls = containerElement.querySelector('[data-section="right"]') as HTMLElement;
-        
-        const leftWidth = leftControls?.getBoundingClientRect().width || 0;
-        const rightWidth = rightControls?.getBoundingClientRect().width || 0;
-        const containerWidth = container.contentRect.width;
-        
-        // Reserve space for gaps (16px between sections)
-        const newAvailableWidth = Math.max(0, containerWidth - leftWidth - rightWidth - 32);
-        setAvailableWidth(newAvailableWidth);
-      }
-    });
-    
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
-  
-  // Debounced recalculation
-  const debouncedCalculateSplit = useMemo(() => {
-    const timeoutId = { current: null as NodeJS.Timeout | null };
-    
-    return () => {
-      if (timeoutId.current) {
-        clearTimeout(timeoutId.current);
-      }
-      timeoutId.current = setTimeout(() => {
-        calculateBadgeSplit();
-        timeoutId.current = null;
-      }, 150);
-    };
-  }, [calculateBadgeSplit]);
   
   useEffect(() => {
     setAllFiltersForDisplay(enabledFilters);
-    debouncedCalculateSplit();
-  }, [availableWidth, enabledFilters, debouncedCalculateSplit]);
+    
+    // Responsive logic: estimate how many badges can fit based on available width
+    // On smaller screens, show fewer badges inline to prevent overflow
+    const estimateMaxInlineBadges = () => {
+      const screenWidth = window.innerWidth;
+      // Conservative estimate: each badge ~100px, account for controls and margins
+      const availableWidth = Math.max(200, screenWidth - 600); // Reserve 600px for controls
+      const averageBadgeWidth = 100;
+      return Math.max(1, Math.min(4, Math.floor(availableWidth / averageBadgeWidth)));
+    };
+    
+    const maxFirstRowBadges = estimateMaxInlineBadges();
+    const firstRow = enabledFilters.slice(0, maxFirstRowBadges);
+    const overflow = enabledFilters.slice(maxFirstRowBadges);
+    
+    setFirstRowBadges(firstRow);
+    setOverflowBadges(overflow);
+  }, [enabledFilters]);
 
   // Helper function to render filter badges (reusable for both inline and overflow)
   const renderFilterBadge = (filter: ActiveFilter) => {
