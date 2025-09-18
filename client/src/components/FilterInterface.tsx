@@ -472,29 +472,34 @@ export default function FilterInterface({
   };
 
   // Get all filters that have data OR are enabled for display
-  const allAvailableFilters = [...activeFilters];
+  const allAvailableFilters = useMemo(() => {
+    const filters = [...activeFilters];
+    
+    // Add placeholder filters for enabled options that don't have data yet
+    availableFilters
+      .filter(option => option.enabled)
+      .forEach(option => {
+        if (!activeFilters.find(filter => filter.id === option.id)) {
+          // Add placeholder filter for enabled options without data
+          filters.push({
+            id: option.id,
+            label: option.label,
+            value: 'Configure',
+            operator: 'in'
+          });
+        }
+      });
+    
+    return filters;
+  }, [activeFilters, availableFilters]);
   
-  // Add placeholder filters for enabled options that don't have data yet
-  availableFilters
-    .filter(option => option.enabled)
-    .forEach(option => {
-      if (!activeFilters.find(filter => filter.id === option.id)) {
-        // Add placeholder filter for enabled options without data
-        allAvailableFilters.push({
-          id: option.id,
-          label: option.label,
-          value: 'Configure',
-          operator: 'in'
-        });
-      }
-    });
-  
-  const enabledFilters = allAvailableFilters
-    .sort((a, b) => {
+  const enabledFilters = useMemo(() => {
+    return allAvailableFilters.sort((a, b) => {
       const aOption = availableFilters.find(opt => opt.id === a.id);
       const bOption = availableFilters.find(opt => opt.id === b.id);
       return (aOption?.order || 999) - (bOption?.order || 999);
     });
+  }, [allAvailableFilters, availableFilters]);
 
   // Split badges between first row (inline) and second row (overflow)
   const [allFiltersForDisplay, setAllFiltersForDisplay] = useState<ActiveFilter[]>([]);
