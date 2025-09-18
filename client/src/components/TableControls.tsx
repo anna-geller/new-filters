@@ -48,6 +48,10 @@ export default function TableControls({
                   checked={periodicRefresh}
                   onCheckedChange={onTogglePeriodicRefresh}
                   data-testid="switch-periodic-refresh"
+                  className="w-8 h-[18.29px]"
+                  style={{
+                    backgroundColor: periodicRefresh ? 'var(--ks-button-background-primary, #8405FF)' : undefined
+                  }}
                 />
                 <Label htmlFor="periodic-refresh" className="text-sm cursor-pointer">
                   Periodic refresh
