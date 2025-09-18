@@ -888,11 +888,6 @@ export default function FilterInterface({
                 checked={showChart}
                 onCheckedChange={onToggleShowChart}
                 data-testid="switch-show-chart"
-                className="w-8 h-[18.29px] rounded-[13.33px] border-[0.83px]"
-                style={{
-                  background: 'var(--ks-background-input, #14181F)',
-                  border: '0.83px solid var(--ks-border-primary, #404559)'
-                }}
               />
               <Label htmlFor="show-chart" className="text-sm cursor-pointer">
                 Show Chart
@@ -908,10 +903,6 @@ export default function FilterInterface({
                   checked={periodicRefresh}
                   onCheckedChange={onTogglePeriodicRefresh}
                   data-testid="switch-periodic-refresh"
-                  className="w-8 h-[18.29px]"
-                  style={{
-                    backgroundColor: periodicRefresh ? 'var(--ks-button-background-primary, #8405FF)' : undefined
-                  }}
                 />
                 <Label htmlFor="periodic-refresh" className="text-sm cursor-pointer">
                   Periodic refresh
