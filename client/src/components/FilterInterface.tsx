@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, ChevronUp, RefreshCw, Settings } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ChevronDown, ChevronUp, RefreshCw, Settings, Sliders } from "lucide-react";
 import CustomizeFiltersButton from './CustomizeFiltersButton';
 import ResetFiltersButton from './ResetFiltersButton';
 import FilterBadge from './FilterBadge';
@@ -559,21 +560,23 @@ export default function FilterInterface({
           />
 
           {/* Table options button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleTableOptionsToggle}
-            className="text-xs px-3 py-1 h-7 bg-background border-border text-foreground hover:bg-muted"
-            data-testid="table-options-button"
-          >
-            <Settings className="h-4 w-4 mr-1" />
-            Table options
-            {tableOptionsOpen ? (
-              <ChevronUp className="h-3 w-3 ml-1" />
-            ) : (
-              <ChevronDown className="h-3 w-3 ml-1" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTableOptionsToggle}
+                className="h-7 w-7 p-0 flex items-center justify-center"
+                data-testid="table-options-button"
+                aria-label="Show table options"
+              >
+                <Sliders className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Show table options
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
