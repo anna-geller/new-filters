@@ -14,6 +14,8 @@ import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
 import StateFilterEditor from './StateFilterEditor';
 import LabelsFilterEditor from './LabelsFilterEditor';
+import InputsFilterEditor from './InputsFilterEditor';
+import OutputsFilterEditor from './OutputsFilterEditor';
 import NamespaceFilterEditor from './NamespaceFilterEditor';
 import FlowFilterEditor from './FlowFilterEditor';
 import ScopeFilterEditor from './ScopeFilterEditor';
@@ -71,6 +73,18 @@ interface FilterInterfaceProps {
   onLabelsSelectionChange: (labels: string[]) => void;
   onLabelsOperatorChange: (operator: string) => void;
   onLabelsCustomValueChange: (value: string) => void;
+  selectedInputs: string[];
+  inputsOperator: string;
+  inputsCustomValue: string;
+  onInputsSelectionChange: (inputs: string[]) => void;
+  onInputsOperatorChange: (operator: string) => void;
+  onInputsCustomValueChange: (value: string) => void;
+  selectedOutputs: string[];
+  outputsOperator: string;
+  outputsCustomValue: string;
+  onOutputsSelectionChange: (outputs: string[]) => void;
+  onOutputsOperatorChange: (operator: string) => void;
+  onOutputsCustomValueChange: (value: string) => void;
   selectedNamespaces: string[];
   namespaceOperator: string;
   namespaceCustomValue: string;
@@ -106,7 +120,9 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 6 },
   { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 7 },
   { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 8 },
-  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 9 },
+  { id: 'inputs', label: 'Inputs', description: 'Filter by execution inputs', enabled: false, order: 9 },
+  { id: 'outputs', label: 'Outputs', description: 'Filter by execution outputs', enabled: false, order: 10 },
+  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 11 },
 ];
 
 export default function FilterInterface({
@@ -137,6 +153,18 @@ export default function FilterInterface({
   onLabelsSelectionChange,
   onLabelsOperatorChange,
   onLabelsCustomValueChange,
+  selectedInputs,
+  inputsOperator,
+  inputsCustomValue,
+  onInputsSelectionChange,
+  onInputsOperatorChange,
+  onInputsCustomValueChange,
+  selectedOutputs,
+  outputsOperator,
+  outputsCustomValue,
+  onOutputsSelectionChange,
+  onOutputsOperatorChange,
+  onOutputsCustomValueChange,
   selectedNamespaces,
   namespaceOperator,
   namespaceCustomValue,
@@ -174,6 +202,8 @@ export default function FilterInterface({
   }, [visibleFilters]);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
+  const [inputsFilterOpen, setInputsFilterOpen] = useState(false);
+  const [outputsFilterOpen, setOutputsFilterOpen] = useState(false);
   const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
   const [flowFilterOpen, setFlowFilterOpen] = useState(false);
   const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
@@ -259,6 +289,22 @@ export default function FilterInterface({
         onLabelsOperatorChange('has-any-of');
         onLabelsCustomValueChange('');
       }
+    } else if (filterId === 'inputs') {
+      if (!currentlyVisible) {
+        setInputsFilterOpen(true);
+      } else {
+        onInputsSelectionChange([]);
+        onInputsOperatorChange('has-any-of');
+        onInputsCustomValueChange('');
+      }
+    } else if (filterId === 'outputs') {
+      if (!currentlyVisible) {
+        setOutputsFilterOpen(true);
+      } else {
+        onOutputsSelectionChange([]);
+        onOutputsOperatorChange('has-any-of');
+        onOutputsCustomValueChange('');
+      }
     } else if (filterId === 'namespace') {
       if (!currentlyVisible) {
         setNamespaceFilterOpen(true);
@@ -322,6 +368,10 @@ export default function FilterInterface({
       setStateFilterOpen(true);
     } else if (filterId === 'labels') {
       setLabelsFilterOpen(true);
+    } else if (filterId === 'inputs') {
+      setInputsFilterOpen(true);
+    } else if (filterId === 'outputs') {
+      setOutputsFilterOpen(true);
     } else if (filterId === 'namespace') {
       setNamespaceFilterOpen(true);
     } else if (filterId === 'flow') {
@@ -366,6 +416,38 @@ export default function FilterInterface({
 
   const handleCloseLabelsFilter = () => {
     setLabelsFilterOpen(false);
+  };
+
+  const handleInputsSelectionChange = (inputs: string[]) => {
+    onInputsSelectionChange(inputs);
+  };
+
+  const handleInputsOperatorChange = (operator: string) => {
+    onInputsOperatorChange(operator);
+  };
+
+  const handleInputsCustomValueChange = (value: string) => {
+    onInputsCustomValueChange(value);
+  };
+
+  const handleCloseInputsFilter = () => {
+    setInputsFilterOpen(false);
+  };
+
+  const handleOutputsSelectionChange = (outputs: string[]) => {
+    onOutputsSelectionChange(outputs);
+  };
+
+  const handleOutputsOperatorChange = (operator: string) => {
+    onOutputsOperatorChange(operator);
+  };
+
+  const handleOutputsCustomValueChange = (value: string) => {
+    onOutputsCustomValueChange(value);
+  };
+
+  const handleCloseOutputsFilter = () => {
+    setOutputsFilterOpen(false);
   };
 
   const handleNamespacesSelectionChange = (namespaces: string[]) => {
@@ -582,6 +664,66 @@ export default function FilterInterface({
               onReset={() => onResetFilter('labels')}
               onCustomValueChange={handleLabelsCustomValueChange}
               onClose={handleCloseLabelsFilter}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    // Inputs Filter with Popover
+    else if (filter.id === 'inputs') {
+      return (
+        <Popover key={filter.id} open={inputsFilterOpen} onOpenChange={setInputsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <InputsFilterEditor
+              selectedInputs={selectedInputs}
+              selectedOperator={inputsOperator}
+              customValue={inputsCustomValue}
+              onSelectionChange={handleInputsSelectionChange}
+              onOperatorChange={handleInputsOperatorChange}
+              onCustomValueChange={handleInputsCustomValueChange}
+              onClose={handleCloseInputsFilter}
+              onReset={() => onResetFilter('inputs')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    // Outputs Filter with Popover
+    else if (filter.id === 'outputs') {
+      return (
+        <Popover key={filter.id} open={outputsFilterOpen} onOpenChange={setOutputsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <OutputsFilterEditor
+              selectedOutputs={selectedOutputs}
+              selectedOperator={outputsOperator}
+              customValue={outputsCustomValue}
+              onSelectionChange={handleOutputsSelectionChange}
+              onOperatorChange={handleOutputsOperatorChange}
+              onCustomValueChange={handleOutputsCustomValueChange}
+              onClose={handleCloseOutputsFilter}
+              onReset={() => onResetFilter('outputs')}
             />
           </PopoverContent>
         </Popover>

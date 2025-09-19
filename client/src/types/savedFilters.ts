@@ -14,6 +14,12 @@ export interface SavedFilter {
     selectedLabels: string[];
     labelsOperator: string;
     labelsCustomValue: string;
+    selectedInputs?: string[];
+    inputsOperator?: string;
+    inputsCustomValue?: string;
+    selectedOutputs?: string[];
+    outputsOperator?: string;
+    outputsCustomValue?: string;
     selectedNamespaces: string[];
   namespaceOperator?: string;
   namespaceCustomValue?: string;

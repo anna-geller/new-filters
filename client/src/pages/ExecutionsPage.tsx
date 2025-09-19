@@ -22,6 +22,10 @@ const mockExecutions = [
     namespace: 'company',
     flow: 'myflow',
     labels: ['dev-production', 'team-backend'],
+    revision: '1',
+    inputs: ['customer_id:98213', 'region:us-east-1', 'priority:high'],
+    outputs: ['status:success', 'records_processed:4201', 'duration_ms:3150'],
+    taskId: 'finalize-report',
     state: 'SUCCESS' as const
   },
   {
@@ -32,6 +36,10 @@ const mockExecutions = [
     namespace: 'company.team',
     flow: 'myflow',
     labels: ['dev-production', 'team-backend'],
+    revision: '2',
+    inputs: ['customer_id:10342', 'feature_flag:new-filters'],
+    outputs: ['status:failed', 'error_code:timeout'],
+    taskId: 'resolve-dependencies',
     state: 'FAILED' as const
   },
   {
@@ -42,6 +50,10 @@ const mockExecutions = [
     namespace: 'company.team.backend',
     flow: 'myflow',
     labels: ['dev-production', 'team-backend'],
+    revision: '1',
+    inputs: ['correlation_id:12ab-45cd', 'trigger:api'],
+    outputs: ['status:running', 'records_processed:128'],
+    taskId: 'aggregate-events',
     state: 'RUNNING' as const
   },
   {
@@ -52,6 +64,10 @@ const mockExecutions = [
     namespace: 'company.team.frontend',
     flow: 'myflow',
     labels: ['dev-production', 'team-frontend'],
+    revision: '4',
+    inputs: ['dataset:daily-sync', 'retry_count:0'],
+    outputs: ['status:queued', 'records_processed:0'],
+    taskId: 'queue-run',
     state: 'QUEUED' as const
   },
   {
@@ -62,6 +78,10 @@ const mockExecutions = [
     namespace: 'company.team.api',
     flow: 'myflow',
     labels: ['dev-production', 'team-analytics'],
+    revision: '5',
+    inputs: ['source:cli', 'plan:enterprise'],
+    outputs: ['status:warning', 'alerts_sent:true'],
+    taskId: 'notify-observers',
     state: 'WARNING' as const
   },
   {
@@ -72,6 +92,10 @@ const mockExecutions = [
     namespace: 'company.team.database',
     flow: 'myflow',
     labels: ['dev-production', 'team-analytics'],
+    revision: '6',
+    inputs: ['source:cli', 'retry_count:0'],
+    outputs: ['status:paused', 'retry_scheduled:false'],
+    taskId: 'pause-checkpoint',
     state: 'PAUSED' as const
   },
   {
@@ -82,6 +106,10 @@ const mockExecutions = [
     namespace: 'company.analytics',
     flow: 'myflow',
     labels: ['dev-production', 'team-analytics'],
+    revision: '7',
+    inputs: ['dataset:daily-sync', 'priority:high'],
+    outputs: ['status:created', 'records_processed:0'],
+    taskId: 'create-run-record',
     state: 'CREATED' as const
   },
   {
@@ -92,6 +120,10 @@ const mockExecutions = [
     namespace: 'company.security',
     flow: 'security-scan',
     labels: ['security-scan', 'team-security'],
+    revision: '8',
+    inputs: ['customer_id:98213', 'trigger:api'],
+    outputs: ['status:restarted', 'records_failed:1'],
+    taskId: 'restart-checkpoint',
     state: 'RESTARTED' as const
   },
   {
@@ -102,6 +134,10 @@ const mockExecutions = [
     namespace: 'company.security',
     flow: 'security-scan',
     labels: ['security-scan', 'team-security'],
+    revision: '9',
+    inputs: ['customer_id:10342', 'priority:high'],
+    outputs: ['status:cancelled', 'alerts_sent:false'],
+    taskId: 'cancel-run',
     state: 'CANCELLED' as const
   }
 ];
@@ -116,6 +152,12 @@ export default function ExecutionsPage() {
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const [labelsOperator, setLabelsOperator] = useState('has-any-of');
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
+  const [selectedInputs, setSelectedInputs] = useState<string[]>([]);
+  const [inputsOperator, setInputsOperator] = useState('has-any-of');
+  const [inputsCustomValue, setInputsCustomValue] = useState('');
+  const [selectedOutputs, setSelectedOutputs] = useState<string[]>([]);
+  const [outputsOperator, setOutputsOperator] = useState('has-any-of');
+  const [outputsCustomValue, setOutputsCustomValue] = useState('');
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const [namespaceOperator, setNamespaceOperator] = useState('in');
   const [namespaceCustomValue, setNamespaceCustomValue] = useState('');
@@ -272,6 +314,52 @@ export default function ExecutionsPage() {
       filters.push(labelsFilter);
     }
 
+    const isTextBasedInputsOperator = ['contains', 'does-not-contain'].includes(inputsOperator);
+    const isNoInputInputsOperator = ['is-set', 'is-not-set'].includes(inputsOperator);
+    const isSelectionBasedInputsOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(inputsOperator);
+
+    if (
+      visibleFilters.includes('inputs') &&
+      ((isTextBasedInputsOperator && inputsCustomValue.trim()) ||
+        (isSelectionBasedInputsOperator && selectedInputs.length > 0) ||
+        isNoInputInputsOperator)
+    ) {
+      const inputsFilter = {
+        id: 'inputs',
+        label: 'Inputs',
+        value: isTextBasedInputsOperator
+          ? inputsCustomValue
+          : isNoInputInputsOperator
+          ? inputsCustomValue || (inputsOperator === 'is-set' ? 'any' : 'none')
+          : `${selectedInputs.length}`,
+        operator: getOperatorDisplayLabel(inputsOperator),
+      };
+      filters.push(inputsFilter);
+    }
+
+    const isTextBasedOutputsOperator = ['contains', 'does-not-contain'].includes(outputsOperator);
+    const isNoInputOutputsOperator = ['is-set', 'is-not-set'].includes(outputsOperator);
+    const isSelectionBasedOutputsOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(outputsOperator);
+
+    if (
+      visibleFilters.includes('outputs') &&
+      ((isTextBasedOutputsOperator && outputsCustomValue.trim()) ||
+        (isSelectionBasedOutputsOperator && selectedOutputs.length > 0) ||
+        isNoInputOutputsOperator)
+    ) {
+      const outputsFilter = {
+        id: 'outputs',
+        label: 'Outputs',
+        value: isTextBasedOutputsOperator
+          ? outputsCustomValue
+          : isNoInputOutputsOperator
+          ? outputsCustomValue || (outputsOperator === 'is-set' ? 'any' : 'none')
+          : `${selectedOutputs.length}`,
+        operator: getOperatorDisplayLabel(outputsOperator),
+      };
+      filters.push(outputsFilter);
+    }
+
     // Add namespace filter if namespaces are selected or text value is provided AND visible
     const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(namespaceOperator);
     const hasTextValue = isTextBasedOperator && namespaceCustomValue.trim();
@@ -320,7 +408,25 @@ export default function ExecutionsPage() {
     }
 
     return filters;
-  }, [visibleFilters, selectedStates, statesOperator, selectedLabels, labelsOperator, labelsCustomValue, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedFlows, selectedInitialExecution]);
+  }, [
+    visibleFilters,
+    selectedStates,
+    statesOperator,
+    selectedLabels,
+    labelsOperator,
+    labelsCustomValue,
+    selectedInputs,
+    inputsOperator,
+    inputsCustomValue,
+    selectedOutputs,
+    outputsOperator,
+    outputsCustomValue,
+    selectedNamespaces,
+    namespaceOperator,
+    namespaceCustomValue,
+    selectedFlows,
+    selectedInitialExecution,
+  ]);
   
   // Combine all active filters
   const allActiveFilters = [...additionalFilters, ...activeFilters];
@@ -336,6 +442,15 @@ export default function ExecutionsPage() {
     } else if (filterId === 'labels') {
       setSelectedLabels([]);
       setLabelsCustomValue('');
+      setLabelsOperator('has-any-of');
+    } else if (filterId === 'inputs') {
+      setSelectedInputs([]);
+      setInputsCustomValue('');
+      setInputsOperator('has-any-of');
+    } else if (filterId === 'outputs') {
+      setSelectedOutputs([]);
+      setOutputsCustomValue('');
+      setOutputsOperator('has-any-of');
     } else if (filterId === 'namespace') {
       setSelectedNamespaces([]);
       setNamespaceOperator('in');
@@ -394,10 +509,16 @@ export default function ExecutionsPage() {
     
     // Clear non-default filters (they will be hidden anyway)
     setSelectedStates([]);
-    setStatesOperator('in');
-    setSelectedLabels([]);
-    setLabelsOperator('has-any-of');
-    setLabelsCustomValue('');
+   setStatesOperator('in');
+   setSelectedLabels([]);
+   setLabelsOperator('has-any-of');
+   setLabelsCustomValue('');
+    setSelectedInputs([]);
+    setInputsOperator('has-any-of');
+    setInputsCustomValue('');
+    setSelectedOutputs([]);
+    setOutputsOperator('has-any-of');
+    setOutputsCustomValue('');
     setSelectedNamespaces([]);
     setNamespaceOperator('in');
     setNamespaceCustomValue('');
@@ -434,6 +555,14 @@ export default function ExecutionsPage() {
         setSelectedLabels([]);
         setLabelsCustomValue('');
         setLabelsOperator('has-any-of');
+      } else if (filterId === 'inputs') {
+        setSelectedInputs([]);
+        setInputsCustomValue('');
+        setInputsOperator('has-any-of');
+      } else if (filterId === 'outputs') {
+        setSelectedOutputs([]);
+        setOutputsCustomValue('');
+        setOutputsOperator('has-any-of');
       } else if (filterId === 'namespace') {
         setSelectedNamespaces([]);
         setNamespaceOperator('in');
@@ -459,6 +588,12 @@ export default function ExecutionsPage() {
       selectedLabels,
       labelsOperator,
       labelsCustomValue,
+      selectedInputs,
+      inputsOperator,
+      inputsCustomValue,
+      selectedOutputs,
+      outputsOperator,
+      outputsCustomValue,
       selectedNamespaces,
       namespaceOperator,
       namespaceCustomValue,
@@ -517,6 +652,8 @@ export default function ExecutionsPage() {
     
     // Normalize legacy labels operator
     const normalizedLabels = normalizeLegacyOperator(state.labelsOperator, state.labelsCustomValue || '');
+    const normalizedInputs = normalizeLegacyOperator(state.inputsOperator || 'has-any-of', state.inputsCustomValue || '');
+    const normalizedOutputs = normalizeLegacyOperator(state.outputsOperator || 'has-any-of', state.outputsCustomValue || '');
     
     // Phase 1: Determine which filters need to be visible based on saved state
     const requiredFilters = new Set<string>();
@@ -539,6 +676,24 @@ export default function ExecutionsPage() {
     if ((normalizedLabels.customValue && normalizedLabels.customValue.trim()) || 
         ['is-set', 'is-not-set'].includes(normalizedLabels.operator)) {
       requiredFilters.add('labels');
+    }
+
+    if (state.selectedInputs && state.selectedInputs.length > 0) {
+      requiredFilters.add('inputs');
+    }
+
+    if ((normalizedInputs.customValue && normalizedInputs.customValue.trim()) ||
+        ['is-set', 'is-not-set'].includes(normalizedInputs.operator)) {
+      requiredFilters.add('inputs');
+    }
+
+    if (state.selectedOutputs && state.selectedOutputs.length > 0) {
+      requiredFilters.add('outputs');
+    }
+
+    if ((normalizedOutputs.customValue && normalizedOutputs.customValue.trim()) ||
+        ['is-set', 'is-not-set'].includes(normalizedOutputs.operator)) {
+      requiredFilters.add('outputs');
     }
     
     if (state.selectedNamespaces && state.selectedNamespaces.length > 0) {
@@ -571,6 +726,12 @@ export default function ExecutionsPage() {
     setSelectedLabels(state.selectedLabels);
     setLabelsOperator(normalizedLabels.operator);
     setLabelsCustomValue(normalizedLabels.customValue);
+    setSelectedInputs(state.selectedInputs || []);
+    setInputsOperator(normalizedInputs.operator || 'has-any-of');
+    setInputsCustomValue(normalizedInputs.customValue || '');
+    setSelectedOutputs(state.selectedOutputs || []);
+    setOutputsOperator(normalizedOutputs.operator || 'has-any-of');
+    setOutputsCustomValue(normalizedOutputs.customValue || '');
     setSelectedNamespaces(state.selectedNamespaces);
     setNamespaceOperator(state.namespaceOperator || 'in');
     setNamespaceCustomValue(state.namespaceCustomValue || '');
@@ -695,6 +856,18 @@ export default function ExecutionsPage() {
           onLabelsSelectionChange={setSelectedLabels}
           onLabelsOperatorChange={setLabelsOperator}
           onLabelsCustomValueChange={setLabelsCustomValue}
+          selectedInputs={selectedInputs}
+          inputsOperator={inputsOperator}
+          inputsCustomValue={inputsCustomValue}
+          onInputsSelectionChange={setSelectedInputs}
+          onInputsOperatorChange={setInputsOperator}
+          onInputsCustomValueChange={setInputsCustomValue}
+          selectedOutputs={selectedOutputs}
+          outputsOperator={outputsOperator}
+          outputsCustomValue={outputsCustomValue}
+          onOutputsSelectionChange={setSelectedOutputs}
+          onOutputsOperatorChange={setOutputsOperator}
+          onOutputsCustomValueChange={setOutputsCustomValue}
           selectedNamespaces={selectedNamespaces}
           namespaceOperator={namespaceOperator}
           namespaceCustomValue={namespaceCustomValue}
