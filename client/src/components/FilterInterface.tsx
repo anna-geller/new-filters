@@ -12,12 +12,12 @@ import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
 import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
-import StateFilterEditor from './StateFilterEditor';
+import StateFilterEditor, { type StateOption } from './StateFilterEditor';
 import LabelsFilterEditor from './LabelsFilterEditor';
 import InputsFilterEditor from './InputsFilterEditor';
 import OutputsFilterEditor from './OutputsFilterEditor';
 import NamespaceFilterEditor from './NamespaceFilterEditor';
-import FlowFilterEditor from './FlowFilterEditor';
+import FlowFilterEditor, { type FlowOption } from './FlowFilterEditor';
 import ScopeFilterEditor from './ScopeFilterEditor';
 import KindFilterEditor from './KindFilterEditor';
 import HierarchyFilterEditor from './SubflowFilterEditor';
@@ -30,7 +30,7 @@ import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 import { SavedFilter } from '../types/savedFilters';
 import { filterCustomizationStorage } from '../utils/filterCustomizationStorage';
 
-interface FilterOption {
+export interface FilterOption {
   id: string;
   label: string;
   description: string;
@@ -109,6 +109,10 @@ interface FilterInterfaceProps {
   visibleFilters: string[];
   onVisibleFiltersChange: (filters: string[]) => void;
   onResetFilter: (filterId: string) => void;
+  stateFilterOptions?: StateOption[];
+  filterOptions?: FilterOption[];
+  namespaceMode?: 'executions' | 'tests';
+  flowOptions?: FlowOption[];
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -188,18 +192,26 @@ export default function FilterInterface({
   onUpdateFilter,
   visibleFilters,
   onVisibleFiltersChange,
-  onResetFilter
+  onResetFilter,
+  stateFilterOptions,
+  filterOptions,
+  namespaceMode = 'executions',
+  flowOptions,
 }: FilterInterfaceProps) {
+  const filterOptionsList = useMemo(
+    () => filterOptions ?? defaultFilterOptions,
+    [filterOptions],
+  );
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   // Derive available filters from visibleFilters instead of maintaining separate state
   const availableFilters = useMemo(() => {
-    return defaultFilterOptions.map(option => ({
+    return filterOptionsList.map(option => ({
       ...option,
       enabled: visibleFilters.includes(option.id)
     }));
-  }, [visibleFilters]);
+  }, [visibleFilters, filterOptionsList]);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
   const [inputsFilterOpen, setInputsFilterOpen] = useState(false);
@@ -634,6 +646,7 @@ export default function FilterInterface({
               onOperatorChange={handleStatesOperatorChange}
               onClose={handleCloseStateFilter}
               onReset={() => onResetFilter('state')}
+              stateOptions={stateFilterOptions}
             />
           </PopoverContent>
         </Popover>
@@ -754,6 +767,7 @@ export default function FilterInterface({
               onReset={() => onResetFilter('namespace')}
               onCustomValueChange={handleNamespaceCustomValueChange}
               onClose={handleCloseNamespaceFilter}
+              mode={namespaceMode}
             />
           </PopoverContent>
         </Popover>
@@ -780,6 +794,7 @@ export default function FilterInterface({
               onSelectionChange={handleFlowsSelectionChange}
               onClose={handleCloseFlowFilter}
               onReset={() => onResetFilter('flow')}
+              options={flowOptions}
             />
           </PopoverContent>
         </Popover>

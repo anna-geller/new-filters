@@ -10,8 +10,15 @@ const namespaceOptions = [
   'company',
   'company.team',
   'company.team.backend',
-  'company.team.frontend', 
-  'company.team.api'
+  'company.team.frontend',
+  'company.team.api',
+];
+
+const testsNamespaceOptions = [
+  'company',
+  'company.team',
+  'company.backend',
+  'tutorial',
 ];
 
 interface NamespaceFilterEditorProps {
@@ -23,6 +30,7 @@ interface NamespaceFilterEditorProps {
   onCustomValueChange: (value: string) => void;
   onClose: () => void;
   onReset?: () => void;
+  mode?: 'executions' | 'tests';
 }
 
 const operatorOptions = [
@@ -30,27 +38,27 @@ const operatorOptions = [
   { value: 'not-in', label: 'not in', description: 'Exclude any of the selected namespaces' },
   { value: 'contains', label: 'contains', description: 'Namespace contains the text' },
   { value: 'starts-with', label: 'starts with', description: 'Namespace starts with the text' },
-  { value: 'ends-with', label: 'ends with', description: 'Namespace ends with the text' }
+  { value: 'ends-with', label: 'ends with', description: 'Namespace ends with the text' },
 ];
 
-export default function NamespaceFilterEditor({ 
-  selectedNamespaces, 
+export default function NamespaceFilterEditor({
+  selectedNamespaces,
   namespaceOperator,
   customValue,
   onSelectionChange,
   onOperatorChange,
   onCustomValueChange,
   onClose,
-  onReset
+  onReset,
+  mode = 'executions',
 }: NamespaceFilterEditorProps) {
+  const options = mode === 'tests' ? testsNamespaceOptions : namespaceOptions;
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Local state to track current values vs original props
+
   const [currentNamespaces, setCurrentNamespaces] = useState(selectedNamespaces);
   const [currentOperator, setCurrentOperator] = useState(namespaceOperator);
   const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
 
-  // Sync local state with props when they change (important for reset functionality)
   useEffect(() => {
     setCurrentNamespaces(selectedNamespaces);
   }, [selectedNamespaces]);
@@ -63,17 +71,16 @@ export default function NamespaceFilterEditor({
     setCurrentCustomValue(customValue);
   }, [customValue]);
 
-  // Check if current operator uses text input instead of multi-select
   const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(currentOperator);
 
-  const filteredNamespaces = namespaceOptions.filter(namespace =>
-    namespace.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredNamespaces = options.filter((namespace) =>
+    namespace.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleToggleNamespace = (namespace: string) => {
     const isSelected = currentNamespaces.includes(namespace);
     if (isSelected) {
-      setCurrentNamespaces(currentNamespaces.filter(ns => ns !== namespace));
+      setCurrentNamespaces(currentNamespaces.filter((ns) => ns !== namespace));
     } else {
       setCurrentNamespaces([...currentNamespaces, namespace]);
     }
@@ -87,20 +94,22 @@ export default function NamespaceFilterEditor({
   };
 
   const handleDeselectAll = () => {
-    const newSelection = currentNamespaces.filter(namespace => !filteredNamespaces.includes(namespace));
+    const newSelection = currentNamespaces.filter(
+      (namespace) => !filteredNamespaces.includes(namespace),
+    );
     setCurrentNamespaces(newSelection);
   };
 
-  const allVisible = filteredNamespaces.every(namespace => currentNamespaces.includes(namespace));
-  const noneVisible = filteredNamespaces.every(namespace => !currentNamespaces.includes(namespace));
-  
+  const allVisible = filteredNamespaces.every((namespace) => currentNamespaces.includes(namespace));
+  const noneVisible = filteredNamespaces.every((namespace) => !currentNamespaces.includes(namespace));
+
   const handleApply = () => {
     onSelectionChange(currentNamespaces);
     onOperatorChange(currentOperator);
     onCustomValueChange(currentCustomValue);
     onClose();
   };
-  
+
   const handleReset = () => {
     if (onReset) {
       onReset();
@@ -111,21 +120,22 @@ export default function NamespaceFilterEditor({
     }
   };
 
-  // Helper function to get namespace depth level for visual indentation
   const getNamespaceLevel = (namespace: string) => {
     return namespace.split('.').length - 1;
   };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header with operator selection */}
       <div className="p-4 border-b border-border">
         <div className="mb-3">
-          <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
+          <label className="text-xs font-medium text-muted-foreground mb-2 block">
+            Filter Operator
+          </label>
           <Select value={currentOperator} onValueChange={setCurrentOperator}>
             <SelectTrigger data-testid="select-namespace-operator">
               <SelectValue placeholder="Select operator...">
-                {operatorOptions.find(opt => opt.value === currentOperator)?.label || "Select operator..."}
+                {operatorOptions.find((opt) => opt.value === currentOperator)?.label ||
+                  'Select operator...'}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -156,8 +166,7 @@ export default function NamespaceFilterEditor({
             data-testid="input-namespace-search"
           />
         )}
-        
-        {/* Select All / Deselect All - only for multi-select operators */}
+
         {!isTextBasedOperator && (
           <div className="flex items-center gap-2 mt-3">
             <Button
@@ -186,12 +195,12 @@ export default function NamespaceFilterEditor({
         )}
       </div>
 
-      {/* Namespace Options - only for multi-select operators */}
       {!isTextBasedOperator && (
         <div className="max-h-64 overflow-y-auto">
           {filteredNamespaces.map((namespace) => {
             const isSelected = currentNamespaces.includes(namespace);
-            
+            const level = getNamespaceLevel(namespace);
+
             return (
               <div
                 key={namespace}
@@ -199,10 +208,18 @@ export default function NamespaceFilterEditor({
                 className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer"
                 data-testid={`namespace-option-${namespace.replace(/\./g, '-')}`}
               >
-                {/* Simple namespace name with checkmark */}
-                <span className="text-sm flex-1">{namespace}</span>
-                
-                {/* Checkmark */}
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+                    isSelected
+                      ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
+                      : 'bg-muted border-border text-muted-foreground'
+                  }`}
+                  style={{ paddingLeft: `${Math.min(level, 3)}rem` }}
+                >
+                  <Building2 className="h-4 w-4" />
+                  <span className="text-sm font-medium whitespace-nowrap">{namespace}</span>
+                </div>
+
                 <div className="ml-auto">
                   {isSelected ? (
                     <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -216,17 +233,13 @@ export default function NamespaceFilterEditor({
         </div>
       )}
 
-      {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          {isTextBasedOperator 
-            ? currentCustomValue.trim() 
-              ? `Text: "${currentCustomValue}"` 
-              : "Enter text to filter"
-            : `${currentNamespaces.length} of ${namespaceOptions.length} namespaces selected`
-          }
+          {isTextBasedOperator
+            ? 'Enter a namespace pattern'
+            : `${currentNamespaces.length} of ${options.length} namespaces selected`}
         </p>
-        
+
         <div className="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip>
@@ -246,7 +259,7 @@ export default function NamespaceFilterEditor({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <Button
             size="sm"
             onClick={handleApply}
