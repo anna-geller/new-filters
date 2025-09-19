@@ -50,6 +50,13 @@ const TEST_ROWS: TestRow[] = [
   { id: 'test_user_authentication', namespace: 'tutorial', flow: 'user-auth-flow', state: 'FAILED' },
 ];
 
+const TEST_NAMESPACE_OPTIONS = Array.from(new Set(TEST_ROWS.map((row) => row.namespace)));
+const TEST_FLOW_OPTIONS = Array.from(new Set(TEST_ROWS.map((row) => row.flow))).map((flow) => ({
+  id: flow,
+  label: flow,
+  description: flow,
+}));
+
 const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: 'id', label: 'Id', description: 'Test identifier', visible: true, order: 1 },
   { id: 'namespace', label: 'Namespace', description: 'Namespace to which the test belongs', visible: true, order: 2 },
@@ -72,34 +79,6 @@ const TEST_FILTER_OPTIONS: FilterOption[] = [
   { id: 'state', label: 'State', description: 'Filter by test run state', enabled: false, order: 1 },
   { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 2 },
   { id: 'flow', label: 'Flow', description: 'Filter by flow', enabled: false, order: 3 },
-];
-
-const TEST_FLOW_OPTIONS: FlowOption[] = [
-  {
-    id: 'data-processing-pipeline',
-    label: 'data-processing-pipeline',
-    description: 'Data processing automated test flow',
-  },
-  {
-    id: 'microservices-and-apis',
-    label: 'microservices-and-apis',
-    description: 'Microservices integration test flow',
-  },
-  {
-    id: 'email-notifications',
-    label: 'email-notifications',
-    description: 'Email notification system test',
-  },
-  {
-    id: 'payment-gateway',
-    label: 'payment-gateway',
-    description: 'Payment gateway verification flow',
-  },
-  {
-    id: 'user-auth-flow',
-    label: 'user-auth-flow',
-    description: 'User authentication validation flow',
-  },
 ];
 
 export default function TestsPage() {
@@ -503,6 +482,7 @@ export default function TestsPage() {
           onNamespacesSelectionChange={setSelectedNamespaces}
           onNamespaceOperatorChange={setNamespaceOperator}
           onNamespaceCustomValueChange={setNamespaceCustomValue}
+          namespaceOptions={TEST_NAMESPACE_OPTIONS}
           selectedFlows={selectedFlows}
           onFlowsSelectionChange={setSelectedFlows}
           selectedScopes={selectedScopes}

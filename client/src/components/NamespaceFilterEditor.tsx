@@ -12,6 +12,9 @@ const namespaceOptions = [
   'company.team.backend',
   'company.team.frontend',
   'company.team.api',
+  'company.analytics',
+  'company.security',
+  'company.team.database',
 ];
 
 const testsNamespaceOptions = [
@@ -31,6 +34,7 @@ interface NamespaceFilterEditorProps {
   onClose: () => void;
   onReset?: () => void;
   mode?: 'executions' | 'tests';
+  options?: string[];
 }
 
 const operatorOptions = [
@@ -51,8 +55,10 @@ export default function NamespaceFilterEditor({
   onClose,
   onReset,
   mode = 'executions',
+  options,
 }: NamespaceFilterEditorProps) {
-  const options = mode === 'tests' ? testsNamespaceOptions : namespaceOptions;
+  const baseOptions = mode === 'tests' ? testsNamespaceOptions : namespaceOptions;
+  const availableNamespaces = options ?? baseOptions;
   const [searchTerm, setSearchTerm] = useState('');
 
   const [currentNamespaces, setCurrentNamespaces] = useState(selectedNamespaces);
@@ -73,7 +79,7 @@ export default function NamespaceFilterEditor({
 
   const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(currentOperator);
 
-  const filteredNamespaces = options.filter((namespace) =>
+  const filteredNamespaces = availableNamespaces.filter((namespace) =>
     namespace.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -237,7 +243,7 @@ export default function NamespaceFilterEditor({
         <p className="text-xs text-muted-foreground">
           {isTextBasedOperator
             ? 'Enter a namespace pattern'
-            : `${currentNamespaces.length} of ${options.length} namespaces selected`}
+            : `${currentNamespaces.length} of ${availableNamespaces.length} namespaces selected`}
         </p>
 
         <div className="flex items-center gap-2">

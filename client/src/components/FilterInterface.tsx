@@ -18,7 +18,7 @@ import InputsFilterEditor from './InputsFilterEditor';
 import OutputsFilterEditor from './OutputsFilterEditor';
 import NamespaceFilterEditor from './NamespaceFilterEditor';
 import FlowFilterEditor, { type FlowOption } from './FlowFilterEditor';
-import ScopeFilterEditor from './ScopeFilterEditor';
+import ScopeFilterEditor, { type ScopeOption } from './ScopeFilterEditor';
 import KindFilterEditor from './KindFilterEditor';
 import HierarchyFilterEditor from './SubflowFilterEditor';
 import ParentFilterEditor from './ParentFilterEditor';
@@ -29,6 +29,8 @@ import SaveFilterDialog from './SaveFilterDialog';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 import { SavedFilter } from '../types/savedFilters';
 import { filterCustomizationStorage } from '../utils/filterCustomizationStorage';
+import TagsFilterEditor, { type TagOption } from './TagsFilterEditor';
+import EnabledFilterEditor, { type EnabledOption } from './EnabledFilterEditor';
 
 export interface FilterOption {
   id: string;
@@ -93,6 +95,14 @@ interface FilterInterfaceProps {
   onNamespaceCustomValueChange: (value: string) => void;
   selectedFlows: string[];
   onFlowsSelectionChange: (flows: string[]) => void;
+  selectedTags?: string[];
+  tagsOperator?: string;
+  tagsCustomValue?: string;
+  onTagsSelectionChange?: (tags: string[]) => void;
+  onTagsOperatorChange?: (operator: string) => void;
+  onTagsCustomValueChange?: (value: string) => void;
+  selectedEnabled?: string | null;
+  onEnabledChange?: (value: string | null) => void;
   selectedScopes: string[];
   onScopesSelectionChange: (scopes: string[]) => void;
   selectedKinds: string[];
@@ -113,6 +123,10 @@ interface FilterInterfaceProps {
   filterOptions?: FilterOption[];
   namespaceMode?: 'executions' | 'tests';
   flowOptions?: FlowOption[];
+  scopeOptions?: ScopeOption[];
+  tagOptions?: TagOption[];
+  enabledOptions?: EnabledOption[];
+  namespaceOptions?: string[];
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -177,6 +191,14 @@ export default function FilterInterface({
   onNamespaceCustomValueChange,
   selectedFlows,
   onFlowsSelectionChange,
+  selectedTags = [],
+  tagsOperator = 'in',
+  tagsCustomValue = '',
+  onTagsSelectionChange,
+  onTagsOperatorChange,
+  onTagsCustomValueChange,
+  selectedEnabled = null,
+  onEnabledChange,
   selectedScopes,
   onScopesSelectionChange,
   selectedKinds,
@@ -197,10 +219,25 @@ export default function FilterInterface({
   filterOptions,
   namespaceMode = 'executions',
   flowOptions,
+  scopeOptions,
+  tagOptions,
+  enabledOptions,
+  namespaceOptions,
 }: FilterInterfaceProps) {
   const filterOptionsList = useMemo(
     () => filterOptions ?? defaultFilterOptions,
     [filterOptions],
+  );
+  const tagsOptionsList = useMemo(
+    () => tagOptions ?? [],
+    [tagOptions],
+  );
+  const enabledOptionsList = useMemo(
+    () => enabledOptions ?? [
+      { id: 'true', label: 'True' },
+      { id: 'false', label: 'False' },
+    ],
+    [enabledOptions],
   );
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
@@ -218,6 +255,8 @@ export default function FilterInterface({
   const [outputsFilterOpen, setOutputsFilterOpen] = useState(false);
   const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
   const [flowFilterOpen, setFlowFilterOpen] = useState(false);
+  const [tagsFilterOpen, setTagsFilterOpen] = useState(false);
+  const [enabledFilterOpen, setEnabledFilterOpen] = useState(false);
   const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
   const [kindFilterOpen, setKindFilterOpen] = useState(false);
   const [hierarchyFilterOpen, setHierarchyFilterOpen] = useState(false);
@@ -291,6 +330,20 @@ export default function FilterInterface({
       } else {
         // Clear state filter values when disabling
         onSelectedStatesChange([]);
+      }
+    } else if (filterId === 'tags') {
+      if (!currentlyVisible) {
+        setTagsFilterOpen(true);
+      } else {
+        onTagsSelectionChange?.([]);
+        onTagsOperatorChange?.('in');
+        onTagsCustomValueChange?.('');
+      }
+    } else if (filterId === 'enabled') {
+      if (!currentlyVisible) {
+        setEnabledFilterOpen(true);
+      } else {
+        onEnabledChange?.(null);
       }
     } else if (filterId === 'labels') {
       if (!currentlyVisible) {
@@ -376,9 +429,13 @@ export default function FilterInterface({
   };
 
   const handleEditFilter = (filterId: string) => {
-    if (filterId === 'state') {
-      setStateFilterOpen(true);
-    } else if (filterId === 'labels') {
+  if (filterId === 'state') {
+    setStateFilterOpen(true);
+  } else if (filterId === 'tags') {
+    setTagsFilterOpen(true);
+  } else if (filterId === 'enabled') {
+    setEnabledFilterOpen(true);
+  } else if (filterId === 'labels') {
       setLabelsFilterOpen(true);
     } else if (filterId === 'inputs') {
       setInputsFilterOpen(true);
@@ -462,6 +519,14 @@ export default function FilterInterface({
     setOutputsFilterOpen(false);
   };
 
+  const handleCloseTagsFilter = () => {
+    setTagsFilterOpen(false);
+  };
+
+  const handleCloseEnabledFilter = () => {
+    setEnabledFilterOpen(false);
+  };
+
   const handleNamespacesSelectionChange = (namespaces: string[]) => {
     onNamespacesSelectionChange(namespaces);
   };
@@ -476,6 +541,22 @@ export default function FilterInterface({
 
   const handleFlowsSelectionChange = (flows: string[]) => {
     onFlowsSelectionChange(flows);
+  };
+
+  const handleTagsSelectionChange = (tags: string[]) => {
+    onTagsSelectionChange?.(tags);
+  };
+
+  const handleTagsOperatorChange = (operator: string) => {
+    onTagsOperatorChange?.(operator);
+  };
+
+  const handleTagsCustomValueChange = (value: string) => {
+    onTagsCustomValueChange?.(value);
+  };
+
+  const handleEnabledSelectionChange = (value: string | null) => {
+    onEnabledChange?.(value);
   };
 
   const handleScopesSelectionChange = (scopes: string[]) => {
@@ -682,6 +763,64 @@ export default function FilterInterface({
         </Popover>
       );
     }
+    // Tags Filter with Popover
+    else if (filter.id === 'tags') {
+      return (
+        <Popover key={filter.id} open={tagsFilterOpen} onOpenChange={setTagsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <TagsFilterEditor
+              selectedTags={selectedTags}
+              operator={tagsOperator}
+              customValue={tagsCustomValue}
+              options={tagsOptionsList}
+              onSelectionChange={handleTagsSelectionChange}
+              onOperatorChange={handleTagsOperatorChange}
+              onCustomValueChange={handleTagsCustomValueChange}
+              onClose={handleCloseTagsFilter}
+              onReset={() => onResetFilter('tags')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    // Enabled Filter with Popover
+    else if (filter.id === 'enabled') {
+      return (
+        <Popover key={filter.id} open={enabledFilterOpen} onOpenChange={setEnabledFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'equals'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-64 p-0">
+            <EnabledFilterEditor
+              selectedValue={selectedEnabled ?? null}
+              options={enabledOptionsList}
+              onSelectionChange={handleEnabledSelectionChange}
+              onClose={handleCloseEnabledFilter}
+              onReset={() => onResetFilter('enabled')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
     // Inputs Filter with Popover
     else if (filter.id === 'inputs') {
       return (
@@ -768,6 +907,7 @@ export default function FilterInterface({
               onCustomValueChange={handleNamespaceCustomValueChange}
               onClose={handleCloseNamespaceFilter}
               mode={namespaceMode}
+              options={namespaceOptions}
             />
           </PopoverContent>
         </Popover>
@@ -820,6 +960,7 @@ export default function FilterInterface({
               selectedScopes={selectedScopes}
               onSelectionChange={handleScopesSelectionChange}
               onClose={handleCloseScopeFilter}
+              options={scopeOptions}
             />
           </PopoverContent>
         </Popover>

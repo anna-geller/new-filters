@@ -5,16 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckSquare, Square, CheckCircle, Target, RotateCcw } from "lucide-react";
 
-const scopeOptions = [
-  { 
-    id: 'user', 
-    label: 'User Executions', 
-    description: 'Executions initiated by regular users'
+export interface ScopeOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+const defaultScopeOptions: ScopeOption[] = [
+  {
+    id: 'user',
+    label: 'User Executions',
+    description: 'Executions initiated by regular users',
   },
-  { 
-    id: 'system', 
-    label: 'System Executions', 
-    description: 'Maintenance executions'
+  {
+    id: 'system',
+    label: 'System Executions',
+    description: 'Maintenance executions',
   },
 ];
 
@@ -22,60 +28,68 @@ interface ScopeFilterEditorProps {
   selectedScopes: string[];
   onSelectionChange: (scopes: string[]) => void;
   onClose: () => void;
+  onReset?: () => void;
+  options?: ScopeOption[];
 }
 
-export default function ScopeFilterEditor({ 
-  selectedScopes, 
-  onSelectionChange, 
-  onClose 
+export default function ScopeFilterEditor({
+  selectedScopes,
+  onSelectionChange,
+  onClose,
+  onReset,
+  options,
 }: ScopeFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Local state to track current values vs original props
+
+  const availableScopes = options ?? defaultScopeOptions;
   const [currentScopes, setCurrentScopes] = useState(selectedScopes);
 
-  const filteredScopes = scopeOptions.filter(scope =>
-    scope.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    scope.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredScopes = availableScopes.filter(
+    (scope) =>
+      scope.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      scope.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleToggleScope = (scopeId: string) => {
     const isSelected = currentScopes.includes(scopeId);
     if (isSelected) {
-      setCurrentScopes(currentScopes.filter(id => id !== scopeId));
+      setCurrentScopes(currentScopes.filter((id) => id !== scopeId));
     } else {
       setCurrentScopes([...currentScopes, scopeId]);
     }
   };
 
   const handleSelectAll = () => {
-    const allVisibleScopes = filteredScopes.map(scope => scope.id);
+    const allVisibleScopes = filteredScopes.map((scope) => scope.id);
     const combinedScopes = [...currentScopes, ...allVisibleScopes];
     const newSelection = Array.from(new Set(combinedScopes));
     setCurrentScopes(newSelection);
   };
 
   const handleDeselectAll = () => {
-    const visibleScopeIds = filteredScopes.map(scope => scope.id);
-    const newSelection = currentScopes.filter(id => !visibleScopeIds.includes(id));
+    const visibleScopeIds = filteredScopes.map((scope) => scope.id);
+    const newSelection = currentScopes.filter((id) => !visibleScopeIds.includes(id));
     setCurrentScopes(newSelection);
   };
 
-  const allVisible = filteredScopes.every(scope => currentScopes.includes(scope.id));
-  const noneVisible = filteredScopes.every(scope => !currentScopes.includes(scope.id));
-  
+  const allVisible = filteredScopes.every((scope) => currentScopes.includes(scope.id));
+  const noneVisible = filteredScopes.every((scope) => !currentScopes.includes(scope.id));
+
   const handleApply = () => {
     onSelectionChange(currentScopes);
     onClose();
   };
-  
+
   const handleReset = () => {
-    setCurrentScopes(['user']); // Reset to default value
+    if (onReset) {
+      onReset();
+    } else {
+      setCurrentScopes(['user']);
+    }
   };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header with search */}
       <div className="p-4 border-b border-border">
         <Input
           placeholder="Search scopes..."
@@ -84,8 +98,7 @@ export default function ScopeFilterEditor({
           className="mb-3"
           data-testid="scope-search-input"
         />
-        
-        {/* Select/Deselect buttons */}
+
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -112,7 +125,6 @@ export default function ScopeFilterEditor({
         </div>
       </div>
 
-      {/* Scope list */}
       <div className="max-h-64 overflow-y-auto" data-testid="scope-options-list">
         {filteredScopes.length === 0 ? (
           <div className="p-4 text-sm text-muted-foreground text-center">
@@ -148,13 +160,12 @@ export default function ScopeFilterEditor({
         )}
       </div>
 
-      {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentScopes.length} scope{currentScopes.length !== 1 ? 's' : ''} selected
           </span>
-          
+
           <div className="flex items-center gap-2">
             <TooltipProvider>
               <Tooltip>
@@ -174,7 +185,7 @@ export default function ScopeFilterEditor({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
+
             <Button
               size="sm"
               onClick={handleApply}
