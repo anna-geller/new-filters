@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckSquare, Square, CheckCircle, Workflow, RotateCcw } from "lucide-react";
 
-const flowOptions = [
+export interface FlowOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+const defaultFlowOptions: FlowOption[] = [
   { 
     id: 'myflow', 
     label: 'myflow', 
@@ -20,6 +26,11 @@ const flowOptions = [
     id: 'data-pipeline', 
     label: 'data-pipeline', 
     description: 'Data processing pipeline'
+  },
+  { 
+    id: 'data-processing-pipeline', 
+    label: 'data-processing-pipeline', 
+    description: 'Data processing automated test flow'
   },
   { 
     id: 'user-onboarding', 
@@ -56,6 +67,26 @@ const flowOptions = [
     label: 'analytics-report', 
     description: 'Analytics data processing flow'
   },
+  { 
+    id: 'microservices-and-apis', 
+    label: 'microservices-and-apis', 
+    description: 'Microservices integration test flow'
+  },
+  { 
+    id: 'email-notifications', 
+    label: 'email-notifications', 
+    description: 'Email notification system test'
+  },
+  { 
+    id: 'payment-gateway', 
+    label: 'payment-gateway', 
+    description: 'Payment gateway verification flow'
+  },
+  { 
+    id: 'user-auth-flow', 
+    label: 'user-auth-flow', 
+    description: 'User authentication validation flow'
+  },
 ];
 
 interface FlowFilterEditorProps {
@@ -63,25 +94,28 @@ interface FlowFilterEditorProps {
   onSelectionChange: (flows: string[]) => void;
   onClose: () => void;
   onReset?: () => void;
+  options?: FlowOption[];
 }
 
 export default function FlowFilterEditor({ 
   selectedFlows, 
   onSelectionChange, 
   onClose,
-  onReset
+  onReset,
+  options
 }: FlowFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Local state to track current values vs original props
   const [currentFlows, setCurrentFlows] = useState(selectedFlows);
+  const availableFlows = options ?? defaultFlowOptions;
 
   // Sync local state with props when they change (important for reset functionality)
   useEffect(() => {
     setCurrentFlows(selectedFlows);
   }, [selectedFlows]);
 
-  const filteredFlows = flowOptions.filter(flow =>
+  const filteredFlows = availableFlows.filter(flow =>
     flow.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
     flow.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -221,7 +255,7 @@ export default function FlowFilterEditor({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Reset to original value</p>
+                  <p>Reset to default</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

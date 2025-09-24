@@ -12,11 +12,13 @@ import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
 import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
-import StateFilterEditor from './StateFilterEditor';
+import StateFilterEditor, { type StateOption } from './StateFilterEditor';
 import LabelsFilterEditor from './LabelsFilterEditor';
+import InputsFilterEditor from './InputsFilterEditor';
+import OutputsFilterEditor from './OutputsFilterEditor';
 import NamespaceFilterEditor from './NamespaceFilterEditor';
-import FlowFilterEditor from './FlowFilterEditor';
-import ScopeFilterEditor from './ScopeFilterEditor';
+import FlowFilterEditor, { type FlowOption } from './FlowFilterEditor';
+import ScopeFilterEditor, { type ScopeOption } from './ScopeFilterEditor';
 import KindFilterEditor from './KindFilterEditor';
 import HierarchyFilterEditor from './SubflowFilterEditor';
 import ParentFilterEditor from './ParentFilterEditor';
@@ -27,8 +29,11 @@ import SaveFilterDialog from './SaveFilterDialog';
 import { ColumnConfig, defaultColumns } from './ExecutionsTable';
 import { SavedFilter } from '../types/savedFilters';
 import { filterCustomizationStorage } from '../utils/filterCustomizationStorage';
+import TagsFilterEditor, { type TagOption } from './TagsFilterEditor';
+import EnabledFilterEditor, { type EnabledOption } from './EnabledFilterEditor';
+import TriggerIdFilterEditor from './TriggerIdFilterEditor';
 
-interface FilterOption {
+export interface FilterOption {
   id: string;
   label: string;
   description: string;
@@ -61,6 +66,10 @@ interface FilterInterfaceProps {
   statesOperator: string;
   onSelectedStatesChange: (states: string[]) => void;
   onStatesOperatorChange: (operator: string) => void;
+  selectedLevels?: string[];
+  levelsOperator?: string;
+  onLevelsSelectionChange?: (levels: string[]) => void;
+  onLevelsOperatorChange?: (operator: string) => void;
   selectedInterval: string;
   intervalStartDate?: string;
   intervalEndDate?: string;
@@ -71,6 +80,18 @@ interface FilterInterfaceProps {
   onLabelsSelectionChange: (labels: string[]) => void;
   onLabelsOperatorChange: (operator: string) => void;
   onLabelsCustomValueChange: (value: string) => void;
+  selectedInputs: string[];
+  inputsOperator: string;
+  inputsCustomValue: string;
+  onInputsSelectionChange: (inputs: string[]) => void;
+  onInputsOperatorChange: (operator: string) => void;
+  onInputsCustomValueChange: (value: string) => void;
+  selectedOutputs: string[];
+  outputsOperator: string;
+  outputsCustomValue: string;
+  onOutputsSelectionChange: (outputs: string[]) => void;
+  onOutputsOperatorChange: (operator: string) => void;
+  onOutputsCustomValueChange: (value: string) => void;
   selectedNamespaces: string[];
   namespaceOperator: string;
   namespaceCustomValue: string;
@@ -79,6 +100,18 @@ interface FilterInterfaceProps {
   onNamespaceCustomValueChange: (value: string) => void;
   selectedFlows: string[];
   onFlowsSelectionChange: (flows: string[]) => void;
+  selectedTags?: string[];
+  tagsOperator?: string;
+  tagsCustomValue?: string;
+  onTagsSelectionChange?: (tags: string[]) => void;
+  onTagsOperatorChange?: (operator: string) => void;
+  onTagsCustomValueChange?: (value: string) => void;
+  selectedEnabled?: string | null;
+  onEnabledChange?: (value: string | null) => void;
+  selectedLocked?: string | null;
+  onLockedChange?: (value: string | null) => void;
+  selectedMissingSource?: string | null;
+  onMissingSourceChange?: (value: string | null) => void;
   selectedScopes: string[];
   onScopesSelectionChange: (scopes: string[]) => void;
   selectedKinds: string[];
@@ -95,6 +128,25 @@ interface FilterInterfaceProps {
   visibleFilters: string[];
   onVisibleFiltersChange: (filters: string[]) => void;
   onResetFilter: (filterId: string) => void;
+  stateFilterOptions?: StateOption[];
+  filterOptions?: FilterOption[];
+  namespaceMode?: 'executions' | 'tests';
+  flowOptions?: FlowOption[];
+  scopeOptions?: ScopeOption[];
+  tagOptions?: TagOption[];
+  enabledOptions?: EnabledOption[];
+  lockedOptions?: EnabledOption[];
+  missingSourceOptions?: EnabledOption[];
+  namespaceOptions?: string[];
+  levelsFilterOptions?: StateOption[];
+  triggerIdValue?: string;
+  triggerIdOperator?: string;
+  onTriggerIdValueChange?: (value: string) => void;
+  onTriggerIdOperatorChange?: (operator: string) => void;
+  searchPlaceholder?: string;
+  showChartToggleControl?: boolean;
+  showColumnsControl?: boolean;
+  showPeriodicRefreshControl?: boolean;
 }
 
 const defaultFilterOptions: FilterOption[] = [
@@ -106,7 +158,9 @@ const defaultFilterOptions: FilterOption[] = [
   { id: 'namespace', label: 'Namespace', description: 'Filter by namespace', enabled: false, order: 6 },
   { id: 'flow', label: 'Flow', description: 'Filter by workflow name', enabled: false, order: 7 },
   { id: 'labels', label: 'Labels', description: 'Filter by execution labels', enabled: false, order: 8 },
-  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 9 },
+  { id: 'inputs', label: 'Inputs', description: 'Filter by execution inputs', enabled: false, order: 9 },
+  { id: 'outputs', label: 'Outputs', description: 'Filter by execution outputs', enabled: false, order: 10 },
+  { id: 'initial-execution', label: 'Parent', description: 'Filter by parent execution', enabled: false, order: 11 },
 ];
 
 export default function FilterInterface({
@@ -127,6 +181,10 @@ export default function FilterInterface({
   statesOperator,
   onSelectedStatesChange,
   onStatesOperatorChange,
+  selectedLevels = [],
+  levelsOperator = 'in',
+  onLevelsSelectionChange,
+  onLevelsOperatorChange,
   selectedInterval,
   intervalStartDate,
   intervalEndDate,
@@ -137,6 +195,18 @@ export default function FilterInterface({
   onLabelsSelectionChange,
   onLabelsOperatorChange,
   onLabelsCustomValueChange,
+  selectedInputs,
+  inputsOperator,
+  inputsCustomValue,
+  onInputsSelectionChange,
+  onInputsOperatorChange,
+  onInputsCustomValueChange,
+  selectedOutputs,
+  outputsOperator,
+  outputsCustomValue,
+  onOutputsSelectionChange,
+  onOutputsOperatorChange,
+  onOutputsCustomValueChange,
   selectedNamespaces,
   namespaceOperator,
   namespaceCustomValue,
@@ -145,6 +215,18 @@ export default function FilterInterface({
   onNamespaceCustomValueChange,
   selectedFlows,
   onFlowsSelectionChange,
+  selectedTags = [],
+  tagsOperator = 'in',
+  tagsCustomValue = '',
+  onTagsSelectionChange,
+  onTagsOperatorChange,
+  onTagsCustomValueChange,
+  selectedEnabled = null,
+  onEnabledChange,
+  selectedLocked = null,
+  onLockedChange,
+  selectedMissingSource = null,
+  onMissingSourceChange,
   selectedScopes,
   onScopesSelectionChange,
   selectedKinds,
@@ -160,22 +242,82 @@ export default function FilterInterface({
   onUpdateFilter,
   visibleFilters,
   onVisibleFiltersChange,
-  onResetFilter
+  onResetFilter,
+  stateFilterOptions,
+  filterOptions,
+  namespaceMode = 'executions',
+  flowOptions,
+  scopeOptions,
+  tagOptions,
+  enabledOptions,
+  lockedOptions,
+  missingSourceOptions,
+  namespaceOptions,
+  levelsFilterOptions,
+  triggerIdValue = '',
+  triggerIdOperator = 'equals',
+  onTriggerIdValueChange,
+  onTriggerIdOperatorChange,
+  searchPlaceholder = 'Search executions...',
+  showChartToggleControl = true,
+  showColumnsControl = true,
+  showPeriodicRefreshControl = true,
 }: FilterInterfaceProps) {
+  const filterOptionsList = useMemo(
+    () => filterOptions ?? defaultFilterOptions,
+    [filterOptions],
+  );
+  const tagsOptionsList = useMemo(
+    () => tagOptions ?? [],
+    [tagOptions],
+  );
+  const enabledOptionsList = useMemo(
+    () => enabledOptions ?? [
+      { id: 'true', label: 'True' },
+      { id: 'false', label: 'False' },
+    ],
+    [enabledOptions],
+  );
+  const lockedOptionsList = useMemo(
+    () => lockedOptions ?? [
+      { id: 'true', label: 'True' },
+      { id: 'false', label: 'False' },
+    ],
+    [lockedOptions],
+  );
+  const missingSourceOptionsList = useMemo(
+    () => missingSourceOptions ?? [
+      { id: 'true', label: 'True' },
+      { id: 'false', label: 'False' },
+    ],
+    [missingSourceOptions],
+  );
+  const levelsOptionsList = useMemo(
+    () => levelsFilterOptions ?? [],
+    [levelsFilterOptions],
+  );
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
   // Derive available filters from visibleFilters instead of maintaining separate state
   const availableFilters = useMemo(() => {
-    return defaultFilterOptions.map(option => ({
+    return filterOptionsList.map(option => ({
       ...option,
       enabled: visibleFilters.includes(option.id)
     }));
-  }, [visibleFilters]);
+  }, [visibleFilters, filterOptionsList]);
   const [stateFilterOpen, setStateFilterOpen] = useState(false);
   const [labelsFilterOpen, setLabelsFilterOpen] = useState(false);
+  const [inputsFilterOpen, setInputsFilterOpen] = useState(false);
+  const [outputsFilterOpen, setOutputsFilterOpen] = useState(false);
   const [namespaceFilterOpen, setNamespaceFilterOpen] = useState(false);
   const [flowFilterOpen, setFlowFilterOpen] = useState(false);
+  const [tagsFilterOpen, setTagsFilterOpen] = useState(false);
+  const [enabledFilterOpen, setEnabledFilterOpen] = useState(false);
+  const [lockedFilterOpen, setLockedFilterOpen] = useState(false);
+  const [missingSourceFilterOpen, setMissingSourceFilterOpen] = useState(false);
+  const [levelsFilterOpen, setLevelsFilterOpen] = useState(false);
+  const [triggerIdFilterOpen, setTriggerIdFilterOpen] = useState(false);
   const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
   const [kindFilterOpen, setKindFilterOpen] = useState(false);
   const [hierarchyFilterOpen, setHierarchyFilterOpen] = useState(false);
@@ -250,6 +392,39 @@ export default function FilterInterface({
         // Clear state filter values when disabling
         onSelectedStatesChange([]);
       }
+    } else if (filterId === 'levels') {
+      if (!currentlyVisible) {
+        setLevelsFilterOpen(true);
+      } else {
+        onLevelsSelectionChange?.([]);
+        onLevelsOperatorChange?.('in');
+      }
+    } else if (filterId === 'tags') {
+      if (!currentlyVisible) {
+        setTagsFilterOpen(true);
+      } else {
+        onTagsSelectionChange?.([]);
+        onTagsOperatorChange?.('in');
+        onTagsCustomValueChange?.('');
+      }
+    } else if (filterId === 'enabled') {
+      if (!currentlyVisible) {
+        setEnabledFilterOpen(true);
+      } else {
+        onEnabledChange?.(null);
+      }
+    } else if (filterId === 'locked') {
+      if (!currentlyVisible) {
+        setLockedFilterOpen(true);
+      } else {
+        onLockedChange?.(null);
+      }
+    } else if (filterId === 'missing-source') {
+      if (!currentlyVisible) {
+        setMissingSourceFilterOpen(true);
+      } else {
+        onMissingSourceChange?.(null);
+      }
     } else if (filterId === 'labels') {
       if (!currentlyVisible) {
         setLabelsFilterOpen(true);
@@ -258,6 +433,22 @@ export default function FilterInterface({
         onLabelsSelectionChange([]);
         onLabelsOperatorChange('has-any-of');
         onLabelsCustomValueChange('');
+      }
+    } else if (filterId === 'inputs') {
+      if (!currentlyVisible) {
+        setInputsFilterOpen(true);
+      } else {
+        onInputsSelectionChange([]);
+        onInputsOperatorChange('has-any-of');
+        onInputsCustomValueChange('');
+      }
+    } else if (filterId === 'outputs') {
+      if (!currentlyVisible) {
+        setOutputsFilterOpen(true);
+      } else {
+        onOutputsSelectionChange([]);
+        onOutputsOperatorChange('has-any-of');
+        onOutputsCustomValueChange('');
       }
     } else if (filterId === 'namespace') {
       if (!currentlyVisible) {
@@ -272,6 +463,13 @@ export default function FilterInterface({
       } else {
         // Clear flow filter values when disabling
         onFlowsSelectionChange([]);
+      }
+    } else if (filterId === 'trigger-id') {
+      if (!currentlyVisible) {
+        setTriggerIdFilterOpen(true);
+      } else {
+        onTriggerIdValueChange?.('');
+        onTriggerIdOperatorChange?.('equals');
       }
     } else if (filterId === 'scope') {
       if (!currentlyVisible) {
@@ -320,12 +518,28 @@ export default function FilterInterface({
   const handleEditFilter = (filterId: string) => {
     if (filterId === 'state') {
       setStateFilterOpen(true);
+    } else if (filterId === 'levels') {
+      setLevelsFilterOpen(true);
+    } else if (filterId === 'tags') {
+      setTagsFilterOpen(true);
+    } else if (filterId === 'enabled') {
+      setEnabledFilterOpen(true);
+    } else if (filterId === 'locked') {
+      setLockedFilterOpen(true);
+    } else if (filterId === 'missing-source') {
+      setMissingSourceFilterOpen(true);
     } else if (filterId === 'labels') {
       setLabelsFilterOpen(true);
+    } else if (filterId === 'inputs') {
+      setInputsFilterOpen(true);
+    } else if (filterId === 'outputs') {
+      setOutputsFilterOpen(true);
     } else if (filterId === 'namespace') {
       setNamespaceFilterOpen(true);
     } else if (filterId === 'flow') {
       setFlowFilterOpen(true);
+    } else if (filterId === 'trigger-id') {
+      setTriggerIdFilterOpen(true);
     } else if (filterId === 'scope') {
       setScopeFilterOpen(true);
     } else if (filterId === 'kind') {
@@ -352,6 +566,18 @@ export default function FilterInterface({
     setStateFilterOpen(false);
   };
 
+  const handleLevelsSelectionChange = (levels: string[]) => {
+    onLevelsSelectionChange?.(levels);
+  };
+
+  const handleLevelsOperatorSelectionChange = (operator: string) => {
+    onLevelsOperatorChange?.(operator);
+  };
+
+  const handleCloseLevelsFilter = () => {
+    setLevelsFilterOpen(false);
+  };
+
   const handleLabelsSelectionChange = (labels: string[]) => {
     onLabelsSelectionChange(labels);
   };
@@ -368,6 +594,74 @@ export default function FilterInterface({
     setLabelsFilterOpen(false);
   };
 
+  const handleInputsSelectionChange = (inputs: string[]) => {
+    onInputsSelectionChange(inputs);
+  };
+
+  const handleInputsOperatorChange = (operator: string) => {
+    onInputsOperatorChange(operator);
+  };
+
+  const handleInputsCustomValueChange = (value: string) => {
+    onInputsCustomValueChange(value);
+  };
+
+  const handleCloseInputsFilter = () => {
+    setInputsFilterOpen(false);
+  };
+
+  const handleOutputsSelectionChange = (outputs: string[]) => {
+    onOutputsSelectionChange(outputs);
+  };
+
+  const handleOutputsOperatorChange = (operator: string) => {
+    onOutputsOperatorChange(operator);
+  };
+
+  const handleOutputsCustomValueChange = (value: string) => {
+    onOutputsCustomValueChange(value);
+  };
+
+  const handleCloseOutputsFilter = () => {
+    setOutputsFilterOpen(false);
+  };
+
+  const handleCloseTagsFilter = () => {
+    setTagsFilterOpen(false);
+  };
+
+  const handleCloseEnabledFilter = () => {
+    setEnabledFilterOpen(false);
+  };
+
+  const handleLockedSelectionChange = (value: string | null) => {
+    onLockedChange?.(value);
+  };
+
+  const handleCloseLockedFilter = () => {
+    setLockedFilterOpen(false);
+  };
+
+  const handleMissingSourceSelectionChange = (value: string | null) => {
+    onMissingSourceChange?.(value);
+  };
+
+  const handleCloseMissingSourceFilter = () => {
+    setMissingSourceFilterOpen(false);
+  };
+
+  const handleTriggerIdOperatorSelectionChange = (operator: string) => {
+    onTriggerIdOperatorChange?.(operator);
+  };
+
+  const handleTriggerIdValueChangeInternal = (value: string) => {
+    onTriggerIdValueChange?.(value);
+  };
+
+  const handleCloseTriggerIdFilter = () => {
+    setTriggerIdFilterOpen(false);
+  };
+
   const handleNamespacesSelectionChange = (namespaces: string[]) => {
     onNamespacesSelectionChange(namespaces);
   };
@@ -382,6 +676,22 @@ export default function FilterInterface({
 
   const handleFlowsSelectionChange = (flows: string[]) => {
     onFlowsSelectionChange(flows);
+  };
+
+  const handleTagsSelectionChange = (tags: string[]) => {
+    onTagsSelectionChange?.(tags);
+  };
+
+  const handleTagsOperatorChange = (operator: string) => {
+    onTagsOperatorChange?.(operator);
+  };
+
+  const handleTagsCustomValueChange = (value: string) => {
+    onTagsCustomValueChange?.(value);
+  };
+
+  const handleEnabledSelectionChange = (value: string | null) => {
+    onEnabledChange?.(value);
   };
 
   const handleScopesSelectionChange = (scopes: string[]) => {
@@ -552,6 +862,35 @@ export default function FilterInterface({
               onOperatorChange={handleStatesOperatorChange}
               onClose={handleCloseStateFilter}
               onReset={() => onResetFilter('state')}
+              stateOptions={stateFilterOptions}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'levels') {
+      return (
+        <Popover key={filter.id} open={levelsFilterOpen} onOpenChange={setLevelsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <StateFilterEditor
+              selectedStates={selectedLevels}
+              statesOperator={levelsOperator}
+              onSelectionChange={handleLevelsSelectionChange}
+              onOperatorChange={handleLevelsOperatorSelectionChange}
+              onClose={handleCloseLevelsFilter}
+              onReset={() => onResetFilter('levels')}
+              stateOptions={levelsOptionsList}
             />
           </PopoverContent>
         </Popover>
@@ -587,6 +926,178 @@ export default function FilterInterface({
         </Popover>
       );
     }
+    // Tags Filter with Popover
+    else if (filter.id === 'tags') {
+      return (
+        <Popover key={filter.id} open={tagsFilterOpen} onOpenChange={setTagsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <TagsFilterEditor
+              selectedTags={selectedTags}
+              operator={tagsOperator}
+              customValue={tagsCustomValue}
+              options={tagsOptionsList}
+              onSelectionChange={handleTagsSelectionChange}
+              onOperatorChange={handleTagsOperatorChange}
+              onCustomValueChange={handleTagsCustomValueChange}
+              onClose={handleCloseTagsFilter}
+              onReset={() => onResetFilter('tags')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    // Enabled Filter with Popover
+    else if (filter.id === 'enabled') {
+      return (
+        <Popover key={filter.id} open={enabledFilterOpen} onOpenChange={setEnabledFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'equals'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-64 p-0">
+            <EnabledFilterEditor
+              selectedValue={selectedEnabled ?? null}
+              options={enabledOptionsList}
+              onSelectionChange={handleEnabledSelectionChange}
+              onClose={handleCloseEnabledFilter}
+              onReset={() => onResetFilter('enabled')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'locked') {
+      return (
+        <Popover key={filter.id} open={lockedFilterOpen} onOpenChange={setLockedFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'equals'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-64 p-0">
+            <EnabledFilterEditor
+              selectedValue={selectedLocked ?? null}
+              options={lockedOptionsList}
+              onSelectionChange={handleLockedSelectionChange}
+              onClose={handleCloseLockedFilter}
+              onReset={() => onResetFilter('locked')}
+              hideStatusText
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'missing-source') {
+      return (
+        <Popover key={filter.id} open={missingSourceFilterOpen} onOpenChange={setMissingSourceFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'equals'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-64 p-0">
+            <EnabledFilterEditor
+              selectedValue={selectedMissingSource ?? null}
+              options={missingSourceOptionsList}
+              onSelectionChange={handleMissingSourceSelectionChange}
+              onClose={handleCloseMissingSourceFilter}
+              onReset={() => onResetFilter('missing-source')}
+              hideStatusText
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    // Inputs Filter with Popover
+    else if (filter.id === 'inputs') {
+      return (
+        <Popover key={filter.id} open={inputsFilterOpen} onOpenChange={setInputsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <InputsFilterEditor
+              selectedInputs={selectedInputs}
+              selectedOperator={inputsOperator}
+              customValue={inputsCustomValue}
+              onSelectionChange={handleInputsSelectionChange}
+              onOperatorChange={handleInputsOperatorChange}
+              onCustomValueChange={handleInputsCustomValueChange}
+              onClose={handleCloseInputsFilter}
+              onReset={() => onResetFilter('inputs')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    // Outputs Filter with Popover
+    else if (filter.id === 'outputs') {
+      return (
+        <Popover key={filter.id} open={outputsFilterOpen} onOpenChange={setOutputsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <OutputsFilterEditor
+              selectedOutputs={selectedOutputs}
+              selectedOperator={outputsOperator}
+              customValue={outputsCustomValue}
+              onSelectionChange={handleOutputsSelectionChange}
+              onOperatorChange={handleOutputsOperatorChange}
+              onCustomValueChange={handleOutputsCustomValueChange}
+              onClose={handleCloseOutputsFilter}
+              onReset={() => onResetFilter('outputs')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
     // Namespace Filter with Popover
     else if (filter.id === 'namespace') {
       return (
@@ -612,6 +1123,8 @@ export default function FilterInterface({
               onReset={() => onResetFilter('namespace')}
               onCustomValueChange={handleNamespaceCustomValueChange}
               onClose={handleCloseNamespaceFilter}
+              mode={namespaceMode}
+              options={namespaceOptions}
             />
           </PopoverContent>
         </Popover>
@@ -638,6 +1151,34 @@ export default function FilterInterface({
               onSelectionChange={handleFlowsSelectionChange}
               onClose={handleCloseFlowFilter}
               onReset={() => onResetFilter('flow')}
+              options={flowOptions}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'trigger-id') {
+      return (
+        <Popover key={filter.id} open={triggerIdFilterOpen} onOpenChange={setTriggerIdFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || triggerIdOperator}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <TriggerIdFilterEditor
+              value={triggerIdValue}
+              operator={triggerIdOperator}
+              onValueChange={handleTriggerIdValueChangeInternal}
+              onOperatorChange={handleTriggerIdOperatorSelectionChange}
+              onClose={handleCloseTriggerIdFilter}
+              onReset={() => onResetFilter('trigger-id')}
             />
           </PopoverContent>
         </Popover>
@@ -663,6 +1204,7 @@ export default function FilterInterface({
               selectedScopes={selectedScopes}
               onSelectionChange={handleScopesSelectionChange}
               onClose={handleCloseScopeFilter}
+              options={scopeOptions}
             />
           </PopoverContent>
         </Popover>
@@ -824,7 +1366,7 @@ export default function FilterInterface({
           <SearchBar
             value={searchValue}
             onChange={onSearchChange}
-            placeholder="Search executions..."
+            placeholder={searchPlaceholder}
           />
         </div>
 
@@ -861,13 +1403,13 @@ export default function FilterInterface({
                 onClick={handleTableOptionsToggle}
                 className="h-7 w-7 p-0 flex items-center justify-center"
                 data-testid="table-options-button"
-                aria-label="Show table options"
+                aria-label="Show data options"
               >
                 <Sliders className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              Show table options
+              Show data options
             </TooltipContent>
           </Tooltip>
         </div>
@@ -885,36 +1427,40 @@ export default function FilterInterface({
       {/* Table Options Panel */}
       {tableOptionsOpen && (
         <div className="px-4 py-3 border-b border-border bg-card/30">
-          <div className="flex items-center justify-between">
-            {/* Show Chart - Left side */}
-            <div className="flex items-center gap-2">
-              <Switch
-                id="show-chart"
-                checked={showChart}
-                onCheckedChange={onToggleShowChart}
-                data-testid="switch-show-chart"
-              />
-              <Label htmlFor="show-chart" className="text-sm cursor-pointer">
-                Show Chart
-              </Label>
-            </div>
-
-            {/* Right side controls */}
-            <div className="flex items-center gap-6">
-              {/* Periodic Refresh */}
+          <div
+            className={`flex items-center gap-6 ${
+              showChartToggleControl ? 'justify-between' : 'justify-end'
+            }`}
+          >
+            {showChartToggleControl && (
               <div className="flex items-center gap-2">
                 <Switch
-                  id="periodic-refresh"
-                  checked={periodicRefresh}
-                  onCheckedChange={onTogglePeriodicRefresh}
-                  data-testid="switch-periodic-refresh"
+                  id="show-chart"
+                  checked={showChart}
+                  onCheckedChange={onToggleShowChart}
+                  data-testid="switch-show-chart"
                 />
-                <Label htmlFor="periodic-refresh" className="text-sm cursor-pointer">
-                  Periodic refresh
+                <Label htmlFor="show-chart" className="text-sm cursor-pointer">
+                  Show Chart
                 </Label>
               </div>
+            )}
 
-              {/* Refresh Data Button */}
+            <div className="flex items-center gap-6">
+              {showPeriodicRefreshControl && (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="periodic-refresh"
+                    checked={periodicRefresh}
+                    onCheckedChange={onTogglePeriodicRefresh}
+                    data-testid="switch-periodic-refresh"
+                  />
+                  <Label htmlFor="periodic-refresh" className="text-sm cursor-pointer">
+                    Periodic refresh
+                  </Label>
+                </div>
+              )}
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -926,34 +1472,35 @@ export default function FilterInterface({
                 Refresh data
               </Button>
 
-              {/* Columns Button with Popover */}
-              <Popover open={tablePropertiesOpen} onOpenChange={setTablePropertiesOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-2 hover-elevate"
-                    data-testid="button-columns"
+              {showColumnsControl && (
+                <Popover open={tablePropertiesOpen} onOpenChange={setTablePropertiesOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-2 hover-elevate"
+                      data-testid="button-columns"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Columns
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side="bottom"
+                    align="end"
+                    className="w-80 p-0"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
                   >
-                    <Settings className="h-4 w-4" />
-                    Columns
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  side="bottom" 
-                  align="end" 
-                  className="w-80 p-0"
-                  onOpenAutoFocus={(e) => e.preventDefault()}
-                >
-                  <TablePropertiesPanel
-                    columns={columns}
-                    onToggleColumn={handleColumnToggle}
-                    onReorderColumns={handleColumnReorder}
-                    isOpen={tablePropertiesOpen}
-                    onClose={() => setTablePropertiesOpen(false)}
-                  />
-                </PopoverContent>
-              </Popover>
+                    <TablePropertiesPanel
+                      columns={columns}
+                      onToggleColumn={handleColumnToggle}
+                      onReorderColumns={handleColumnReorder}
+                      isOpen={tablePropertiesOpen}
+                      onClose={() => setTablePropertiesOpen(false)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           </div>
         </div>

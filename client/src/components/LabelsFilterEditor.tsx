@@ -1,81 +1,67 @@
-import { useState, useEffect } from 'react';
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CheckSquare, Square, CheckCircle, Link2, RotateCcw } from "lucide-react";
+import KeyValueFilterEditor, {
+  KeyValueFilterOption,
+} from './KeyValueFilterEditor';
 
-const operatorOptions = [
-  { id: 'has-any-of', label: 'has any of', description: 'Matches at least one of the selected labels (OR)' },
-  { id: 'has-none-of', label: 'has none of', description: 'Matches none of the selected labels (NOT OR)' },
-  { id: 'has-all-of', label: 'has all of', description: 'Matches all of the selected labels (AND)' },
-  { id: 'contains', label: 'contains', description: 'Label contains the specified text (LIKE)' },
-  { id: 'does-not-contain', label: 'does not contain', description: 'Label does not contain the specified text (NOT LIKE)' },
-  { id: 'is-set', label: 'is set', description: 'Key exists with any value (IS NOT NULL)' },
-  { id: 'is-not-set', label: 'is not set', description: 'Key does not exist (IS NULL)' },
-];
-
-const labelOptions = [
-  { 
-    id: 'env:production', 
-    label: 'env:production', 
+const labelOptions: KeyValueFilterOption[] = [
+  {
+    id: 'env:production',
+    label: 'env:production',
     color: 'bg-blue-500',
-    description: 'Production environment'
+    description: 'Production environment',
   },
-  { 
-    id: 'team:backend', 
-    label: 'team:backend', 
+  {
+    id: 'team:backend',
+    label: 'team:backend',
     color: 'bg-green-500',
-    description: 'Backend team assignments'
+    description: 'Backend team assignments',
   },
-  { 
-    id: 'team:frontend', 
-    label: 'team:frontend', 
+  {
+    id: 'team:frontend',
+    label: 'team:frontend',
     color: 'bg-purple-500',
-    description: 'Frontend team assignments'
+    description: 'Frontend team assignments',
   },
-  { 
-    id: 'team:analytics', 
-    label: 'team:analytics', 
+  {
+    id: 'team:analytics',
+    label: 'team:analytics',
     color: 'bg-orange-500',
-    description: 'Analytics team assignments'
+    description: 'Analytics team assignments',
   },
-  { 
-    id: 'action:cvescan', 
-    label: 'action:cvescan', 
+  {
+    id: 'action:cvescan',
+    label: 'action:cvescan',
     color: 'bg-red-500',
-    description: 'Security scanning processes'
+    description: 'Security scanning processes',
   },
-  { 
-    id: 'team:security', 
-    label: 'team:security', 
+  {
+    id: 'team:security',
+    label: 'team:security',
     color: 'bg-yellow-500',
-    description: 'Security team assignments'
+    description: 'Security team assignments',
   },
-  { 
-    id: 'action:test', 
-    label: 'action:test', 
+  {
+    id: 'action:test',
+    label: 'action:test',
     color: 'bg-cyan-500',
-    description: 'Automated testing processes'
+    description: 'Automated testing processes',
   },
-  { 
-    id: 'priority:critical', 
-    label: 'priority:critical', 
+  {
+    id: 'priority:critical',
+    label: 'priority:critical',
     color: 'bg-pink-500',
-    description: 'Critical path executions'
+    description: 'Critical path executions',
   },
-  { 
-    id: 'type:user-facing', 
-    label: 'type:user-facing', 
+  {
+    id: 'type:user-facing',
+    label: 'type:user-facing',
     color: 'bg-indigo-500',
-    description: 'User-facing features'
+    description: 'User-facing features',
   },
-  { 
-    id: 'type:internal', 
-    label: 'type:internal', 
+  {
+    id: 'type:internal',
+    label: 'type:internal',
     color: 'bg-teal-500',
-    description: 'Internal tooling processes'
+    description: 'Internal tooling processes',
   },
 ];
 
@@ -90,288 +76,29 @@ interface LabelsFilterEditorProps {
   onReset?: () => void;
 }
 
-export default function LabelsFilterEditor({ 
-  selectedLabels, 
+export default function LabelsFilterEditor({
+  selectedLabels,
   selectedOperator,
   customValue = '',
-  onSelectionChange, 
+  onSelectionChange,
   onOperatorChange,
   onCustomValueChange,
   onClose,
-  onReset
+  onReset,
 }: LabelsFilterEditorProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  // Local state to track current values vs original props
-  const [currentLabels, setCurrentLabels] = useState(selectedLabels);
-  const [currentOperator, setCurrentOperator] = useState(selectedOperator);
-  const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
-
-  // Sync local state with props when they change (important for reset functionality)
-  useEffect(() => {
-    setCurrentLabels(selectedLabels);
-  }, [selectedLabels]);
-
-  useEffect(() => {
-    setCurrentOperator(selectedOperator);
-  }, [selectedOperator]);
-
-  useEffect(() => {
-    setCurrentCustomValue(customValue);
-  }, [customValue]);
-
-  const filteredLabels = labelOptions.filter(label =>
-    label.label.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleToggleLabel = (labelId: string) => {
-    const isSelected = currentLabels.includes(labelId);
-    if (isSelected) {
-      setCurrentLabels(currentLabels.filter(id => id !== labelId));
-    } else {
-      setCurrentLabels([...currentLabels, labelId]);
-    }
-  };
-
-  const handleSelectAll = () => {
-    const allVisibleLabels = filteredLabels.map(label => label.id);
-    const combinedLabels = [...currentLabels, ...allVisibleLabels];
-    const newSelection = Array.from(new Set(combinedLabels));
-    setCurrentLabels(newSelection);
-  };
-
-  const handleDeselectAll = () => {
-    const visibleLabelIds = filteredLabels.map(label => label.id);
-    const newSelection = currentLabels.filter(id => !visibleLabelIds.includes(id));
-    setCurrentLabels(newSelection);
-  };
-
-  const allVisible = filteredLabels.every(label => currentLabels.includes(label.id));
-  const noneVisible = filteredLabels.every(label => !currentLabels.includes(label.id));
-  
-  const selectedOperatorObj = operatorOptions.find(op => op.id === currentOperator);
-  const isTextBasedOperator = ['contains', 'does-not-contain'].includes(currentOperator);
-  const isKeyBasedOperator = ['is-set', 'is-not-set'].includes(currentOperator);
-  const isNoInputOperator = false; // No operators currently need no input
-  const isSelectionBasedOperator = ['has-any-of', 'has-none-of', 'has-all-of'].includes(currentOperator);
-  
-  const handleApply = () => {
-    onSelectionChange(currentLabels);
-    onOperatorChange(currentOperator);
-    onCustomValueChange(currentCustomValue);
-    onClose();
-  };
-  
-  const handleReset = () => {
-    if (onReset) {
-      onReset();
-    } else {
-      setCurrentLabels(selectedLabels);
-      setCurrentOperator(selectedOperator);
-      setCurrentCustomValue(customValue);
-    }
-  };
-
   return (
-    <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header with operator and search */}
-      <div className="p-4 border-b border-border">
-        {/* Operator Selection */}
-        <div className="mb-3">
-          <label className="text-xs font-medium text-muted-foreground mb-2 block">
-            Filter Operator
-          </label>
-          <Select value={currentOperator} onValueChange={setCurrentOperator}>
-            <SelectTrigger data-testid="select-labels-operator">
-              <SelectValue placeholder="Select operator...">
-                {selectedOperatorObj?.label || "Select operator..."}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {operatorOptions.map((operator) => (
-                <SelectItem key={operator.id} value={operator.id}>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{operator.label}</span>
-                    <span className="text-xs text-muted-foreground">{operator.description}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Custom Value Input for text-based operators */}
-        {isTextBasedOperator && (
-          <div className="mb-3">
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">
-              Value
-            </label>
-            <Input
-              placeholder={`Enter text that labels should ${selectedOperatorObj?.label || 'match'}...`}
-              value={currentCustomValue}
-              onChange={(e) => setCurrentCustomValue(e.target.value)}
-              className="text-sm"
-              data-testid="input-labels-custom-value"
-            />
-          </div>
-        )}
-
-        {/* Label Key Input for key-based operators */}
-        {isKeyBasedOperator && (
-          <div className="mb-3">
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">
-              Label Key
-            </label>
-            <Input
-              placeholder="Enter label key (e.g. env, team, action)..."
-              value={currentCustomValue}
-              onChange={(e) => setCurrentCustomValue(e.target.value)}
-              className="text-sm"
-              data-testid="input-labels-key-value"
-            />
-          </div>
-        )}
-
-        {/* Search for selection-based operators */}
-        {isSelectionBasedOperator && (
-          <div className="mb-3">
-            <Input
-              placeholder="Search labels..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="text-sm"
-              data-testid="input-labels-search"
-            />
-          </div>
-        )}
-        
-        {/* Information display for no-input operators */}
-        {isNoInputOperator && (
-          <div className="mb-3 p-3 bg-muted/30 rounded-md border border-border">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium text-foreground">
-                {selectedOperatorObj?.label}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {selectedOperatorObj?.description}
-            </p>
-            <p className="text-xs text-blue-600 mt-2">
-              No additional configuration needed for this operator.
-            </p>
-          </div>
-        )}
-
-        {/* Select All / Deselect All for selection-based operators */}
-        {isSelectionBasedOperator && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSelectAll}
-              disabled={allVisible}
-              className="flex-1"
-              data-testid="button-select-all-labels"
-            >
-              <CheckSquare className="w-3 h-3 mr-1" />
-              Select All
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDeselectAll}
-              disabled={noneVisible}
-              className="flex-1"
-              data-testid="button-deselect-all-labels"
-            >
-              <Square className="w-3 h-3 mr-1" />
-              Deselect All
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Label Options for selection-based operators */}
-      {isSelectionBasedOperator && (
-        <div className="max-h-64 overflow-y-auto">
-          {filteredLabels.map((label) => {
-            const isSelected = currentLabels.includes(label.id);
-            
-            return (
-              <div
-                key={label.id}
-                onClick={() => handleToggleLabel(label.id)}
-                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer"
-                data-testid={`label-option-${label.id}`}
-              >
-                {/* Label Badge with colored chain-link icon */}
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
-                  isSelected 
-                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                    : 'bg-muted border-border text-muted-foreground'
-                }`}>
-                  <div className={`p-1 rounded ${label.color}`}>
-                    <Link2 className="h-3 w-3 text-white" />
-                  </div>
-                  <span className="text-sm font-medium">{label.label}</span>
-                </div>
-                
-                {/* Checkmark */}
-                <div className="ml-auto">
-                  {isSelected ? (
-                    <CheckCircle className="h-5 w-5 text-emerald-500" />
-                  ) : (
-                    <div className="h-5 w-5 rounded border border-border" />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          {isTextBasedOperator 
-            ? `Operator: ${selectedOperatorObj?.label || 'None'}`
-            : isNoInputOperator
-            ? `Operator: ${selectedOperatorObj?.label || 'None'}`
-            : `${currentLabels.length} of ${labelOptions.length} labels selected`
-          }
-        </p>
-        
-        <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReset}
-                  className="px-2"
-                  data-testid="button-reset-labels-filter"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Reset to original value</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <Button
-            size="sm"
-            onClick={handleApply}
-            className="flex-1"
-            data-testid="button-apply-labels-filter"
-          >
-            Apply
-          </Button>
-        </div>
-      </div>
-    </Card>
+    <KeyValueFilterEditor
+      entityNames={{ singular: 'Label', plural: 'Labels' }}
+      options={labelOptions}
+      selectedValues={selectedLabels}
+      selectedOperator={selectedOperator}
+      customValue={customValue}
+      onSelectionChange={onSelectionChange}
+      onOperatorChange={onOperatorChange}
+      onCustomValueChange={onCustomValueChange}
+      onClose={onClose}
+      onReset={onReset}
+      dataTestIdPrefix="labels"
+    />
   );
 }

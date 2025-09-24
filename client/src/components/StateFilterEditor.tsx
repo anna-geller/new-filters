@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,14 @@ const operatorOptions = [
   { id: 'not-in', label: 'not in', description: 'Execution state is not one of the selected states' },
 ];
 
-const stateOptions = [
+export interface StateOption {
+  id: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  description: string;
+}
+
+const defaultStateOptions: StateOption[] = [
   { 
     id: 'CREATED', 
     label: 'CREATED', 
@@ -111,6 +119,7 @@ interface StateFilterEditorProps {
   onOperatorChange: (operator: string) => void;
   onClose: () => void;
   onReset?: () => void;
+  stateOptions?: StateOption[];
 }
 
 export default function StateFilterEditor({ 
@@ -119,11 +128,14 @@ export default function StateFilterEditor({
   onSelectionChange, 
   onOperatorChange,
   onClose,
-  onReset
+  onReset,
+  stateOptions
 }: StateFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentStates, setCurrentStates] = useState(selectedStates);
   const [currentOperator, setCurrentOperator] = useState(statesOperator);
+
+  const availableStates = stateOptions ?? defaultStateOptions;
 
   // Sync local state with props when they change (important for reset functionality)
   useEffect(() => {
@@ -134,7 +146,7 @@ export default function StateFilterEditor({
     setCurrentOperator(statesOperator);
   }, [statesOperator]);
 
-  const filteredStates = stateOptions.filter(state =>
+  const filteredStates = availableStates.filter(state =>
     state.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -280,7 +292,7 @@ export default function StateFilterEditor({
       {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          {currentStates.length} of {stateOptions.length} states selected
+          {currentStates.length} of {availableStates.length} states selected
         </p>
         
         <div className="flex items-center gap-2">
@@ -298,7 +310,7 @@ export default function StateFilterEditor({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Reset to original value</p>
+                <p>Reset to default</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

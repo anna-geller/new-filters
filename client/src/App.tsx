@@ -6,12 +6,25 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import ExecutionsPage from "@/pages/ExecutionsPage";
+import FlowsPage from "@/pages/FlowsPage";
+import AppsPage from "@/pages/AppsPage";
+import TestsPage from "@/pages/TestsPage";
+import LogsPage from "@/pages/LogsPage";
+import TriggersPage from "@/pages/TriggersPage";
+import DashboardsPage from "@/pages/DashboardsPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={ExecutionsPage} />
+      <Route path="/executions" component={ExecutionsPage} />
+      <Route path="/dashboards" component={DashboardsPage} />
+      <Route path="/flows" component={FlowsPage} />
+      <Route path="/apps" component={AppsPage} />
+      <Route path="/logs" component={LogsPage} />
+      <Route path="/admin/tenant/triggers" component={TriggersPage} />
+      <Route path="/tests" component={TestsPage} />
       <Route component={NotFound} />
     </Switch>
   );

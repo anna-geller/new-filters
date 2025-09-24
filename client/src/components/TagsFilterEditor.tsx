@@ -4,113 +4,93 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CheckSquare, Square, CheckCircle, Building2, RotateCcw } from "lucide-react";
+import { CheckSquare, Square, CheckCircle, Tag, RotateCcw } from "lucide-react";
 
-const namespaceOptions = [
-  'company',
-  'company.team',
-  'company.team.backend',
-  'company.team.frontend',
-  'company.team.api',
-  'company.analytics',
-  'company.security',
-  'company.team.database',
-];
+export interface TagOption {
+  id: string;
+  label: string;
+}
 
-const testsNamespaceOptions = [
-  'company',
-  'company.team',
-  'company.backend',
-  'tutorial',
-];
-
-interface NamespaceFilterEditorProps {
-  selectedNamespaces: string[];
-  namespaceOperator: string;
+interface TagsFilterEditorProps {
+  selectedTags: string[];
+  operator: string;
   customValue: string;
-  onSelectionChange: (namespaces: string[]) => void;
+  options: TagOption[];
+  onSelectionChange: (tags: string[]) => void;
   onOperatorChange: (operator: string) => void;
   onCustomValueChange: (value: string) => void;
   onClose: () => void;
   onReset?: () => void;
-  mode?: 'executions' | 'tests';
-  options?: string[];
 }
 
 const operatorOptions = [
-  { value: 'in', label: 'in', description: 'Match any of the selected namespaces' },
-  { value: 'not-in', label: 'not in', description: 'Exclude any of the selected namespaces' },
-  { value: 'contains', label: 'contains', description: 'Namespace contains the text' },
-  { value: 'starts-with', label: 'starts with', description: 'Namespace starts with the text' },
-  { value: 'ends-with', label: 'ends with', description: 'Namespace ends with the text' },
+  { value: 'in', label: 'in' },
+  { value: 'not-in', label: 'not in' },
+  { value: 'contains', label: 'contains' },
+  { value: 'starts-with', label: 'starts with' },
+  { value: 'ends-with', label: 'ends with' },
 ];
 
-export default function NamespaceFilterEditor({
-  selectedNamespaces,
-  namespaceOperator,
+export default function TagsFilterEditor({
+  selectedTags,
+  operator,
   customValue,
+  options,
   onSelectionChange,
   onOperatorChange,
   onCustomValueChange,
   onClose,
   onReset,
-  mode = 'executions',
-  options,
-}: NamespaceFilterEditorProps) {
-  const baseOptions = mode === 'tests' ? testsNamespaceOptions : namespaceOptions;
-  const availableNamespaces = options ?? baseOptions;
+}: TagsFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const [currentNamespaces, setCurrentNamespaces] = useState(selectedNamespaces);
-  const [currentOperator, setCurrentOperator] = useState(namespaceOperator);
+  const [currentTags, setCurrentTags] = useState(selectedTags);
+  const [currentOperator, setCurrentOperator] = useState(operator);
   const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
 
-  useEffect(() => {
-    setCurrentNamespaces(selectedNamespaces);
-  }, [selectedNamespaces]);
+  const isTextOperator = ['contains', 'starts-with', 'ends-with'].includes(currentOperator);
 
   useEffect(() => {
-    setCurrentOperator(namespaceOperator);
-  }, [namespaceOperator]);
+    setCurrentTags(selectedTags);
+  }, [selectedTags]);
+
+  useEffect(() => {
+    setCurrentOperator(operator);
+  }, [operator]);
 
   useEffect(() => {
     setCurrentCustomValue(customValue);
   }, [customValue]);
 
-  const isTextBasedOperator = ['contains', 'starts-with', 'ends-with'].includes(currentOperator);
-
-  const filteredNamespaces = availableNamespaces.filter((namespace) =>
-    namespace.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredTags = options.filter((tag) =>
+    tag.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleToggleNamespace = (namespace: string) => {
-    const isSelected = currentNamespaces.includes(namespace);
+  const handleToggleTag = (tagId: string) => {
+    const isSelected = currentTags.includes(tagId);
     if (isSelected) {
-      setCurrentNamespaces(currentNamespaces.filter((ns) => ns !== namespace));
+      setCurrentTags(currentTags.filter((id) => id !== tagId));
     } else {
-      setCurrentNamespaces([...currentNamespaces, namespace]);
+      setCurrentTags([...currentTags, tagId]);
     }
   };
 
   const handleSelectAll = () => {
-    const allVisibleNamespaces = [...filteredNamespaces];
-    const combinedNamespaces = [...currentNamespaces, ...allVisibleNamespaces];
-    const newSelection = Array.from(new Set(combinedNamespaces));
-    setCurrentNamespaces(newSelection);
+    const visibleIds = filteredTags.map((tag) => tag.id);
+    const next = Array.from(new Set([...currentTags, ...visibleIds]));
+    setCurrentTags(next);
   };
 
   const handleDeselectAll = () => {
-    const newSelection = currentNamespaces.filter(
-      (namespace) => !filteredNamespaces.includes(namespace),
-    );
-    setCurrentNamespaces(newSelection);
+    const visibleIds = filteredTags.map((tag) => tag.id);
+    const next = currentTags.filter((id) => !visibleIds.includes(id));
+    setCurrentTags(next);
   };
 
-  const allVisible = filteredNamespaces.every((namespace) => currentNamespaces.includes(namespace));
-  const noneVisible = filteredNamespaces.every((namespace) => !currentNamespaces.includes(namespace));
+  const allVisible = filteredTags.length > 0 && filteredTags.every((tag) => currentTags.includes(tag.id));
+  const noneVisible = filteredTags.every((tag) => !currentTags.includes(tag.id));
 
   const handleApply = () => {
-    onSelectionChange(currentNamespaces);
+    onSelectionChange(currentTags);
     onOperatorChange(currentOperator);
     onCustomValueChange(currentCustomValue);
     onClose();
@@ -120,60 +100,51 @@ export default function NamespaceFilterEditor({
     if (onReset) {
       onReset();
     } else {
-      setCurrentNamespaces(selectedNamespaces);
-      setCurrentOperator(namespaceOperator);
+      setCurrentTags(selectedTags);
+      setCurrentOperator(operator);
       setCurrentCustomValue(customValue);
     }
-  };
-
-  const getNamespaceLevel = (namespace: string) => {
-    return namespace.split('.').length - 1;
   };
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       <div className="p-4 border-b border-border">
         <div className="mb-3">
-          <label className="text-xs font-medium text-muted-foreground mb-2 block">
-            Filter Operator
-          </label>
+          <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
           <Select value={currentOperator} onValueChange={setCurrentOperator}>
-            <SelectTrigger data-testid="select-namespace-operator">
+            <SelectTrigger data-testid="select-tags-operator">
               <SelectValue placeholder="Select operator...">
-                {operatorOptions.find((opt) => opt.value === currentOperator)?.label ||
+                {operatorOptions.find((option) => option.value === currentOperator)?.label ||
                   'Select operator...'}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {operatorOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{option.label}</span>
-                    <span className="text-xs text-muted-foreground">{option.description}</span>
-                  </div>
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {isTextBasedOperator ? (
+        {isTextOperator ? (
           <Input
             placeholder="Enter text..."
             value={currentCustomValue}
             onChange={(e) => setCurrentCustomValue(e.target.value)}
-            data-testid="input-namespace-text"
+            data-testid="input-tags-text"
           />
         ) : (
           <Input
-            placeholder="Search namespaces..."
+            placeholder="Search tags..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            data-testid="input-namespace-search"
+            data-testid="input-tags-search"
           />
         )}
 
-        {!isTextBasedOperator && (
+        {!isTextOperator && (
           <div className="flex items-center gap-2 mt-3">
             <Button
               variant="outline"
@@ -181,7 +152,7 @@ export default function NamespaceFilterEditor({
               onClick={handleSelectAll}
               disabled={allVisible}
               className="flex-1"
-              data-testid="button-select-all-namespaces"
+              data-testid="button-select-all-tags"
             >
               <CheckSquare className="w-3 h-3 mr-1" />
               Select All
@@ -192,7 +163,7 @@ export default function NamespaceFilterEditor({
               onClick={handleDeselectAll}
               disabled={noneVisible}
               className="flex-1"
-              data-testid="button-deselect-all-namespaces"
+              data-testid="button-deselect-all-tags"
             >
               <Square className="w-3 h-3 mr-1" />
               Deselect All
@@ -201,18 +172,16 @@ export default function NamespaceFilterEditor({
         )}
       </div>
 
-      {!isTextBasedOperator && (
+      {!isTextOperator && (
         <div className="max-h-64 overflow-y-auto">
-          {filteredNamespaces.map((namespace) => {
-            const isSelected = currentNamespaces.includes(namespace);
-            const level = getNamespaceLevel(namespace);
-
+          {filteredTags.map((tag) => {
+            const isSelected = currentTags.includes(tag.id);
             return (
               <div
-                key={namespace}
-                onClick={() => handleToggleNamespace(namespace)}
+                key={tag.id}
+                onClick={() => handleToggleTag(tag.id)}
                 className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer"
-                data-testid={`namespace-option-${namespace.replace(/\./g, '-')}`}
+                data-testid={`tag-option-${tag.id}`}
               >
                 <div
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
@@ -220,10 +189,9 @@ export default function NamespaceFilterEditor({
                       ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
                       : 'bg-muted border-border text-muted-foreground'
                   }`}
-                  style={{ paddingLeft: `${Math.min(level, 3)}rem` }}
                 >
-                  <Building2 className="h-4 w-4" />
-                  <span className="text-sm font-medium whitespace-nowrap">{namespace}</span>
+                  <Tag className="h-4 w-4" />
+                  <span className="text-sm font-medium whitespace-nowrap">{tag.label}</span>
                 </div>
 
                 <div className="ml-auto">
@@ -241,9 +209,9 @@ export default function NamespaceFilterEditor({
 
       <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          {isTextBasedOperator
-            ? 'Enter a namespace pattern'
-            : `${currentNamespaces.length} of ${availableNamespaces.length} namespaces selected`}
+          {isTextOperator
+            ? 'Enter a tag pattern'
+            : `${currentTags.length} of ${options.length} tags selected`}
         </p>
 
         <div className="flex items-center gap-2">
@@ -255,7 +223,7 @@ export default function NamespaceFilterEditor({
                   size="sm"
                   onClick={handleReset}
                   className="px-2"
-                  data-testid="button-reset-namespace-filter"
+                  data-testid="button-reset-tags-filter"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>
@@ -270,7 +238,7 @@ export default function NamespaceFilterEditor({
             size="sm"
             onClick={handleApply}
             className="flex-1"
-            data-testid="button-apply-namespace-filter"
+            data-testid="button-apply-tags-filter"
           >
             Apply
           </Button>
