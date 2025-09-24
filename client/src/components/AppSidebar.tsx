@@ -126,7 +126,7 @@ const navigationItems = [
       },
       {
         title: "Triggers",
-        url: "/tenant-admin/triggers",
+        url: "/admin/tenant/triggers",
         icon: Zap,
       },
       {

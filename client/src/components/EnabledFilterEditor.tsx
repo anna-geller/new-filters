@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Radio, RotateCcw } from "lucide-react";
 
 export interface EnabledOption {
@@ -14,6 +15,7 @@ interface EnabledFilterEditorProps {
   onSelectionChange: (value: string | null) => void;
   onClose: () => void;
   onReset?: () => void;
+  hideStatusText?: boolean;
 }
 
 const defaultOptions: EnabledOption[] = [
@@ -27,6 +29,7 @@ export default function EnabledFilterEditor({
   onSelectionChange,
   onClose,
   onReset,
+  hideStatusText = false,
 }: EnabledFilterEditorProps) {
   const [currentValue, setCurrentValue] = useState<string | null>(selectedValue);
 
@@ -83,20 +86,37 @@ export default function EnabledFilterEditor({
           </button>
         </div>
       </div>
-      <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          {currentValue === null ? 'Showing all apps' : `Showing ${currentValue === 'true' ? 'enabled' : 'disabled'} apps`}
-        </p>
+      <div
+        className={`p-4 border-t border-border bg-muted/20 flex items-center ${
+          hideStatusText ? 'justify-end' : 'justify-between'
+        }`}
+      >
+        {!hideStatusText && (
+          <p className="text-xs text-muted-foreground">
+            {currentValue === null
+              ? 'Showing all apps'
+              : `Showing ${currentValue === 'true' ? 'enabled' : 'disabled'} apps`}
+          </p>
+        )}
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            className="px-2"
-            data-testid="button-reset-enabled-filter"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="px-2"
+                  data-testid="button-reset-enabled-filter"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset to default</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button size="sm" onClick={handleApply} className="flex-1" data-testid="button-apply-enabled-filter">
             Apply
           </Button>

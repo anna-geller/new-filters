@@ -8,6 +8,8 @@ export interface SavedFilter {
     searchValue: string;
     selectedStates: string[];
     statesOperator: string;
+    selectedLevels?: string[];
+    levelsOperator?: string;
     selectedInterval: string;
     intervalStartDate?: string;
     intervalEndDate?: string;
@@ -24,14 +26,18 @@ export interface SavedFilter {
     outputsOperator?: string;
     outputsCustomValue?: string;
     enabledValue?: string | null;
+    selectedLocked?: string | null;
+    selectedMissingSource?: string | null;
     selectedNamespaces: string[];
-  namespaceOperator?: string;
-  namespaceCustomValue?: string;
+    namespaceOperator?: string;
+    namespaceCustomValue?: string;
     selectedFlows: string[];
     selectedScopes: string[];
     selectedKinds: string[];
     selectedHierarchy: string;
     selectedInitialExecution: string;
+    triggerIdOperator?: string;
+    triggerIdValue?: string;
   };
 }
 

@@ -181,7 +181,7 @@ export default function ScopeFilterEditor({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Reset to original value</p>
+                  <p>Reset to default</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

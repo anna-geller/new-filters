@@ -255,7 +255,7 @@ export default function FlowFilterEditor({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Reset to original value</p>
+                  <p>Reset to default</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
