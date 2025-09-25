@@ -401,7 +401,6 @@ export default function InstanceAuditLogsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -484,7 +483,7 @@ export default function InstanceAuditLogsPage() {
           searchPlaceholder="Search audit logs..."
           showChartToggleControl={false}
         />
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">
           <AuditLogsTable rows={filteredRows} columns={columns} />
         </div>
       </main>
