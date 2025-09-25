@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     // Disabled runtimeErrorOverlay to prevent conflicts with browser extensions
-    // runtimeErrorOverlay(),
+    runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
