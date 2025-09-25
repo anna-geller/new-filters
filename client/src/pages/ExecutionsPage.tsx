@@ -804,7 +804,7 @@ export default function ExecutionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#1F232D]">
       {/* Header */}
       <header className="border-b border-border bg-card/50">
         <div className="flex items-center justify-between px-6 py-4">
@@ -824,7 +824,6 @@ export default function ExecutionsPage() {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <main className="flex-1">
         {/* Filter Interface */}
