@@ -58,7 +58,7 @@ export default function ExecutionChart({ executions }: ExecutionChartProps) {
   const totalExecutions = executions.length;
 
   return (
-    <Card className="mx-4 mb-4 p-6 bg-card border border-border">
+    <Card className="shadcn-card rounded-xl text-card-foreground shadow-sm mx-4 mb-4 p-6 border border-border bg-[#262A35]">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
