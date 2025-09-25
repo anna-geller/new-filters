@@ -336,7 +336,6 @@ export default function TenantInvitationsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -432,7 +431,7 @@ export default function TenantInvitationsPage() {
           searchPlaceholder="Search invitations..."
           showChartToggleControl={false}
         />
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">
           <InvitationsTable rows={filteredRows} columns={columns} />
         </div>
       </main>
