@@ -90,7 +90,7 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
       case 'id':
         return (
           <div className="flex items-center gap-2">
-            <span className="font-mono text-primary truncate" title={execution.id}>
+            <span className="font-mono truncate text-[#A3A4DF]" title={execution.id}>
               {execution.id}
             </span>
             <Button size="icon" variant="ghost" className="h-4 w-4">
