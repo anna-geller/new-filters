@@ -88,7 +88,7 @@ export default function InvitationsTable({ rows, columns }: InvitationsTableProp
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className="text-left font-semibold text-xs md:text-sm py-3 px-4 border-b border-border/70"
+                  className="text-left font-semibold text-xs md:text-sm py-3 px-4 border-b border-border/70 bg-[#2F3341]"
                 >
                   {column.label}
                 </th>
