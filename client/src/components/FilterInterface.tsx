@@ -2095,7 +2095,7 @@ export default function FilterInterface({
       )}
       {/* Table Options Panel */}
       {tableOptionsOpen && (
-        <div className="px-4 py-3 border-b border-border bg-card/30">
+        <div className="px-4 py-3 border-b border-border bg-[#1F232D]">
           <div
             className={`flex items-center gap-6 ${
               showChartToggleControl ? 'justify-between' : 'justify-end'
