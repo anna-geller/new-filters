@@ -432,7 +432,7 @@ export function AppSidebar() {
           className="w-auto max-w-full p-4"
         />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-[#1E202A]">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
