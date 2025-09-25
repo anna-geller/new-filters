@@ -335,7 +335,7 @@ export default function TenantGroupsPage() {
                   </button>
                 </div>
                 <div>
-                  <a href="#" className="font-mono text-sm text-primary hover:underline break-all">
+                  <a href="#" className="font-mono text-sm hover:underline break-all text-[#BBF]">
                     {group.id}
                   </a>
                 </div>
