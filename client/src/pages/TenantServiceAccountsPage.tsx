@@ -189,7 +189,7 @@ export default function TenantServiceAccountsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-[#262A35]/80">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Service Accounts</h1>
@@ -203,7 +203,6 @@ export default function TenantServiceAccountsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
