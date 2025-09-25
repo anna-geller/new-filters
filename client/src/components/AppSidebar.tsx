@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
+import kestraLogo from "../../../images/Kestra.full.logo.light.png";
 import { 
   Home, 
   Eye, 
@@ -38,6 +39,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -245,11 +247,35 @@ export function AppSidebar() {
   const toggleExpanded = (nodeKey: string) => {
     setExpandedItems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(nodeKey)) {
-        newSet.delete(nodeKey);
+      
+      // Check if this is a top-level menu item
+      const isTopLevel = navigationItems.some(item => generateNodeKey(item) === nodeKey);
+      
+      if (isTopLevel) {
+        // For top-level items, implement single-expand behavior
+        if (newSet.has(nodeKey)) {
+          // If already expanded, collapse it
+          newSet.delete(nodeKey);
+        } else {
+          // If not expanded, collapse all other top-level items first
+          navigationItems.forEach(item => {
+            const itemKey = generateNodeKey(item);
+            if (itemKey !== nodeKey) {
+              newSet.delete(itemKey);
+            }
+          });
+          // Then expand the selected item
+          newSet.add(nodeKey);
+        }
       } else {
-        newSet.add(nodeKey);
+        // For sub-items, use normal toggle behavior
+        if (newSet.has(nodeKey)) {
+          newSet.delete(nodeKey);
+        } else {
+          newSet.add(nodeKey);
+        }
       }
+      
       return newSet;
     });
   };
@@ -276,8 +302,19 @@ export function AppSidebar() {
     if (activePath.length > 0) {
       setExpandedItems(prev => {
         const newSet = new Set(prev);
-        // Expand all ancestors of the active item
+        
+        // Find the top-level parent of the active item
+        const topLevelParent = activePath[0];
+        
+        // Clear all top-level expansions first
+        navigationItems.forEach(item => {
+          const itemKey = generateNodeKey(item);
+          newSet.delete(itemKey);
+        });
+        
+        // Expand only the path to the active item
         activePath.slice(0, -1).forEach(key => newSet.add(key));
+        
         return newSet;
       });
     }
@@ -388,9 +425,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader className="pb-4">
+        <img 
+          src={kestraLogo} 
+          alt="Kestra" 
+          className="w-auto max-w-full p-4"
+        />
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => renderMenuItem(item))}
