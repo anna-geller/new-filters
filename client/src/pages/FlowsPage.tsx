@@ -53,8 +53,8 @@ const FLOW_COLUMNS: ColumnConfig[] = [
   { id: 'last-execution-status', label: 'Last execution status', description: 'Status of the most recent execution', visible: true, order: 5 },
   { id: 'execution-statistics', label: 'Execution statistics', description: 'Chart showing recent execution states', visible: true, order: 6 },
   { id: 'triggers', label: 'Triggers', description: 'Triggers that can start the flow (e.g., schedule, event)', visible: true, order: 7 },
-  { id: 'revision', label: 'Revision', description: 'Current version number of the flow definition', visible: true, order: 8 },
-  { id: 'description', label: 'Description', description: 'Text description provided for the flow', visible: true, order: 9 },
+  { id: 'revision', label: 'Revision', description: 'Current version number of the flow definition', visible: false, order: 8 },
+  { id: 'description', label: 'Description', description: 'Text description provided for the flow', visible: false, order: 9 },
 ];
 
 const FLOW_ROWS: FlowRow[] = [

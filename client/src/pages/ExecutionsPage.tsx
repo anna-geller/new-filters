@@ -444,6 +444,22 @@ export default function ExecutionsPage() {
   // Apply filtering logic to executions
   const filteredExecutions = useMemo(() => {
     return mockExecutions.filter(execution => {
+      // Search filter - search across multiple fields
+      if (searchValue.trim()) {
+        const searchTerm = searchValue.toLowerCase();
+        const searchableFields = [
+          execution.flow,
+          execution.namespace,
+          execution.id,
+          execution.taskId,
+          ...execution.labels,
+          ...execution.inputs,
+          ...execution.outputs
+        ].join(' ').toLowerCase();
+        
+        if (!searchableFields.includes(searchTerm)) return false;
+      }
+
       // State filter
       if (selectedStates.length > 0) {
         const stateMatch = statesOperator === 'in' 
@@ -493,7 +509,7 @@ export default function ExecutionsPage() {
 
       return true;
     });
-  }, [mockExecutions, selectedStates, statesOperator, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedLabels, labelsOperator, labelsCustomValue, selectedFlows]);
+  }, [mockExecutions, searchValue, selectedStates, statesOperator, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedLabels, labelsOperator, labelsCustomValue, selectedFlows]);
 
   const handleClearFilter = (filterId: string) => {
     // Remove filter from visibleFilters array to hide it completely
