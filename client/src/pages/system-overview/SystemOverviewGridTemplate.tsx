@@ -38,7 +38,7 @@ export function SystemOverviewGridTemplate({
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50">
-        <div className="flex flex-col gap-2 px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-2 px-6 py-4 md:flex-row md:items-center md:justify-between bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
               {scope === "instance" ? "Instance Administration" : "Tenant Administration"}
@@ -53,7 +53,6 @@ export function SystemOverviewGridTemplate({
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-y-auto">
         <section className="grid gap-6 p-6">
           {/* 2x2 Grid Layout */}
