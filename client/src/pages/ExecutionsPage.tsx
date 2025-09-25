@@ -835,6 +835,11 @@ export default function ExecutionsPage() {
     setSelectedHierarchy(state.selectedHierarchy || 'all');
     setSelectedInitialExecution(state.selectedInitialExecution);
     
+    // Restore column configuration if available (fallback to default columns for backwards compatibility)
+    if (state.columnConfig && state.columnConfig.length > 0) {
+      setColumns(state.columnConfig);
+    }
+    
     console.log('Filter loaded:', filter.name);
   };
 
