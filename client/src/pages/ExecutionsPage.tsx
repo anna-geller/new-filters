@@ -836,9 +836,7 @@ export default function ExecutionsPage() {
     setSelectedInitialExecution(state.selectedInitialExecution);
     
     // Restore column configuration if available (fallback to default columns for backwards compatibility)
-    if (state.columnConfig && state.columnConfig.length > 0) {
-      setColumns(state.columnConfig);
-    }
+    setColumns(state.columnConfig && state.columnConfig.length > 0 ? state.columnConfig : defaultColumns);
     
     console.log('Filter loaded:', filter.name);
   };
