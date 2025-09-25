@@ -52,7 +52,7 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
           <thead>
             <tr className="bg-surface/60 text-muted-foreground">
               {visibleColumns.map(column => (
-                <th key={column.id} className="text-left font-semibold text-xs md:text-sm py-3 px-4 border-b border-border/70 text-muted-foreground">
+                <th key={column.id} className="text-left font-semibold text-xs md:text-sm py-3 px-4 border-b border-border/70 text-muted-foreground bg-[#2F3341]">
                   {column.label}
                 </th>
               ))}
