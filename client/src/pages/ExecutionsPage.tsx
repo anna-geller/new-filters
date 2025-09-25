@@ -818,7 +818,7 @@ export default function ExecutionsPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Ctrl+Cmd+K</span>
             </div>
-            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
+            <button className="px-3 py-1 text-sm text-primary-foreground rounded-md hover-elevate bg-[#8408FF]">
               Execute
             </button>
           </div>
