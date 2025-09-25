@@ -382,7 +382,7 @@ export default function PluginsPage() {
                 return (
                   <Tooltip key={plugin.id}>
                     <TooltipTrigger asChild>
-                      <Card className="flex h-28 flex-col items-center justify-center gap-3 border border-border/60 bg-card/70 p-4 text-center shadow-sm transition hover:border-primary/50 hover:shadow-md">
+                      <Card className="flex h-28 flex-col items-center justify-center gap-3 border border-border/60 p-4 text-center shadow-sm transition hover:border-primary/50 hover:shadow-md bg-[#262A35]">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border/50 bg-muted/30 text-primary">
                           <Icon className="h-6 w-6" />
                         </div>
