@@ -73,7 +73,7 @@ export default function AnnouncementsTable({ rows, columns }: AnnouncementsTable
             {rows.map((row, index) => (
               <tr key={`${row.message}-${index}`} className="border-b border-border/60 last:border-b-0 hover:bg-muted/30 transition-colors">
                 {visibleColumns.map((column) => (
-                  <td key={column.id} className="py-3 px-4 align-top">
+                  <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                     {renderCell(row, column.id)}
                   </td>
                 ))}
