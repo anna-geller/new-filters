@@ -221,7 +221,6 @@ export default function TenantGroupsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -319,7 +318,7 @@ export default function TenantGroupsPage() {
           showColumnsControl={false}
         />
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {filteredGroups.map((group) => (
               <Card key={group.id} className="bg-card/60 border border-border/60 shadow-sm p-6 flex flex-col gap-6">
