@@ -143,6 +143,16 @@ const mockExecutions = [
 ];
 
 export default function ExecutionsPage() {
+  // Generate dynamic flow options from execution data
+  const flowOptions = useMemo(() => {
+    const uniqueFlows = Array.from(new Set(mockExecutions.map(exec => exec.flow)));
+    return uniqueFlows.map(flow => ({
+      id: flow,
+      label: flow,
+      description: '' // No descriptions needed
+    }));
+  }, []);
+
   const [searchValue, setSearchValue] = useState('');
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [statesOperator, setStatesOperator] = useState<string>('in');
@@ -430,6 +440,60 @@ export default function ExecutionsPage() {
   
   // Combine all active filters
   const allActiveFilters = [...additionalFilters, ...activeFilters];
+
+  // Apply filtering logic to executions
+  const filteredExecutions = useMemo(() => {
+    return mockExecutions.filter(execution => {
+      // State filter
+      if (selectedStates.length > 0) {
+        const stateMatch = statesOperator === 'in' 
+          ? selectedStates.includes(execution.state)
+          : !selectedStates.includes(execution.state);
+        if (!stateMatch) return false;
+      }
+
+      // Namespace filter
+      if (selectedNamespaces.length > 0 || namespaceCustomValue.trim()) {
+        if (namespaceOperator === 'in') {
+          if (!selectedNamespaces.includes(execution.namespace)) return false;
+        } else if (namespaceOperator === 'not-in') {
+          if (selectedNamespaces.includes(execution.namespace)) return false;
+        } else if (namespaceOperator === 'contains' && namespaceCustomValue.trim()) {
+          if (!execution.namespace.toLowerCase().includes(namespaceCustomValue.toLowerCase())) return false;
+        } else if (namespaceOperator === 'starts-with' && namespaceCustomValue.trim()) {
+          if (!execution.namespace.toLowerCase().startsWith(namespaceCustomValue.toLowerCase())) return false;
+        } else if (namespaceOperator === 'ends-with' && namespaceCustomValue.trim()) {
+          if (!execution.namespace.toLowerCase().endsWith(namespaceCustomValue.toLowerCase())) return false;
+        }
+      }
+
+      // Labels filter
+      if (selectedLabels.length > 0 || labelsCustomValue.trim() || ['is-set', 'is-not-set'].includes(labelsOperator)) {
+        if (labelsOperator === 'has-any-of') {
+          if (!selectedLabels.some(label => execution.labels.includes(label))) return false;
+        } else if (labelsOperator === 'has-none-of') {
+          if (selectedLabels.some(label => execution.labels.includes(label))) return false;
+        } else if (labelsOperator === 'has-all-of') {
+          if (!selectedLabels.every(label => execution.labels.includes(label))) return false;
+        } else if (labelsOperator === 'contains' && labelsCustomValue.trim()) {
+          if (!execution.labels.some(label => label.toLowerCase().includes(labelsCustomValue.toLowerCase()))) return false;
+        } else if (labelsOperator === 'does-not-contain' && labelsCustomValue.trim()) {
+          if (execution.labels.some(label => label.toLowerCase().includes(labelsCustomValue.toLowerCase()))) return false;
+        } else if (labelsOperator === 'is-set') {
+          if (execution.labels.length === 0) return false;
+        } else if (labelsOperator === 'is-not-set') {
+          if (execution.labels.length > 0) return false;
+        }
+      }
+
+      // Flow filter
+      if (selectedFlows.length > 0) {
+        if (!selectedFlows.includes(execution.flow)) return false;
+      }
+
+      return true;
+    });
+  }, [mockExecutions, selectedStates, statesOperator, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedLabels, labelsOperator, labelsCustomValue, selectedFlows]);
 
   const handleClearFilter = (filterId: string) => {
     // Remove filter from visibleFilters array to hide it completely
@@ -875,6 +939,7 @@ export default function ExecutionsPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           selectedFlows={selectedFlows}
           onFlowsSelectionChange={setSelectedFlows}
+          flowOptions={flowOptions}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}
@@ -895,13 +960,13 @@ export default function ExecutionsPage() {
 
         {/* Chart - displayed when Show Chart toggle is enabled */}
         {showChart && (
-          <ExecutionChart executions={mockExecutions} />
+          <ExecutionChart executions={filteredExecutions} />
         )}
 
         {/* Table */}
         <div className="p-4">
           <ExecutionsTable 
-            executions={mockExecutions} 
+            executions={filteredExecutions} 
             columns={columns}
             onLabelClick={handleLabelClick}
           />

@@ -217,7 +217,6 @@ export default function FlowFilterEditor({
                   <Workflow className="w-4 h-4 text-blue-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{flow.label}</div>
-                    <div className="text-xs text-muted-foreground truncate">{flow.description}</div>
                   </div>
                 </div>
                 <div className="flex-shrink-0">
