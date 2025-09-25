@@ -274,9 +274,8 @@ export default function NamespacesPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Namespaces</h1>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -288,7 +287,6 @@ export default function NamespacesPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -385,14 +383,13 @@ export default function NamespacesPage() {
           showColumnsControl={false}
         />
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredCards.map((card) => (
-              <Card key={card.name} className="bg-card/60 border border-border/60 shadow-sm p-6 flex flex-col gap-4">
+              <Card key={card.name} className="border border-border/60 shadow-sm p-6 flex flex-col gap-4 bg-[#262A35]">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-lg font-semibold text-foreground">{card.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Owner: {card.owner}</p>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{card.description}</p>

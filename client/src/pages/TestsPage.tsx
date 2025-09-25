@@ -414,9 +414,9 @@ export default function TestsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-[#1F232D]">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Tests</h1>
             <span className="text-sm text-muted-foreground">Validate your flows with comprehensive test suites</span>
@@ -434,7 +434,6 @@ export default function TestsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-y-auto">
         <FilterInterface
           searchValue={searchValue}

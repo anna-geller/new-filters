@@ -1,3 +1,11 @@
+export interface ColumnConfig {
+  id: string;
+  label: string;
+  description: string;
+  visible: boolean;
+  order: number;
+}
+
 export interface SavedFilter {
   id: string;
   name: string;
@@ -58,13 +66,14 @@ export interface SavedFilter {
     selectedServiceTypes?: string[];
     serviceTypeOperator?: string;
     selectedBindingTypes?: string[];
-
+    // Column configuration for table display
+    columnConfig?: ColumnConfig[];
   };
 }
 
 export interface SavedFiltersContextType {
   savedFilters: SavedFilter[];
-  saveFilter: (name: string, description: string, filterState: SavedFilter['filterState']) => void;
+  saveFilter: (name: string, description: string, filterState: SavedFilter['filterState'], columnConfig?: ColumnConfig[]) => void;
   loadFilter: (filterId: string) => SavedFilter | null;
   deleteFilter: (filterId: string) => void;
   updateFilter: (filterId: string, name: string, description: string) => void;

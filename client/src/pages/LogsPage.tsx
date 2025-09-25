@@ -153,8 +153,8 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: "namespace", label: "Namespace", description: "Namespace where the log was generated", visible: true, order: 3 },
   { id: "flow", label: "Flow", description: "Name of the flow associated with the log entry", visible: true, order: 4 },
   { id: "task", label: "Task", description: "Task within the flow that produced the log", visible: true, order: 5 },
-  { id: "scope", label: "Scope", description: "Scope classification for the log (user or system)", visible: true, order: 6 },
-  { id: "executionId", label: "ExecutionId", description: "Execution identifier that produced this log", visible: true, order: 7 },
+  { id: "scope", label: "Scope", description: "Scope classification for the log (user or system)", visible: false, order: 6 },
+  { id: "executionId", label: "ExecutionId", description: "Execution identifier that produced this log", visible: false, order: 7 },
   { id: "message", label: "Message", description: "Content of the log entry", visible: true, order: 8 },
 ];
 
@@ -650,9 +650,9 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-[#1F232D]">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-foreground">Logs</h1>
           </div>
@@ -662,7 +662,6 @@ export default function LogsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-y-auto">
         <FilterInterface
           searchValue={searchValue}
@@ -802,15 +801,15 @@ export default function LogsPage() {
                 </div>
 
                 <div className="grid w-full max-w-xs gap-3 text-sm">
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-xl border border-border/60 bg-[#262A35] p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Interval</p>
                     <p className="text-sm font-medium text-foreground">{intervalDisplayValue}</p>
                   </div>
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-xl border border-border/60 bg-[#262A35] p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Levels</p>
                     <p className="text-sm font-medium text-foreground">{levelsFilterValue}</p>
                   </div>
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-xl border border-border/60 bg-[#262A35] p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Namespaces</p>
                     <p className="text-sm font-medium text-foreground">{namespaceFilterValue}</p>
                   </div>

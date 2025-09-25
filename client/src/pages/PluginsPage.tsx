@@ -276,9 +276,9 @@ export default function PluginsPage() {
   const noop = () => {};
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#1F232D]">
       <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Plugins</h1>
             <span className="text-sm text-muted-foreground">Search for tasks and triggers to build your flow.</span>
@@ -289,7 +289,6 @@ export default function PluginsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -383,7 +382,7 @@ export default function PluginsPage() {
                 return (
                   <Tooltip key={plugin.id}>
                     <TooltipTrigger asChild>
-                      <Card className="flex h-28 flex-col items-center justify-center gap-3 border border-border/60 bg-card/70 p-4 text-center shadow-sm transition hover:border-primary/50 hover:shadow-md">
+                      <Card className="flex h-28 flex-col items-center justify-center gap-3 border border-border/60 p-4 text-center shadow-sm transition hover:border-primary/50 hover:shadow-md bg-[#262A35]">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border/50 bg-muted/30 text-primary">
                           <Icon className="h-6 w-6" />
                         </div>

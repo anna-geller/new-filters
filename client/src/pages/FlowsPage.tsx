@@ -53,8 +53,8 @@ const FLOW_COLUMNS: ColumnConfig[] = [
   { id: 'last-execution-status', label: 'Last execution status', description: 'Status of the most recent execution', visible: true, order: 5 },
   { id: 'execution-statistics', label: 'Execution statistics', description: 'Chart showing recent execution states', visible: true, order: 6 },
   { id: 'triggers', label: 'Triggers', description: 'Triggers that can start the flow (e.g., schedule, event)', visible: true, order: 7 },
-  { id: 'revision', label: 'Revision', description: 'Current version number of the flow definition', visible: true, order: 8 },
-  { id: 'description', label: 'Description', description: 'Text description provided for the flow', visible: true, order: 9 },
+  { id: 'revision', label: 'Revision', description: 'Current version number of the flow definition', visible: false, order: 8 },
+  { id: 'description', label: 'Description', description: 'Text description provided for the flow', visible: false, order: 9 },
 ];
 
 const FLOW_ROWS: FlowRow[] = [
@@ -503,9 +503,9 @@ export default function FlowsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+    <div className="min-h-screen bg-[#1F232D]">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-foreground">Flows</h1>
           </div>
@@ -520,7 +520,6 @@ export default function FlowsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-y-auto">
         <FilterInterface
           searchValue={searchValue}

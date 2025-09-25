@@ -49,7 +49,7 @@ export default function VersionedPluginsTable({ rows, columns }: VersionedPlugin
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className="text-left font-semibold text-xs md:text-sm py-3 px-4 border-b border-border/70"
+                  className="text-left font-semibold text-xs md:text-sm py-3 px-4 border-b border-border/70 bg-[#2F3341]"
                 >
                   {column.label}
                 </th>
@@ -60,7 +60,7 @@ export default function VersionedPluginsTable({ rows, columns }: VersionedPlugin
             {rows.map((row) => (
               <tr key={row.plugin} className="border-b border-border/60 last:border-b-0 hover:bg-muted/30 transition-colors">
                 {visibleColumns.map((column) => (
-                  <td key={column.id} className="py-3 px-4 align-top">
+                  <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                     {renderCell(row, column.id)}
                   </td>
                 ))}

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
+import { ColumnConfig } from '../types/savedFilters';
 
 interface Execution {
   id: string;
@@ -19,13 +20,6 @@ interface Execution {
   state: 'SUCCESS' | 'FAILED' | 'RUNNING' | 'QUEUED' | 'WARNING' | 'PAUSED' | 'CREATED' | 'RESTARTED' | 'CANCELLED';
 }
 
-export interface ColumnConfig {
-  id: string;
-  label: string;
-  description: string;
-  visible: boolean;
-  order: number;
-}
 
 interface ExecutionsTableProps {
   executions: Execution[];
@@ -90,7 +84,7 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
       case 'id':
         return (
           <div className="flex items-center gap-2">
-            <span className="font-mono text-primary truncate" title={execution.id}>
+            <span className="font-mono truncate text-[#A3A4DF]" title={execution.id}>
               {execution.id}
             </span>
             <Button size="icon" variant="ghost" className="h-4 w-4">
@@ -130,42 +124,24 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
         );
       case 'labels':
         return (
-          <div className="flex flex-wrap gap-1">
-            {execution.labels.slice(0, 2).map((label, index) => (
+          <div className="flex flex-wrap gap-1 max-w-[12rem]">
+            {execution.labels.map((label, index) => (
               <Badge
                 key={index}
                 variant="outline"
-                className={`text-xs cursor-pointer transition-all duration-200 max-w-[9rem] truncate 
+                className={`text-xs cursor-pointer transition-all duration-200 
                   ${
                     onLabelClick
                       ? 'hover:bg-blue-500/20 hover:border-blue-400 hover:text-blue-300 border-border/40 text-foreground/80'
                       : 'border-border text-foreground/80'
                   }
-                  hover:scale-105 active:scale-95`}
+                  hover:scale-105 active:scale-95 whitespace-nowrap`}
                 onClick={() => onLabelClick?.(label)}
                 data-testid={`label-badge-${label}`}
               >
-                {(() => {
-                  if (label.startsWith('team-')) {
-                    return label.replace('team-', 'team:');
-                  } else if (label === 'dev-production') {
-                    return 'env:production';
-                  } else if (label === 'security-scan') {
-                    return 'action:cvescan';
-                  }
-                  return label;
-                })()}
+                {label}
               </Badge>
             ))}
-            {execution.labels.length > 2 && (
-              <Badge
-                variant="outline"
-                className="text-xs border-border/40 text-muted-foreground pointer-events-none"
-                data-testid="label-overflow-badge"
-              >
-                +{execution.labels.length - 2}
-              </Badge>
-            )}
           </div>
         );
       case 'revision':
@@ -236,7 +212,7 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="shadcn-card rounded-xl border border-card-border text-card-foreground shadow-sm overflow-hidden bg-[#262A35]">
       <div className="overflow-x-auto">
         <table className="w-full table-fixed border-separate border-spacing-0 text-sm">
           <thead>

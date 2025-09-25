@@ -206,8 +206,8 @@ export default function TenantGroupsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Groups</h1>
@@ -221,7 +221,6 @@ export default function TenantGroupsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -319,10 +318,10 @@ export default function TenantGroupsPage() {
           showColumnsControl={false}
         />
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {filteredGroups.map((group) => (
-              <Card key={group.id} className="bg-card/60 border border-border/60 shadow-sm p-6 flex flex-col gap-6">
+              <Card key={group.id} className="border border-border/60 shadow-sm p-6 flex flex-col gap-6 bg-[#262A35]">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-lg font-semibold text-foreground">{group.name}</p>
@@ -336,7 +335,7 @@ export default function TenantGroupsPage() {
                   </button>
                 </div>
                 <div>
-                  <a href="#" className="font-mono text-sm text-primary hover:underline break-all">
+                  <a href="#" className="font-mono text-sm hover:underline break-all text-[#BBF]">
                     {group.id}
                   </a>
                 </div>

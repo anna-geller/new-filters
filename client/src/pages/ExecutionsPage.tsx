@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import FilterInterface from '@/components/FilterInterface';
-import ExecutionsTable, { ColumnConfig, defaultColumns } from '@/components/ExecutionsTable';
+import ExecutionsTable, { defaultColumns } from '@/components/ExecutionsTable';
+import { ColumnConfig } from '@/types/savedFilters';
 import ExecutionChart from '@/components/ExecutionChart';
 import { SavedFilter } from '@/types/savedFilters';
 import { savedFiltersStorage } from '@/utils/savedFiltersStorage';
@@ -20,8 +21,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:38 PM',
     duration: '0.1s',
     namespace: 'company',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-backend'],
+    flow: 'data-pipeline',
+    labels: ['env:production', 'team:backend'],
     revision: '1',
     inputs: ['customer_id:98213', 'region:us-east-1', 'priority:high'],
     outputs: ['status:success', 'records_processed:4201', 'duration_ms:3150'],
@@ -34,8 +35,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:38 PM',
     duration: '1.5s',
     namespace: 'company.team',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-backend'],
+    flow: 'user-onboarding',
+    labels: ['env:staging', 'team:frontend'],
     revision: '2',
     inputs: ['customer_id:10342', 'feature_flag:new-filters'],
     outputs: ['status:failed', 'error_code:timeout'],
@@ -48,8 +49,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:37 PM',
     duration: '2.1s',
     namespace: 'company.team.backend',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-backend'],
+    flow: 'payment-processing',
+    labels: ['env:production', 'team:backend', 'priority:critical'],
     revision: '1',
     inputs: ['correlation_id:12ab-45cd', 'trigger:api'],
     outputs: ['status:running', 'records_processed:128'],
@@ -62,8 +63,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:36 PM',
     duration: '0.4s',
     namespace: 'company.team.frontend',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-frontend'],
+    flow: 'notification-service',
+    labels: ['env:development', 'team:frontend'],
     revision: '4',
     inputs: ['dataset:daily-sync', 'retry_count:0'],
     outputs: ['status:queued', 'records_processed:0'],
@@ -76,8 +77,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:35 PM',
     duration: '3.2s',
     namespace: 'company.team.api',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-analytics'],
+    flow: 'content-moderation',
+    labels: ['env:staging', 'team:analytics'],
     revision: '5',
     inputs: ['source:cli', 'plan:enterprise'],
     outputs: ['status:warning', 'alerts_sent:true'],
@@ -90,8 +91,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:34 PM',
     duration: '0.8s',
     namespace: 'company.team.database',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-analytics'],
+    flow: 'backup-restore',
+    labels: ['env:production', 'team:analytics', 'type:maintenance'],
     revision: '6',
     inputs: ['source:cli', 'retry_count:0'],
     outputs: ['status:paused', 'retry_scheduled:false'],
@@ -104,8 +105,8 @@ const mockExecutions = [
     endDate: 'Thu, Jul 24, 2025 3:33 PM',
     duration: '1.1s',
     namespace: 'company.analytics',
-    flow: 'myflow',
-    labels: ['dev-production', 'team-analytics'],
+    flow: 'analytics-report',
+    labels: ['env:production', 'team:analytics'],
     revision: '7',
     inputs: ['dataset:daily-sync', 'priority:high'],
     outputs: ['status:created', 'records_processed:0'],
@@ -119,7 +120,7 @@ const mockExecutions = [
     duration: '1.4s',
     namespace: 'company.security',
     flow: 'security-scan',
-    labels: ['security-scan', 'team-security'],
+    labels: ['env:production', 'team:security', 'type:security-scan'],
     revision: '8',
     inputs: ['customer_id:98213', 'trigger:api'],
     outputs: ['status:restarted', 'records_failed:1'],
@@ -133,7 +134,7 @@ const mockExecutions = [
     duration: '1.4s',
     namespace: 'company.security',
     flow: 'security-scan',
-    labels: ['security-scan', 'team-security'],
+    labels: ['env:staging', 'team:security', 'type:security-scan'],
     revision: '9',
     inputs: ['customer_id:10342', 'priority:high'],
     outputs: ['status:cancelled', 'alerts_sent:false'],
@@ -143,6 +144,16 @@ const mockExecutions = [
 ];
 
 export default function ExecutionsPage() {
+  // Generate dynamic flow options from execution data
+  const flowOptions = useMemo(() => {
+    const uniqueFlows = Array.from(new Set(mockExecutions.map(exec => exec.flow)));
+    return uniqueFlows.map(flow => ({
+      id: flow,
+      label: flow,
+      description: '' // No descriptions needed
+    }));
+  }, []);
+
   const [searchValue, setSearchValue] = useState('');
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [statesOperator, setStatesOperator] = useState<string>('in');
@@ -431,6 +442,78 @@ export default function ExecutionsPage() {
   // Combine all active filters
   const allActiveFilters = [...additionalFilters, ...activeFilters];
 
+  // Apply filtering logic to executions
+  const filteredExecutions = useMemo(() => {
+    return mockExecutions.filter(execution => {
+      // Search filter - search across multiple fields
+      if (searchValue.trim()) {
+        const searchTerm = searchValue.toLowerCase();
+        const searchableFields = [
+          execution.flow,
+          execution.namespace,
+          execution.id,
+          execution.taskId,
+          ...execution.labels,
+          ...execution.inputs,
+          ...execution.outputs
+        ].join(' ').toLowerCase();
+        
+        if (!searchableFields.includes(searchTerm)) return false;
+      }
+
+      // State filter
+      if (selectedStates.length > 0) {
+        const stateMatch = statesOperator === 'in' 
+          ? selectedStates.includes(execution.state)
+          : !selectedStates.includes(execution.state);
+        if (!stateMatch) return false;
+      }
+
+      // Namespace filter
+      if (selectedNamespaces.length > 0 || namespaceCustomValue.trim()) {
+        if (namespaceOperator === 'in') {
+          if (!selectedNamespaces.includes(execution.namespace)) return false;
+        } else if (namespaceOperator === 'not-in') {
+          if (selectedNamespaces.includes(execution.namespace)) return false;
+        } else if (namespaceOperator === 'contains' && namespaceCustomValue.trim()) {
+          if (!execution.namespace.toLowerCase().includes(namespaceCustomValue.toLowerCase())) return false;
+        } else if (namespaceOperator === 'starts-with' && namespaceCustomValue.trim()) {
+          if (!execution.namespace.toLowerCase().startsWith(namespaceCustomValue.toLowerCase())) return false;
+        } else if (namespaceOperator === 'ends-with' && namespaceCustomValue.trim()) {
+          if (!execution.namespace.toLowerCase().endsWith(namespaceCustomValue.toLowerCase())) return false;
+        }
+      }
+
+      // Labels filter
+      if (selectedLabels.length > 0 || labelsCustomValue.trim() || ['is-set', 'is-not-set'].includes(labelsOperator)) {
+        if (labelsOperator === 'has-any-of') {
+          if (!selectedLabels.some(label => execution.labels.includes(label))) return false;
+        } else if (labelsOperator === 'has-none-of') {
+          if (selectedLabels.some(label => execution.labels.includes(label))) return false;
+        } else if (labelsOperator === 'has-all-of') {
+          if (!selectedLabels.every(label => execution.labels.includes(label))) return false;
+        } else if (labelsOperator === 'contains' && labelsCustomValue.trim()) {
+          if (!execution.labels.some(label => label.toLowerCase().includes(labelsCustomValue.toLowerCase()))) return false;
+        } else if (labelsOperator === 'does-not-contain' && labelsCustomValue.trim()) {
+          if (execution.labels.some(label => label.toLowerCase().includes(labelsCustomValue.toLowerCase()))) return false;
+        } else if (labelsOperator === 'is-set' && labelsCustomValue.trim()) {
+          const labelKey = labelsCustomValue.trim();
+          if (!execution.labels.some(label => label.startsWith(labelKey + ':'))) return false;
+        } else if (labelsOperator === 'is-not-set' && labelsCustomValue.trim()) {
+          const labelKey = labelsCustomValue.trim();
+          if (execution.labels.some(label => label.startsWith(labelKey + ':'))) return false;
+        }
+      }
+
+      // Flow filter
+      if (selectedFlows.length > 0) {
+        if (!selectedFlows.includes(execution.flow)) return false;
+      }
+
+      return true;
+    });
+  }, [mockExecutions, searchValue, selectedStates, statesOperator, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedLabels, labelsOperator, labelsCustomValue, selectedFlows]);
+
   const handleClearFilter = (filterId: string) => {
     // Remove filter from visibleFilters array to hide it completely
     setVisibleFilters(prev => prev.filter(id => id !== filterId));
@@ -602,6 +685,8 @@ export default function ExecutionsPage() {
       selectedKinds,
       selectedHierarchy,
       selectedInitialExecution,
+      visibleFilters,
+      columnConfig: columns,
     };
   };
 
@@ -750,6 +835,9 @@ export default function ExecutionsPage() {
     setSelectedHierarchy(state.selectedHierarchy || 'all');
     setSelectedInitialExecution(state.selectedInitialExecution);
     
+    // Restore column configuration if available (fallback to default columns for backwards compatibility)
+    setColumns(state.columnConfig && state.columnConfig.length > 0 ? state.columnConfig : defaultColumns);
+    
     console.log('Filter loaded:', filter.name);
   };
 
@@ -804,10 +892,10 @@ export default function ExecutionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#1F232D]">
       {/* Header */}
       <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-foreground">Executions</h1>
           </div>
@@ -818,13 +906,12 @@ export default function ExecutionsPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Ctrl+Cmd+K</span>
             </div>
-            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
+            <button className="px-3 py-1 text-sm text-primary-foreground rounded-md hover-elevate bg-[#8408FF]">
               Execute
             </button>
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <main className="flex-1">
         {/* Filter Interface */}
@@ -876,6 +963,7 @@ export default function ExecutionsPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           selectedFlows={selectedFlows}
           onFlowsSelectionChange={setSelectedFlows}
+          flowOptions={flowOptions}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}
@@ -896,13 +984,13 @@ export default function ExecutionsPage() {
 
         {/* Chart - displayed when Show Chart toggle is enabled */}
         {showChart && (
-          <ExecutionChart executions={mockExecutions} />
+          <ExecutionChart executions={filteredExecutions} />
         )}
 
         {/* Table */}
         <div className="p-4">
           <ExecutionsTable 
-            executions={mockExecutions} 
+            executions={filteredExecutions} 
             columns={columns}
             onLabelClick={handleLabelClick}
           />

@@ -366,10 +366,9 @@ export function BlueprintsLibraryPage({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">{title}</h1>
             <span className="text-sm text-muted-foreground">{subtitle}</span>
           </div>
@@ -384,7 +383,6 @@ export function BlueprintsLibraryPage({
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -466,7 +464,7 @@ export function BlueprintsLibraryPage({
           showPeriodicRefreshControl={false}
         />
 
-        <section className="flex-1 overflow-auto p-6">
+        <section className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           {paginatedBlueprints.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground border border-dashed border-border/60 rounded-lg p-12">
               No blueprints match the current filters.
@@ -476,7 +474,7 @@ export function BlueprintsLibraryPage({
               {paginatedBlueprints.map((blueprint) => (
                 <Card
                   key={blueprint.id}
-                  className="border border-border/60 bg-card/60 shadow-sm transition hover:border-primary/50 hover:shadow-md"
+                  className="border border-border/60 bg-[#262A35] shadow-sm transition hover:border-primary/50 hover:shadow-md"
                 >
                   <div className="flex h-full flex-col gap-4 p-5">
                     <div className="flex flex-wrap gap-2">
@@ -548,7 +546,7 @@ export function BlueprintsLibraryPage({
           )}
         </section>
 
-        <div className="border-t border-border/60 bg-card/40 px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="border-t border-border/60 bg-[#262A35]/60 px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <span>Per page</span>
             <Select value={pageSize} onValueChange={setPageSize}>

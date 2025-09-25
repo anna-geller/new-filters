@@ -554,8 +554,8 @@ export default function InstanceServicesPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Instance Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Services</h1>
@@ -573,7 +573,6 @@ export default function InstanceServicesPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -683,7 +682,7 @@ export default function InstanceServicesPage() {
           searchPlaceholder="Search services..."
           showChartToggleControl={false}
         />
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">
           <ServicesTable rows={filteredRows} columns={columns} />
         </div>
       </main>

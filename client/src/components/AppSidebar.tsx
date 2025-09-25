@@ -182,14 +182,14 @@ const navigationItems = [
     icon: Server,
     children: [
       {
-        title: "Services",
-        url: "/admin/instance/services",
-        icon: Activity,
-      },
-      {
         title: "System Overview",
         url: "/admin/instance/system-overview",
         icon: Monitor,
+      },
+      {
+        title: "Services",
+        url: "/admin/instance/services",
+        icon: Activity,
       },
       {
         title: "Audit Logs",
@@ -425,14 +425,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="pb-4">
+      <SidebarHeader className="pb-4 bg-[#1E202A]">
         <img 
           src={kestraLogo} 
           alt="Kestra" 
           className="w-auto max-w-full p-4"
         />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-[#1E202A]">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

@@ -211,8 +211,8 @@ export default function TenantRolesPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+      <header className="border-b border-border bg-[#262A35]/80">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Roles</h1>
@@ -226,7 +226,6 @@ export default function TenantRolesPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -324,14 +323,14 @@ export default function TenantRolesPage() {
           showColumnsControl={false}
         />
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {filteredRoles.map((role) => (
-              <Card key={role.id} className="bg-card/60 border border-border/60 shadow-sm p-6 flex flex-col gap-6">
+              <Card key={role.id} className="border border-border/60 shadow-sm p-6 flex flex-col gap-6 bg-[#262A35]">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <p className="text-lg font-semibold text-foreground">{role.name}</p>
-                    <a href="#" className="font-mono text-sm text-primary hover:underline break-all block">
+                    <a href="#" className="font-mono text-sm hover:underline break-all block text-[#A3A4DF]">
                       {role.id}
                     </a>
                   </div>

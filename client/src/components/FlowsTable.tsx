@@ -126,7 +126,7 @@ export default function FlowsTable({ rows, columns }: FlowsTableProps) {
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className="px-4 py-3 text-left font-medium text-muted-foreground align-top"
+                  className="px-4 py-3 text-left font-medium text-muted-foreground align-top bg-[#2F3341]"
                   style={{ minWidth: '8rem' }}
                 >
                   <span className="truncate block" title={column.label}>
@@ -140,7 +140,7 @@ export default function FlowsTable({ rows, columns }: FlowsTableProps) {
             {rows.map((row) => (
               <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-card/40">
                 {visibleColumns.map((column) => (
-                  <td key={column.id} className="px-4 py-3 align-top text-foreground">
+                  <td key={column.id} className="px-4 py-3 align-top text-foreground bg-[#262A35]">
                     <div className="min-h-[32px] flex items-start">
                       {renderCell(row, column.id)}
                     </div>

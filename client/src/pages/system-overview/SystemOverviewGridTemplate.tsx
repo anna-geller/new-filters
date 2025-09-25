@@ -36,9 +36,9 @@ export function SystemOverviewGridTemplate({
   secretsButtonText 
 }: SystemOverviewGridProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#1F232D]">
       <header className="border-b border-border bg-card/50">
-        <div className="flex flex-col gap-2 px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-2 px-6 py-4 md:flex-row md:items-center md:justify-between bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
               {scope === "instance" ? "Instance Administration" : "Tenant Administration"}
@@ -53,13 +53,12 @@ export function SystemOverviewGridTemplate({
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-y-auto">
         <section className="grid gap-6 p-6">
           {/* 2x2 Grid Layout */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Top Left: Your license */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">Your license</h2>
                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
@@ -87,7 +86,7 @@ export function SystemOverviewGridTemplate({
             </Card>
 
             {/* Top Right: Your usage */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">Your usage</h2>
                 <Button size="sm" variant="outline" className="gap-2">
@@ -119,7 +118,7 @@ export function SystemOverviewGridTemplate({
             </Card>
 
             {/* Bottom Left: Your Internal Storages */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">{storageTitle}</h2>
                 <Button size="sm" variant="outline" className="gap-2">
@@ -142,7 +141,7 @@ export function SystemOverviewGridTemplate({
             </Card>
 
             {/* Bottom Right: Your Secrets Managers */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">{secretsTitle}</h2>
                 <Button size="sm" variant="outline" className="gap-2">

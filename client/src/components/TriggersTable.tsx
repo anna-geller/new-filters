@@ -99,7 +99,7 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className={`px-4 py-3 text-left font-medium text-muted-foreground align-top ${columnClasses[column.id] ?? "w-40"}`}
+                  className="px-4 py-3 text-left font-medium text-muted-foreground align-top w-48 max-w-[12rem] bg-[#2F3341]"
                 >
                   <span className="truncate block" title={column.label}>
                     {column.label}
@@ -110,11 +110,11 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
           </thead>
           <tbody>
             {triggers.map((row) => (
-              <tr key={row.id + row.namespace} className="border-b border-border last:border-b-0 hover:bg-card/40">
+              <tr key={JSON.stringify([row.id, row.namespace])} className="border-b border-border last:border-b-0 hover:bg-card/40">
                 {visibleColumns.map((column) => (
                   <td
                     key={column.id}
-                    className={`px-4 py-3 align-top text-foreground ${columnClasses[column.id] ?? "w-40"}`}
+                    className="px-4 py-3 align-top text-foreground w-52 max-w-[13rem] bg-[#262A35]"
                   >
                     <div className="min-h-[32px] flex items-start">
                       {renderCell(row, column.id)}
