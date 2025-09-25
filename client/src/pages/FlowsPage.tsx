@@ -503,7 +503,7 @@ export default function FlowsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#1F232D]">
       <header className="border-b border-border bg-[#262A35]/80">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -520,7 +520,6 @@ export default function FlowsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-y-auto">
         <FilterInterface
           searchValue={searchValue}
