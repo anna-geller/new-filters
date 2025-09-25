@@ -651,7 +651,7 @@ export default function LogsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
+      <header className="border-b border-border bg-[#262A35]/80">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-foreground">Logs</h1>
@@ -802,15 +802,15 @@ export default function LogsPage() {
                 </div>
 
                 <div className="grid w-full max-w-xs gap-3 text-sm">
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-xl border border-border/60 bg-[#262A35] p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Interval</p>
                     <p className="text-sm font-medium text-foreground">{intervalDisplayValue}</p>
                   </div>
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-xl border border-border/60 bg-[#262A35] p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Levels</p>
                     <p className="text-sm font-medium text-foreground">{levelsFilterValue}</p>
                   </div>
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-xl border border-border/60 bg-[#262A35] p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Namespaces</p>
                     <p className="text-sm font-medium text-foreground">{namespaceFilterValue}</p>
                   </div>

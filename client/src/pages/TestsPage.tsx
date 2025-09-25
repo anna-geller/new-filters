@@ -415,7 +415,7 @@ export default function TestsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
+      <header className="border-b border-border bg-[#262A35]/80">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Tests</h1>

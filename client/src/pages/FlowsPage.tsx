@@ -504,7 +504,7 @@ export default function FlowsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50">
+      <header className="border-b border-border bg-[#262A35]/80">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-foreground">Flows</h1>
