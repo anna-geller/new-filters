@@ -437,7 +437,7 @@ export default function DashboardsPage() {
         <section className="p-6 space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {METRIC_CARDS.map((card) => (
-              <Card key={card.title} className="p-4 bg-card/80 border border-border/60 shadow-sm">
+              <Card key={card.title} className="p-4 bg-[#262A35]/80 border border-border/60 shadow-sm">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">{card.title}</p>
@@ -451,7 +451,7 @@ export default function DashboardsPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="p-6 bg-card/80 border border-border/60 shadow-sm lg:col-span-2">
+            <Card className="p-6 bg-[#262A35]/80 border border-border/60 shadow-sm lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">Total Executions</h2>
@@ -482,7 +482,7 @@ export default function DashboardsPage() {
               </ChartContainer>
             </Card>
 
-            <Card className="p-6 bg-card/80 border border-border/60 shadow-sm">
+            <Card className="p-6 bg-[#262A35]/80 border border-border/60 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">Total Executions</h2>

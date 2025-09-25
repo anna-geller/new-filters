@@ -82,7 +82,7 @@ export function SystemOverviewTemplate({ scope, title, subtitle, summary, usage,
         <section className="grid gap-6 p-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {summary.map((metric) => (
-              <Card key={metric.id} className="border border-border/60 bg-card/70 p-5 shadow-sm">
+              <Card key={metric.id} className="border border-border/60 bg-[#262A35] p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">{metric.title}</p>
                   {metric.trend && (
@@ -99,7 +99,7 @@ export function SystemOverviewTemplate({ scope, title, subtitle, summary, usage,
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2 border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="lg:col-span-2 border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Platform throughput</p>
@@ -129,7 +129,7 @@ export function SystemOverviewTemplate({ scope, title, subtitle, summary, usage,
               </div>
             </Card>
 
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Your usage</p>
               <h2 className="text-lg font-semibold text-foreground">Current allocation</h2>
               <div className="mt-4 space-y-4">
@@ -148,7 +148,7 @@ export function SystemOverviewTemplate({ scope, title, subtitle, summary, usage,
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm lg:col-span-2">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm lg:col-span-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Latest activity</p>
                 <Button variant="ghost" size="sm" className="text-xs">
@@ -176,7 +176,7 @@ export function SystemOverviewTemplate({ scope, title, subtitle, summary, usage,
               </div>
             </Card>
 
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm space-y-4">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Infrastructure</p>
                 <Badge variant="secondary" className="text-xs">

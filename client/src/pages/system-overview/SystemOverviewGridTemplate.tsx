@@ -59,7 +59,7 @@ export function SystemOverviewGridTemplate({
           {/* 2x2 Grid Layout */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Top Left: Your license */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">Your license</h2>
                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
@@ -87,7 +87,7 @@ export function SystemOverviewGridTemplate({
             </Card>
 
             {/* Top Right: Your usage */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">Your usage</h2>
                 <Button size="sm" variant="outline" className="gap-2">
@@ -119,7 +119,7 @@ export function SystemOverviewGridTemplate({
             </Card>
 
             {/* Bottom Left: Your Internal Storages */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">{storageTitle}</h2>
                 <Button size="sm" variant="outline" className="gap-2">
@@ -142,7 +142,7 @@ export function SystemOverviewGridTemplate({
             </Card>
 
             {/* Bottom Right: Your Secrets Managers */}
-            <Card className="border border-border/60 bg-card/70 p-6 shadow-sm">
+            <Card className="border border-border/60 bg-[#262A35] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">{secretsTitle}</h2>
                 <Button size="sm" variant="outline" className="gap-2">
