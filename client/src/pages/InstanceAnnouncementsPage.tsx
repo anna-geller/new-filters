@@ -210,7 +210,7 @@ export default function InstanceAnnouncementsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Instance Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Announcements</h1>
