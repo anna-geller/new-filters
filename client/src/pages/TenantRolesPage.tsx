@@ -326,7 +326,7 @@ export default function TenantRolesPage() {
         <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {filteredRoles.map((role) => (
-              <Card key={role.id} className="bg-card/60 border border-border/60 shadow-sm p-6 flex flex-col gap-6">
+              <Card key={role.id} className="border border-border/60 shadow-sm p-6 flex flex-col gap-6 bg-[#262A35]">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <p className="text-lg font-semibold text-foreground">{role.name}</p>
