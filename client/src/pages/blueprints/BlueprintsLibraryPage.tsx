@@ -465,7 +465,7 @@ export function BlueprintsLibraryPage({
           showPeriodicRefreshControl={false}
         />
 
-        <section className="flex-1 overflow-auto p-6">
+        <section className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           {paginatedBlueprints.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground border border-dashed border-border/60 rounded-lg p-12">
               No blueprints match the current filters.
