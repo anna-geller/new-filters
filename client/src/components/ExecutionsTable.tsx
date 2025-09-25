@@ -236,7 +236,7 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="shadcn-card rounded-xl border border-card-border text-card-foreground shadow-sm overflow-hidden bg-[#262A35]">
       <div className="overflow-x-auto">
         <table className="w-full table-fixed border-separate border-spacing-0 text-sm">
           <thead>
