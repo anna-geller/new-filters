@@ -130,42 +130,24 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
         );
       case 'labels':
         return (
-          <div className="flex flex-wrap gap-1">
-            {execution.labels.slice(0, 2).map((label, index) => (
+          <div className="flex flex-wrap gap-1 max-w-[12rem]">
+            {execution.labels.map((label, index) => (
               <Badge
                 key={index}
                 variant="outline"
-                className={`text-xs cursor-pointer transition-all duration-200 max-w-[9rem] truncate 
+                className={`text-xs cursor-pointer transition-all duration-200 
                   ${
                     onLabelClick
                       ? 'hover:bg-blue-500/20 hover:border-blue-400 hover:text-blue-300 border-border/40 text-foreground/80'
                       : 'border-border text-foreground/80'
                   }
-                  hover:scale-105 active:scale-95`}
+                  hover:scale-105 active:scale-95 whitespace-nowrap`}
                 onClick={() => onLabelClick?.(label)}
                 data-testid={`label-badge-${label}`}
               >
-                {(() => {
-                  if (label.startsWith('team-')) {
-                    return label.replace('team-', 'team:');
-                  } else if (label === 'dev-production') {
-                    return 'env:production';
-                  } else if (label === 'security-scan') {
-                    return 'action:cvescan';
-                  }
-                  return label;
-                })()}
+                {label}
               </Badge>
             ))}
-            {execution.labels.length > 2 && (
-              <Badge
-                variant="outline"
-                className="text-xs border-border/40 text-muted-foreground pointer-events-none"
-                data-testid="label-overflow-badge"
-              >
-                +{execution.labels.length - 2}
-              </Badge>
-            )}
           </div>
         );
       case 'revision':
