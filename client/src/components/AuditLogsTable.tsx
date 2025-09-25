@@ -81,7 +81,7 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                       );
                     case 'actor':
                       return (
-                        <td key={column.id} className="py-3 px-4 align-top">
+                        <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                           {row.actor.url ? (
                             <a
                               href={row.actor.url}
@@ -98,7 +98,7 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                       );
                     case 'details':
                       return (
-                        <td key={column.id} className="py-3 px-4 align-top">
+                        <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                           <div className="text-xs text-foreground/80 whitespace-pre-line font-mono leading-relaxed">
                             {row.details}
                           </div>
