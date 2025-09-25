@@ -317,7 +317,7 @@ export default function InstanceVersionedPluginsPage() {
           searchPlaceholder="Search plugins..."
           showChartToggleControl={false}
         />
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">
           <VersionedPluginsTable rows={filteredRows} columns={columns} />
         </div>
       </main>
