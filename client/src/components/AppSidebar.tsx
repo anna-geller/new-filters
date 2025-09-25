@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
+import kestraLogo from "../../../images/Kestra.full.logo.light.png";
 import { 
   Home, 
   Eye, 
@@ -38,6 +39,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -101,8 +103,8 @@ const navigationItems = [
         url: "/blueprints/flow",
       },
       {
-        title: "Apps Blueprints",
-        url: "/blueprints/apps",
+        title: "App Blueprints",
+        url: "/blueprints/app",
       },
       {
         title: "Dashboard Blueprints",
@@ -115,13 +117,18 @@ const navigationItems = [
     icon: Settings,
     children: [
       {
+        title: "System Overview",
+        url: "/admin/tenant/system-overview",
+        icon: Monitor,
+      },
+      {
         title: "KV Store",
-        url: "/tenant-admin/kv-store",
+        url: "/admin/tenant/kv-store",
         icon: Database,
       },
       {
         title: "Secrets",
-        url: "/tenant-admin/secrets",
+        url: "/admin/tenant/secrets",
         icon: Lock,
       },
       {
@@ -131,7 +138,7 @@ const navigationItems = [
       },
       {
         title: "Audit Logs",
-        url: "/tenant-admin/audit-logs",
+        url: "/admin/tenant/auditlogs",
         icon: FileText,
       },
       {
@@ -140,31 +147,31 @@ const navigationItems = [
         children: [
           {
             title: "Users",
-            url: "/tenant-admin/iam/users",
+            url: "/admin/tenant/iam/users",
           },
           {
             title: "Service Accounts",
-            url: "/tenant-admin/iam/service-accounts",
+            url: "/admin/tenant/iam/service-accounts",
           },
           {
             title: "Groups",
-            url: "/tenant-admin/iam/groups",
+            url: "/admin/tenant/iam/groups",
           },
           {
             title: "Access",
-            url: "/tenant-admin/iam/access",
+            url: "/admin/tenant/iam/access",
           },
           {
             title: "Roles",
-            url: "/tenant-admin/iam/roles",
+            url: "/admin/tenant/iam/roles",
           },
           {
             title: "Invitations",
-            url: "/tenant-admin/iam/invitations",
+            url: "/admin/tenant/iam/invitations",
           },
           {
             title: "SCIM Provisioning",
-            url: "/tenant-admin/iam/scim",
+            url: "/admin/tenant/iam/provisioning",
           },
         ],
       },
@@ -176,17 +183,17 @@ const navigationItems = [
     children: [
       {
         title: "Services",
-        url: "/instance-admin/services",
+        url: "/admin/instance/services",
         icon: Activity,
       },
       {
         title: "System Overview",
-        url: "/instance-admin/system-overview",
+        url: "/admin/instance/system-overview",
         icon: Monitor,
       },
       {
         title: "Audit Logs",
-        url: "/instance-admin/audit-logs",
+        url: "/admin/instance/auditlogs",
         icon: FileText,
       },
       {
@@ -195,32 +202,32 @@ const navigationItems = [
         children: [
           {
             title: "Users",
-            url: "/instance-admin/iam/users",
+            url: "/admin/instance/iam/users",
           },
           {
             title: "Service Accounts",
-            url: "/instance-admin/iam/service-accounts",
+            url: "/admin/instance/iam/service-accounts",
           },
         ],
       },
       {
         title: "Versioned Plugins",
-        url: "/instance-admin/versioned-plugins",
-        icon: Puzzle,
+        url: "/admin/instance/versioned-plugins",
+        icon: Package,
       },
       {
         title: "Tenants",
-        url: "/instance-admin/tenants",
+        url: "/admin/instance/tenants",
         icon: UsersRound,
       },
       {
         title: "Worker Groups",
-        url: "/instance-admin/worker-groups",
+        url: "/admin/instance/worker-groups",
         icon: Cpu,
       },
       {
         title: "Announcements",
-        url: "/instance-admin/announcements",
+        url: "/admin/instance/announcements",
         icon: Megaphone,
       },
     ],
@@ -240,11 +247,35 @@ export function AppSidebar() {
   const toggleExpanded = (nodeKey: string) => {
     setExpandedItems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(nodeKey)) {
-        newSet.delete(nodeKey);
+      
+      // Check if this is a top-level menu item
+      const isTopLevel = navigationItems.some(item => generateNodeKey(item) === nodeKey);
+      
+      if (isTopLevel) {
+        // For top-level items, implement single-expand behavior
+        if (newSet.has(nodeKey)) {
+          // If already expanded, collapse it
+          newSet.delete(nodeKey);
+        } else {
+          // If not expanded, collapse all other top-level items first
+          navigationItems.forEach(item => {
+            const itemKey = generateNodeKey(item);
+            if (itemKey !== nodeKey) {
+              newSet.delete(itemKey);
+            }
+          });
+          // Then expand the selected item
+          newSet.add(nodeKey);
+        }
       } else {
-        newSet.add(nodeKey);
+        // For sub-items, use normal toggle behavior
+        if (newSet.has(nodeKey)) {
+          newSet.delete(nodeKey);
+        } else {
+          newSet.add(nodeKey);
+        }
       }
+      
       return newSet;
     });
   };
@@ -271,8 +302,19 @@ export function AppSidebar() {
     if (activePath.length > 0) {
       setExpandedItems(prev => {
         const newSet = new Set(prev);
-        // Expand all ancestors of the active item
+        
+        // Find the top-level parent of the active item
+        const topLevelParent = activePath[0];
+        
+        // Clear all top-level expansions first
+        navigationItems.forEach(item => {
+          const itemKey = generateNodeKey(item);
+          newSet.delete(itemKey);
+        });
+        
+        // Expand only the path to the active item
         activePath.slice(0, -1).forEach(key => newSet.add(key));
+        
         return newSet;
       });
     }
@@ -383,9 +425,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarHeader className="pb-4">
+        <img 
+          src={kestraLogo} 
+          alt="Kestra" 
+          className="w-auto max-w-full p-4"
+        />
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => renderMenuItem(item))}

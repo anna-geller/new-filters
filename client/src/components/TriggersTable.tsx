@@ -1,17 +1,18 @@
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RotateCcw } from "lucide-react";
 import type { ColumnConfig } from "./ExecutionsTable";
 
 export interface TriggerRow {
   id: string;
   flow: string;
   namespace: string;
-  currentExecution?: string;
   lastTriggeredDate: string;
   contextUpdatedDate: string;
   nextEvaluationDate: string;
   details: string;
-  backfillExecutions: string;
-  actions: string;
+  enabled: boolean;
   labels: string[];
   locked: "true" | "false";
   missingSource: "true" | "false";
@@ -26,13 +27,12 @@ const columnClasses: Record<string, string> = {
   id: "w-44 max-w-[11rem]",
   flow: "w-48 max-w-[12rem]",
   namespace: "w-52 max-w-[13rem]",
-  currentExecution: "w-44 max-w-[11rem]",
   lastTriggeredDate: "w-48 max-w-[12rem]",
   contextUpdatedDate: "w-48 max-w-[12rem]",
   nextEvaluationDate: "w-48 max-w-[12rem]",
   details: "w-28 max-w-[7rem]",
-  backfillExecutions: "w-40 max-w-[10rem]",
-  actions: "w-32 max-w-[8rem]",
+  backfillExecutions: "w-16 max-w-[4rem]",
+  enabled: "w-20 max-w-[5rem]",
 };
 
 export default function TriggersTable({ triggers, columns }: TriggersTableProps) {
@@ -52,12 +52,6 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
         return <span className="text-sm text-foreground">{row.flow}</span>;
       case "namespace":
         return <span className="text-sm text-foreground">{row.namespace}</span>;
-      case "currentExecution":
-        return (
-          <span className="text-sm text-muted-foreground">
-            {row.currentExecution ?? "—"}
-          </span>
-        );
       case "lastTriggeredDate":
         return <span className="text-sm text-foreground">{row.lastTriggeredDate}</span>;
       case "contextUpdatedDate":
@@ -67,9 +61,30 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
       case "details":
         return <span className="text-sm text-foreground">{row.details}</span>;
       case "backfillExecutions":
-        return <span className="text-sm text-primary">{row.backfillExecutions}</span>;
-      case "actions":
-        return <span className="text-sm text-foreground">{row.actions}</span>;
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="p-1 hover:bg-muted rounded-sm">
+                  <RotateCcw className="h-4 w-4 text-primary" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Backfill executions</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "enabled":
+        return (
+          <Switch
+            checked={row.enabled}
+            onCheckedChange={(checked) => {
+              // Handle toggle change - you can add your logic here
+              console.log(`Toggle ${row.id} to ${checked}`);
+            }}
+          />
+        );
       default:
         return null;
     }

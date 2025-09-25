@@ -109,7 +109,6 @@ export default function TestsPage() {
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
   const [selectedHierarchy, setSelectedHierarchy] = useState<string>('all');
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
-  const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(false);
 
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
@@ -418,8 +417,9 @@ export default function TestsPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50">
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Tests</h1>
+            <span className="text-sm text-muted-foreground">Validate your flows with comprehensive test suites</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="text-sm text-muted-foreground hover:text-foreground">
@@ -443,8 +443,8 @@ export default function TestsPage() {
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
           onResetFilters={handleResetFilters}
-          showChart={showChart}
-          onToggleShowChart={setShowChart}
+          showChart={false}
+          onToggleShowChart={() => {}}
           periodicRefresh={periodicRefresh}
           onTogglePeriodicRefresh={setPeriodicRefresh}
           onRefreshData={handleRefreshData}
@@ -505,6 +505,8 @@ export default function TestsPage() {
           filterOptions={TEST_FILTER_OPTIONS}
           namespaceMode="tests"
           flowOptions={TEST_FLOW_OPTIONS}
+          showChartToggleControl={false}
+          searchPlaceholder="Search tests..."
         />
 
         <section className="p-6">

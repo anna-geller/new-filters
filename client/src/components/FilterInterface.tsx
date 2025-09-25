@@ -32,6 +32,11 @@ import { filterCustomizationStorage } from '../utils/filterCustomizationStorage'
 import TagsFilterEditor, { type TagOption } from './TagsFilterEditor';
 import EnabledFilterEditor, { type EnabledOption } from './EnabledFilterEditor';
 import TriggerIdFilterEditor from './TriggerIdFilterEditor';
+import ActorFilterEditor from './ActorFilterEditor';
+import ActionFilterEditor from './ActionFilterEditor';
+import ResourceFilterEditor from './ResourceFilterEditor';
+import DetailsFilterEditor from './DetailsFilterEditor';
+import MultiSelectFilterEditor, { type MultiSelectOption } from './MultiSelectFilterEditor';
 
 export interface FilterOption {
   id: string;
@@ -120,6 +125,51 @@ interface FilterInterfaceProps {
   onHierarchySelectionChange: (hierarchy: string) => void;
   selectedInitialExecution: string;
   onInitialExecutionSelectionChange: (value: string) => void;
+  actorValue?: string;
+  onActorChange?: (value: string) => void;
+  selectedBindingTypes?: string[];
+  onBindingTypesChange?: (types: string[]) => void;
+  bindingTypeOptions?: ScopeOption[];
+  selectedActions?: string[];
+  actionsOperator?: 'in' | 'not-in';
+  onActionsSelectionChange?: (actions: string[]) => void;
+  onActionsOperatorChange?: (operator: 'in' | 'not-in') => void;
+  selectedResources?: string[];
+  resourcesOperator?: 'in' | 'not-in';
+  onResourcesSelectionChange?: (resources: string[]) => void;
+  onResourcesOperatorChange?: (operator: 'in' | 'not-in') => void;
+  detailsKey?: string;
+  detailsValue?: string;
+  onDetailsChange?: (detailKey: string, detailValue: string) => void;
+  userValue?: string;
+  onUserChange?: (value: string) => void;
+  selectedSuperadminStatuses?: string[];
+  superadminOperator?: 'in' | 'not-in';
+  onSuperadminSelectionChange?: (statuses: string[]) => void;
+  onSuperadminOperatorChange?: (operator: 'in' | 'not-in') => void;
+  selectedInvitationStatuses?: string[];
+  invitationStatusOperator?: 'in' | 'not-in';
+  onInvitationStatusesChange?: (statuses: string[]) => void;
+  onInvitationStatusOperatorChange?: (operator: 'in' | 'not-in') => void;
+  invitationStatusOptions?: { value: string; label: string }[];
+  selectedPlugins?: string[];
+  pluginOperator?: 'in' | 'not-in';
+  onPluginSelectionChange?: (plugins: string[]) => void;
+  onPluginOperatorChange?: (operator: 'in' | 'not-in') => void;
+  pluginOptions?: { value: string; label: string }[];
+  selectedAnnouncementTypes?: string[];
+  announcementTypeOperator?: 'in' | 'not-in';
+  onAnnouncementTypesChange?: (types: string[]) => void;
+  onAnnouncementTypeOperatorChange?: (operator: 'in' | 'not-in') => void;
+  announcementTypeOptions?: { value: string; label: string }[];
+  selectedServiceTypes?: string[];
+  serviceTypeOperator?: 'in' | 'not-in';
+  onServiceTypesSelectionChange?: (types: string[]) => void;
+  onServiceTypeOperatorChange?: (operator: 'in' | 'not-in') => void;
+  serviceTypeOptions?: MultiSelectOption[];
+  enabledFilterHideStatusText?: boolean;
+  userFilterTitle?: string;
+  userFilterPlaceholder?: string;
   savedFilters: SavedFilter[];
   onSaveFilter: (name: string, description: string) => void;
   onLoadFilter: (filter: SavedFilter) => void;
@@ -235,6 +285,43 @@ export default function FilterInterface({
   onHierarchySelectionChange,
   selectedInitialExecution,
   onInitialExecutionSelectionChange,
+  actorValue = '',
+  onActorChange,
+  selectedActions = [],
+  actionsOperator = 'in',
+  onActionsSelectionChange,
+  onActionsOperatorChange,
+  selectedResources = [],
+  resourcesOperator = 'in',
+  onResourcesSelectionChange,
+  onResourcesOperatorChange,
+  detailsKey = '',
+  detailsValue = '',
+  onDetailsChange,
+  userValue = '',
+  onUserChange,
+  selectedSuperadminStatuses = [],
+  superadminOperator = 'in',
+  onSuperadminSelectionChange,
+  onSuperadminOperatorChange,
+  selectedInvitationStatuses = [],
+  invitationStatusOperator = 'in',
+  onInvitationStatusesChange,
+  onInvitationStatusOperatorChange,
+  invitationStatusOptions,
+  selectedPlugins = [],
+  pluginOperator = 'in',
+  onPluginSelectionChange,
+  onPluginOperatorChange,
+  pluginOptions,
+  selectedAnnouncementTypes = [],
+  announcementTypeOperator = 'in',
+  onAnnouncementTypesChange,
+  onAnnouncementTypeOperatorChange,
+  announcementTypeOptions,
+  enabledFilterHideStatusText = false,
+  userFilterTitle = 'User',
+  userFilterPlaceholder = 'Search by username...',
   savedFilters,
   onSaveFilter,
   onLoadFilter,
@@ -262,6 +349,14 @@ export default function FilterInterface({
   showChartToggleControl = true,
   showColumnsControl = true,
   showPeriodicRefreshControl = true,
+  selectedBindingTypes = [],
+  onBindingTypesChange,
+  bindingTypeOptions,
+  selectedServiceTypes = [],
+  serviceTypeOperator = 'in',
+  onServiceTypesSelectionChange,
+  onServiceTypeOperatorChange,
+  serviceTypeOptions,
 }: FilterInterfaceProps) {
   const filterOptionsList = useMemo(
     () => filterOptions ?? defaultFilterOptions,
@@ -296,6 +391,68 @@ export default function FilterInterface({
     () => levelsFilterOptions ?? [],
     [levelsFilterOptions],
   );
+  const superadminOptionsList = useMemo(
+    () => [
+      { id: 'true', label: 'Superadmin' },
+      { id: 'false', label: 'Non-Superadmin' },
+    ],
+    [],
+  );
+  const invitationStatusOptionsList = useMemo(
+    () => {
+      if (invitationStatusOptions && invitationStatusOptions.length > 0) {
+        return invitationStatusOptions.map(option => ({
+          id: option.value,
+          label: option.label,
+        }));
+      }
+      return [
+        { id: 'PENDING', label: 'PENDING' },
+        { id: 'ACCEPTED', label: 'ACCEPTED' },
+        { id: 'EXPIRED', label: 'EXPIRED' },
+      ];
+    },
+    [invitationStatusOptions],
+  );
+  const pluginOptionsList = useMemo(
+    () => {
+      if (pluginOptions && pluginOptions.length > 0) {
+        return pluginOptions.map(option => ({
+          id: option.value,
+          label: option.label,
+        }));
+      }
+      return [];
+    },
+    [pluginOptions],
+  );
+  const announcementTypeOptionsList = useMemo(
+    () => {
+      if (announcementTypeOptions && announcementTypeOptions.length > 0) {
+        return announcementTypeOptions.map(option => ({
+          id: option.value,
+          label: option.label,
+        }));
+      }
+      return [
+        { id: 'INFO', label: 'INFO' },
+        { id: 'WARNING', label: 'WARNING' },
+        { id: 'ERROR', label: 'ERROR' },
+      ];
+    },
+    [announcementTypeOptions],
+  );
+  const bindingTypeOptionsList = useMemo(
+    () => bindingTypeOptions ?? [
+      { id: 'group', label: 'Group', description: 'Apply bindings to groups' },
+      { id: 'user', label: 'User', description: 'Apply bindings to individual users' },
+    ],
+    [bindingTypeOptions],
+  );
+  const serviceTypeOptionsList = useMemo(
+    () => serviceTypeOptions ?? [],
+    [serviceTypeOptions],
+  );
   const [customizationOpen, setCustomizationOpen] = useState(false);
   const [tableOptionsOpen, setTableOptionsOpen] = useState(false);
   const [tablePropertiesOpen, setTablePropertiesOpen] = useState(false);
@@ -319,10 +476,21 @@ export default function FilterInterface({
   const [levelsFilterOpen, setLevelsFilterOpen] = useState(false);
   const [triggerIdFilterOpen, setTriggerIdFilterOpen] = useState(false);
   const [scopeFilterOpen, setScopeFilterOpen] = useState(false);
+  const [bindingTypeFilterOpen, setBindingTypeFilterOpen] = useState(false);
   const [kindFilterOpen, setKindFilterOpen] = useState(false);
   const [hierarchyFilterOpen, setHierarchyFilterOpen] = useState(false);
   const [parentFilterOpen, setParentFilterOpen] = useState(false);
   const [intervalFilterOpen, setIntervalFilterOpen] = useState(false);
+  const [actorFilterOpen, setActorFilterOpen] = useState(false);
+  const [actionFilterOpen, setActionFilterOpen] = useState(false);
+  const [resourceFilterOpen, setResourceFilterOpen] = useState(false);
+  const [detailsFilterOpen, setDetailsFilterOpen] = useState(false);
+  const [userFilterOpen, setUserFilterOpen] = useState(false);
+  const [superadminFilterOpen, setSuperadminFilterOpen] = useState(false);
+  const [statusFilterOpen, setStatusFilterOpen] = useState(false);
+  const [pluginFilterOpen, setPluginFilterOpen] = useState(false);
+  const [announcementTypeFilterOpen, setAnnouncementTypeFilterOpen] = useState(false);
+  const [serviceTypeFilterOpen, setServiceTypeFilterOpen] = useState(false);
   const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
   const [editFilterDialogOpen, setEditFilterDialogOpen] = useState(false);
   const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
@@ -478,6 +646,12 @@ export default function FilterInterface({
         // Clear scope filter values when disabling, reset to default
         onScopesSelectionChange(['user']);
       }
+    } else if (filterId === 'binding-type') {
+      if (!currentlyVisible) {
+        setBindingTypeFilterOpen(true);
+      } else {
+        onBindingTypesChange?.([]);
+      }
     } else if (filterId === 'kind') {
       if (!currentlyVisible) {
         setKindFilterOpen(true);
@@ -498,6 +672,52 @@ export default function FilterInterface({
       } else {
         // Clear initial execution filter values when disabling
         onInitialExecutionSelectionChange('');
+      }
+    } else if (filterId === 'actor') {
+      if (!currentlyVisible) {
+        setActorFilterOpen(true);
+      } else {
+        onActorChange?.('');
+      }
+    } else if (filterId === 'action') {
+      if (!currentlyVisible) {
+        setActionFilterOpen(true);
+      } else {
+        onActionsSelectionChange?.([]);
+        onActionsOperatorChange?.('in');
+      }
+    } else if (filterId === 'resource') {
+      if (!currentlyVisible) {
+        setResourceFilterOpen(true);
+      } else {
+        onResourcesSelectionChange?.([]);
+        onResourcesOperatorChange?.('in');
+      }
+    } else if (filterId === 'details') {
+      if (!currentlyVisible) {
+        setDetailsFilterOpen(true);
+      } else {
+        onDetailsChange?.('', '');
+      }
+    } else if (filterId === 'user') {
+      if (!currentlyVisible) {
+        setUserFilterOpen(true);
+      } else {
+        onUserChange?.('');
+      }
+    } else if (filterId === 'superadmin') {
+      if (!currentlyVisible) {
+        setSuperadminFilterOpen(true);
+      } else {
+        onSuperadminSelectionChange?.([]);
+        onSuperadminOperatorChange?.('in');
+      }
+    } else if (filterId === 'service-type') {
+      if (!currentlyVisible) {
+        setServiceTypeFilterOpen(true);
+      } else {
+        onServiceTypesSelectionChange?.([]);
+        onServiceTypeOperatorChange?.('in');
       }
     }
   };
@@ -542,12 +762,34 @@ export default function FilterInterface({
       setTriggerIdFilterOpen(true);
     } else if (filterId === 'scope') {
       setScopeFilterOpen(true);
+    } else if (filterId === 'binding-type') {
+      setBindingTypeFilterOpen(true);
     } else if (filterId === 'kind') {
       setKindFilterOpen(true);
     } else if (filterId === 'hierarchy') {
       setHierarchyFilterOpen(true);
     } else if (filterId === 'initial-execution') {
       setParentFilterOpen(true);
+    } else if (filterId === 'actor') {
+      setActorFilterOpen(true);
+    } else if (filterId === 'action') {
+      setActionFilterOpen(true);
+    } else if (filterId === 'resource') {
+      setResourceFilterOpen(true);
+    } else if (filterId === 'details') {
+      setDetailsFilterOpen(true);
+    } else if (filterId === 'user') {
+      setUserFilterOpen(true);
+    } else if (filterId === 'superadmin') {
+      setSuperadminFilterOpen(true);
+    } else if (filterId === 'service-type') {
+      setServiceTypeFilterOpen(true);
+    } else if (filterId === 'plugin') {
+      setPluginFilterOpen(true);
+    } else if (filterId === 'type') {
+      setAnnouncementTypeFilterOpen(true);
+    } else if (filterId === 'status') {
+      setStatusFilterOpen(true);
     } else if (filterId === 'interval') {
       setIntervalFilterOpen(true);
     }
@@ -698,6 +940,10 @@ export default function FilterInterface({
     onScopesSelectionChange(scopes);
   };
 
+  const handleBindingTypesSelectionChange = (types: string[]) => {
+    onBindingTypesChange?.(types);
+  };
+
   const handleKindsSelectionChange = (kinds: string[]) => {
     onKindsSelectionChange(kinds);
   };
@@ -708,6 +954,74 @@ export default function FilterInterface({
 
   const handleInitialExecutionSelectionChange = (value: string) => {
     onInitialExecutionSelectionChange(value);
+  };
+
+  const handleActorValueChangeInternal = (value: string) => {
+    onActorChange?.(value);
+  };
+
+  const handleActionsSelectionChangeInternal = (actions: string[]) => {
+    onActionsSelectionChange?.(actions);
+  };
+
+  const handleActionsOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onActionsOperatorChange?.(operator);
+  };
+
+  const handleResourcesSelectionChangeInternal = (resources: string[]) => {
+    onResourcesSelectionChange?.(resources);
+  };
+
+  const handleResourcesOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onResourcesOperatorChange?.(operator);
+  };
+
+  const handleDetailsChangeInternal = (key: string, value: string) => {
+    onDetailsChange?.(key, value);
+  };
+
+  const handleUserValueChangeInternal = (value: string) => {
+    onUserChange?.(value);
+  };
+
+  const handleSuperadminSelectionChangeInternal = (statuses: string[]) => {
+    onSuperadminSelectionChange?.(statuses);
+  };
+
+  const handleSuperadminOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onSuperadminOperatorChange?.(operator);
+  };
+
+  const handleInvitationStatusesSelectionChangeInternal = (statuses: string[]) => {
+    onInvitationStatusesChange?.(statuses);
+  };
+
+  const handleInvitationStatusOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onInvitationStatusOperatorChange?.(operator);
+  };
+
+  const handlePluginSelectionChangeInternal = (plugins: string[]) => {
+    onPluginSelectionChange?.(plugins);
+  };
+
+  const handlePluginOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onPluginOperatorChange?.(operator);
+  };
+
+  const handleServiceTypeSelectionChangeInternal = (types: string[]) => {
+    onServiceTypesSelectionChange?.(types);
+  };
+
+  const handleServiceTypeOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onServiceTypeOperatorChange?.(operator);
+  };
+
+  const handleAnnouncementTypesSelectionChangeInternal = (types: string[]) => {
+    onAnnouncementTypesChange?.(types);
+  };
+
+  const handleAnnouncementTypeOperatorSelectionChange = (operator: 'in' | 'not-in') => {
+    onAnnouncementTypeOperatorChange?.(operator);
   };
 
   // Save filter handlers
@@ -769,6 +1083,10 @@ export default function FilterInterface({
     setScopeFilterOpen(false);
   };
 
+  const handleCloseBindingTypeFilter = () => {
+    setBindingTypeFilterOpen(false);
+  };
+
   const handleCloseKindFilter = () => {
     setKindFilterOpen(false);
   };
@@ -779,6 +1097,46 @@ export default function FilterInterface({
 
   const handleCloseParentFilter = () => {
     setParentFilterOpen(false);
+  };
+
+  const handleCloseActorFilter = () => {
+    setActorFilterOpen(false);
+  };
+
+  const handleCloseActionFilter = () => {
+    setActionFilterOpen(false);
+  };
+
+  const handleCloseResourceFilter = () => {
+    setResourceFilterOpen(false);
+  };
+
+  const handleCloseDetailsFilter = () => {
+    setDetailsFilterOpen(false);
+  };
+
+  const handleCloseUserFilter = () => {
+    setUserFilterOpen(false);
+  };
+
+  const handleCloseSuperadminFilter = () => {
+    setSuperadminFilterOpen(false);
+  };
+
+  const handleCloseStatusFilter = () => {
+    setStatusFilterOpen(false);
+  };
+
+  const handleClosePluginFilter = () => {
+    setPluginFilterOpen(false);
+  };
+
+  const handleCloseServiceTypeFilter = () => {
+    setServiceTypeFilterOpen(false);
+  };
+
+  const handleCloseAnnouncementTypeFilter = () => {
+    setAnnouncementTypeFilterOpen(false);
   };
 
   // Get all filters that have data OR are enabled for display
@@ -979,6 +1337,7 @@ export default function FilterInterface({
               onSelectionChange={handleEnabledSelectionChange}
               onClose={handleCloseEnabledFilter}
               onReset={() => onResetFilter('enabled')}
+              hideStatusText={enabledFilterHideStatusText}
             />
           </PopoverContent>
         </Popover>
@@ -1179,6 +1538,319 @@ export default function FilterInterface({
               onOperatorChange={handleTriggerIdOperatorSelectionChange}
               onClose={handleCloseTriggerIdFilter}
               onReset={() => onResetFilter('trigger-id')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'actor') {
+      return (
+        <Popover key={filter.id} open={actorFilterOpen} onOpenChange={setActorFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'matches'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <ActorFilterEditor
+              value={actorValue}
+              onChange={handleActorValueChangeInternal}
+              onClose={handleCloseActorFilter}
+              onReset={() => onResetFilter('actor')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'user') {
+      return (
+        <Popover key={filter.id} open={userFilterOpen} onOpenChange={setUserFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'matches'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <ActorFilterEditor
+              value={userValue}
+              onChange={handleUserValueChangeInternal}
+              onClose={handleCloseUserFilter}
+              onReset={() => onResetFilter('user')}
+              title={userFilterTitle}
+              placeholder={userFilterPlaceholder}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'action') {
+      return (
+        <Popover key={filter.id} open={actionFilterOpen} onOpenChange={setActionFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (actionsOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <ActionFilterEditor
+              selectedActions={selectedActions}
+              operator={actionsOperator}
+              onSelectionChange={handleActionsSelectionChangeInternal}
+              onOperatorChange={handleActionsOperatorSelectionChange}
+              onClose={handleCloseActionFilter}
+              onReset={() => onResetFilter('action')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'resource') {
+      return (
+        <Popover key={filter.id} open={resourceFilterOpen} onOpenChange={setResourceFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (resourcesOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <ResourceFilterEditor
+              selectedResources={selectedResources}
+              operator={resourcesOperator}
+              onSelectionChange={handleResourcesSelectionChangeInternal}
+              onOperatorChange={handleResourcesOperatorSelectionChange}
+              onClose={handleCloseResourceFilter}
+              onReset={() => onResetFilter('resource')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'details') {
+      return (
+        <Popover key={filter.id} open={detailsFilterOpen} onOpenChange={setDetailsFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'matches'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-[26rem] p-0">
+            <DetailsFilterEditor
+              detailKey={detailsKey}
+              detailValue={detailsValue}
+              onChange={handleDetailsChangeInternal}
+              onClose={handleCloseDetailsFilter}
+              onReset={() => onResetFilter('details')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'status') {
+      return (
+        <Popover key={filter.id} open={statusFilterOpen} onOpenChange={setStatusFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (invitationStatusOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <MultiSelectFilterEditor
+              title="Status"
+              options={invitationStatusOptionsList}
+              selectedValues={selectedInvitationStatuses}
+              selectedOperator={invitationStatusOperator}
+              onSelectionChange={handleInvitationStatusesSelectionChangeInternal}
+              onOperatorChange={handleInvitationStatusOperatorSelectionChange}
+              onClose={handleCloseStatusFilter}
+              onReset={() => onResetFilter('status')}
+              searchPlaceholder="Search statuses..."
+              dataTestIdPrefix="invitation-status"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'binding-type') {
+      return (
+        <Popover key={filter.id} open={bindingTypeFilterOpen} onOpenChange={setBindingTypeFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'in'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-96 p-0">
+            <ScopeFilterEditor
+              selectedScopes={selectedBindingTypes ?? []}
+              onSelectionChange={handleBindingTypesSelectionChange}
+              onClose={handleCloseBindingTypeFilter}
+              onReset={() => onResetFilter('binding-type')}
+              options={bindingTypeOptionsList}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'service-type') {
+      return (
+        <Popover key={filter.id} open={serviceTypeFilterOpen} onOpenChange={setServiceTypeFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (serviceTypeOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <MultiSelectFilterEditor
+              title="Service Type"
+              options={serviceTypeOptionsList}
+              selectedValues={selectedServiceTypes}
+              selectedOperator={serviceTypeOperator}
+              onSelectionChange={handleServiceTypeSelectionChangeInternal}
+              onOperatorChange={handleServiceTypeOperatorSelectionChange}
+              onClose={handleCloseServiceTypeFilter}
+              onReset={() => onResetFilter('service-type')}
+              searchPlaceholder="Search service types..."
+              dataTestIdPrefix="service-type"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'plugin') {
+      return (
+        <Popover key={filter.id} open={pluginFilterOpen} onOpenChange={setPluginFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (pluginOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <MultiSelectFilterEditor
+              title="Plugin"
+              options={pluginOptionsList}
+              selectedValues={selectedPlugins}
+              selectedOperator={pluginOperator}
+              onSelectionChange={handlePluginSelectionChangeInternal}
+              onOperatorChange={handlePluginOperatorSelectionChange}
+              onClose={handleClosePluginFilter}
+              onReset={() => onResetFilter('plugin')}
+              searchPlaceholder="Search plugins..."
+              dataTestIdPrefix="plugin"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'type') {
+      return (
+        <Popover key={filter.id} open={announcementTypeFilterOpen} onOpenChange={setAnnouncementTypeFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (announcementTypeOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <MultiSelectFilterEditor
+              title="Type"
+              options={announcementTypeOptionsList}
+              selectedValues={selectedAnnouncementTypes}
+              selectedOperator={announcementTypeOperator}
+              onSelectionChange={handleAnnouncementTypesSelectionChangeInternal}
+              onOperatorChange={handleAnnouncementTypeOperatorSelectionChange}
+              onClose={handleCloseAnnouncementTypeFilter}
+              onReset={() => onResetFilter('type')}
+              searchPlaceholder="Search types..."
+              dataTestIdPrefix="announcement-type"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'superadmin') {
+      return (
+        <Popover key={filter.id} open={superadminFilterOpen} onOpenChange={setSuperadminFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || (superadminOperator === 'not-in' ? 'not in' : 'in')}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+            <MultiSelectFilterEditor
+              title="Superadmin"
+              options={superadminOptionsList}
+              selectedValues={selectedSuperadminStatuses}
+              selectedOperator={superadminOperator}
+              onSelectionChange={handleSuperadminSelectionChangeInternal}
+              onOperatorChange={handleSuperadminOperatorSelectionChange}
+              onClose={handleCloseSuperadminFilter}
+              onReset={() => onResetFilter('superadmin')}
+              searchPlaceholder="Search statuses..."
+              dataTestIdPrefix="superadmin"
             />
           </PopoverContent>
         </Popover>

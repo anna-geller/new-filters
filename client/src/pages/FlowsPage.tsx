@@ -199,7 +199,6 @@ export default function FlowsPage() {
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [periodicRefresh, setPeriodicRefresh] = useState(false);
-  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     const stored = flowsSavedFiltersStorage.getAll();
@@ -516,7 +515,7 @@ export default function FlowsPage() {
               <span>Ctrl+Cmd+K</span>
             </div>
             <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
-              Add Flow
+              Create
             </button>
           </div>
         </div>
@@ -530,8 +529,8 @@ export default function FlowsPage() {
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
           onResetFilters={handleResetFilters}
-          showChart={showChart}
-          onToggleShowChart={setShowChart}
+          showChart={false}
+          onToggleShowChart={() => {}}
           periodicRefresh={periodicRefresh}
           onTogglePeriodicRefresh={setPeriodicRefresh}
           onRefreshData={handleRefreshData}
@@ -591,6 +590,7 @@ export default function FlowsPage() {
           filterOptions={FLOW_FILTER_OPTIONS}
           flowOptions={FLOW_OPTIONS}
           scopeOptions={FLOW_SCOPE_OPTIONS}
+          showChartToggleControl={false}
         />
 
         <section className="p-6">

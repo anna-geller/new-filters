@@ -19,13 +19,11 @@ const TRIGGER_ROWS: TriggerRow[] = [
     id: "afternoon_schedule",
     flow: "penguin_988725",
     namespace: "company.team",
-    currentExecution: "",
     lastTriggeredDate: "Thu, Sep 18, 2025 2:00 PM",
     contextUpdatedDate: "Thu, Sep 18, 2025 2:34 PM",
     nextEvaluationDate: "Fri, Sep 19, 2025 2:00 AM",
     details: "🖼️",
-    backfillExecutions: "Backfill executions",
-    actions: "Enabled",
+    enabled: true,
     labels: ["team:backend", "env:production"],
     locked: "false",
     missingSource: "false",
@@ -34,13 +32,11 @@ const TRIGGER_ROWS: TriggerRow[] = [
     id: "afternoon_schedule",
     flow: "aardvark_308870",
     namespace: "company.team",
-    currentExecution: "",
     lastTriggeredDate: "Thu, Sep 18, 2025 2:55 PM",
     contextUpdatedDate: "Thu, Sep 18, 2025 3:26 PM",
     nextEvaluationDate: "Fri, Sep 19, 2025 2:55 AM",
     details: "🖼️",
-    backfillExecutions: "Backfill executions",
-    actions: "Enabled",
+    enabled: true,
     labels: ["team:backend", "env:production"],
     locked: "false",
     missingSource: "false",
@@ -49,13 +45,11 @@ const TRIGGER_ROWS: TriggerRow[] = [
     id: "daily",
     flow: "hello-world",
     namespace: "sanitychecks.blueprints",
-    currentExecution: "",
     lastTriggeredDate: "Thu, May 22, 2025 8:00 PM",
     contextUpdatedDate: "",
     nextEvaluationDate: "Fri, May 23, 2025 9:00 AM",
     details: "🖼️",
-    backfillExecutions: "Backfill executions",
-    actions: "Disabled",
+    enabled: false,
     labels: ["team:frontend", "env:production"],
     locked: "true",
     missingSource: "false",
@@ -64,13 +58,11 @@ const TRIGGER_ROWS: TriggerRow[] = [
     id: "daily",
     flow: "microservices-and-apis",
     namespace: "sanitychecks.blueprints",
-    currentExecution: "",
     lastTriggeredDate: "Thu, May 22, 2025 8:00 PM",
     contextUpdatedDate: "",
     nextEvaluationDate: "Fri, May 23, 2025 9:00 AM",
     details: "🖼️",
-    backfillExecutions: "Backfill executions",
-    actions: "Disabled",
+    enabled: false,
     labels: ["team:backend", "env:production"],
     locked: "true",
     missingSource: "true",
@@ -79,13 +71,11 @@ const TRIGGER_ROWS: TriggerRow[] = [
     id: "daily",
     flow: "porcupine_586521",
     namespace: "company.team",
-    currentExecution: "",
     lastTriggeredDate: "Wed, May 28, 2025 11:00 AM",
     contextUpdatedDate: "",
     nextEvaluationDate: "",
     details: "🖼️",
-    backfillExecutions: "Backfill executions",
-    actions: "Disabled",
+    enabled: false,
     labels: ["team:analytics", "env:production"],
     locked: "true",
     missingSource: "true",
@@ -94,13 +84,11 @@ const TRIGGER_ROWS: TriggerRow[] = [
     id: "daily",
     flow: "sync_sanitychecks",
     namespace: "sanitychecks",
-    currentExecution: "",
     lastTriggeredDate: "Thu, Aug 14, 2025 8:00 AM",
     contextUpdatedDate: "Fri, Sep 12, 2025 6:28 PM",
     nextEvaluationDate: "Aug 14, 2025 10:00 AM",
     details: "🖼️",
-    backfillExecutions: "Backfill executions",
-    actions: "Enabled",
+    enabled: true,
     labels: ["team:backend", "env:production", "priority:critical"],
     locked: "false",
     missingSource: "false",
@@ -136,13 +124,12 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: "id", label: "Id", description: "Trigger identifier", visible: true, order: 1 },
   { id: "flow", label: "Flow", description: "Flow associated with the trigger", visible: true, order: 2 },
   { id: "namespace", label: "Namespace", description: "Namespace of the trigger", visible: true, order: 3 },
-  { id: "currentExecution", label: "Current execution", description: "Currently running execution", visible: true, order: 4 },
-  { id: "lastTriggeredDate", label: "Last triggered date", description: "When the trigger last executed", visible: true, order: 5 },
-  { id: "contextUpdatedDate", label: "Context updated date", description: "Last update of trigger context", visible: true, order: 6 },
-  { id: "nextEvaluationDate", label: "Next evaluation date", description: "When the trigger evaluates next", visible: true, order: 7 },
-  { id: "details", label: "Details", description: "Trigger definition details", visible: true, order: 8 },
-  { id: "backfillExecutions", label: "Backfill", description: "Backfill options", visible: true, order: 9 },
-  { id: "actions", label: "Actions", description: "Manage trigger actions", visible: true, order: 10 },
+  { id: "lastTriggeredDate", label: "Last triggered date", description: "When the trigger last executed", visible: true, order: 4 },
+  { id: "contextUpdatedDate", label: "Context updated date", description: "Last update of trigger context", visible: false, order: 5 },
+  { id: "nextEvaluationDate", label: "Next evaluation date", description: "When the trigger evaluates next", visible: false, order: 6 },
+  { id: "details", label: "Details", description: "Trigger definition details", visible: true, order: 7 },
+  { id: "backfillExecutions", label: "Backfill", description: "Backfill options", visible: true, order: 8 },
+  { id: "enabled", label: "Enabled", description: "Enable/disable trigger", visible: true, order: 9 },
 ];
 
 const DEFAULT_VISIBLE_FILTERS: string[] = [];
@@ -177,7 +164,6 @@ export default function TriggersPage() {
   const [selectedMissingSource, setSelectedMissingSource] = useState<string | null>(null);
   const [columns, setColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS.map((column) => ({ ...column })));
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
-  const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(false);
 
   const [selectedInputs, setSelectedInputs] = useState<string[]>([]);
@@ -619,8 +605,8 @@ export default function TriggersPage() {
           onClearFilter={handleClearFilter}
           onEditFilter={() => {}}
           onResetFilters={handleResetFilters}
-          showChart={showChart}
-          onToggleShowChart={setShowChart}
+          showChart={false}
+          onToggleShowChart={() => {}}
           periodicRefresh={periodicRefresh}
           onTogglePeriodicRefresh={setPeriodicRefresh}
           onRefreshData={handleRefreshData}
@@ -685,6 +671,7 @@ export default function TriggersPage() {
           onResetFilter={handleResetFilter}
           filterOptions={TRIGGERS_FILTER_OPTIONS}
           flowOptions={flowOptions}
+          showChartToggleControl={false}
           searchPlaceholder="Search triggers..."
         />
 
