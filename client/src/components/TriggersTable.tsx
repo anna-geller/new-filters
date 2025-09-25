@@ -114,7 +114,7 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
                 {visibleColumns.map((column) => (
                   <td
                     key={column.id}
-                    className={`px-4 py-3 align-top text-foreground ${columnClasses[column.id] ?? "w-40"}`}
+                    className="px-4 py-3 align-top text-foreground w-52 max-w-[13rem] bg-[#262A35]"
                   >
                     <div className="min-h-[32px] flex items-start">
                       {renderCell(row, column.id)}
