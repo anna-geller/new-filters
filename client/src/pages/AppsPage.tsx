@@ -93,7 +93,6 @@ export default function AppsPage() {
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [periodicRefresh, setPeriodicRefresh] = useState(false);
-  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     setSavedFilters(appsSavedFiltersStorage.getAll());
@@ -405,7 +404,7 @@ export default function AppsPage() {
               <span>Ctrl+Cmd+K</span>
             </div>
             <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
-              Add App
+              Create
             </button>
           </div>
         </div>
@@ -419,8 +418,8 @@ export default function AppsPage() {
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
           onResetFilters={handleResetFilters}
-          showChart={showChart}
-          onToggleShowChart={setShowChart}
+          showChart={false}
+          onToggleShowChart={() => {}}
           periodicRefresh={periodicRefresh}
           onTogglePeriodicRefresh={setPeriodicRefresh}
           onRefreshData={handleRefreshData}
@@ -488,6 +487,8 @@ export default function AppsPage() {
           flowOptions={FLOW_OPTIONS}
           namespaceOptions={NAMESPACE_OPTIONS}
           tagOptions={APP_TAG_OPTIONS}
+          showChartToggleControl={false}
+          searchPlaceholder="Search apps..."
         />
 
         <section className="p-6">

@@ -139,6 +139,14 @@ const LOG_FILTER_OPTIONS: FilterOption[] = [
   { id: "trigger-id", label: "Trigger ID", description: "Filter by trigger identifier", enabled: true, order: 6 },
 ];
 
+const LEVEL_CHART_META: Record<string, { icon: typeof Radio; gradientFrom: string; gradientTo: string; border: string }> = {
+  TRACE: { icon: Radio, gradientFrom: "from-indigo-500/70", gradientTo: "to-indigo-300/60", border: "border-indigo-400/60" },
+  DEBUG: { icon: Bug, gradientFrom: "from-sky-500/70", gradientTo: "to-sky-300/60", border: "border-sky-400/60" },
+  INFO: { icon: Info, gradientFrom: "from-emerald-500/70", gradientTo: "to-emerald-300/60", border: "border-emerald-400/60" },
+  WARN: { icon: AlertTriangle, gradientFrom: "from-amber-500/70", gradientTo: "to-amber-300/60", border: "border-amber-400/60" },
+  ERROR: { icon: OctagonAlert, gradientFrom: "from-rose-500/70", gradientTo: "to-rose-300/60", border: "border-rose-400/60" },
+};
+
 const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: "date", label: "Date", description: "Timestamp of when the log entry was created", visible: true, order: 1 },
   { id: "level", label: "Level", description: "Log severity level", visible: true, order: 2 },
@@ -319,6 +327,30 @@ export default function LogsPage() {
     triggerIdValue,
     triggerIdOperator,
   ]);
+
+  const levelSummary = useMemo(() => {
+    const levelsOrder = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"] as const;
+    const counts = levelsOrder.map((level) => ({
+      level,
+      count: filteredLogs.filter((log) => log.level === level).length,
+    }));
+    const maxCount = counts.reduce((acc, entry) => Math.max(acc, entry.count), 0);
+    const total = counts.reduce((acc, entry) => acc + entry.count, 0);
+    const mostFrequent = counts
+      .filter((entry) => entry.count > 0)
+      .sort((a, b) => b.count - a.count)[0]?.level;
+    const distinctFlows = new Set(filteredLogs.map((log) => log.flow)).size;
+    const distinctNamespaces = new Set(filteredLogs.map((log) => log.namespace)).size;
+
+    return {
+      counts,
+      max: maxCount === 0 ? 1 : maxCount,
+      total,
+      mostFrequent,
+      distinctFlows,
+      distinctNamespaces,
+    };
+  }, [filteredLogs]);
 
   const intervalDisplayValue = useMemo(() => {
     if (selectedInterval === "custom-range" && intervalStartDate && intervalEndDate) {
@@ -711,6 +743,82 @@ export default function LogsPage() {
           onTriggerIdOperatorChange={setTriggerIdOperator}
           searchPlaceholder="Search logs..."
         />
+
+        {showChart && (
+          <section className="px-6 pt-6">
+            <div className="rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Log Volume
+                  </h2>
+                  <p className="text-lg font-semibold text-foreground">{levelSummary.total} entries</p>
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-muted-foreground/80">Most frequent</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {levelSummary.mostFrequent ?? "None"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-muted-foreground/80">Flows</span>
+                    <span className="text-sm font-medium text-foreground">{levelSummary.distinctFlows}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-muted-foreground/80">Namespaces</span>
+                    <span className="text-sm font-medium text-foreground">{levelSummary.distinctNamespaces}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                <div className="flex h-40 flex-1 items-end gap-4">
+                  {levelSummary.counts.map(({ level, count }) => {
+                    const meta = LEVEL_CHART_META[level];
+                    const Icon = meta.icon;
+                    const percentage = Math.max(8, Math.round((count / levelSummary.max) * 100));
+
+                    return (
+                      <div key={level} className="flex flex-1 flex-col items-center gap-2">
+                        <div className="flex h-full w-full items-end justify-center">
+                          <div
+                            className={`w-full max-w-[3rem] rounded-t-md border ${meta.border} bg-gradient-to-t ${meta.gradientFrom} ${meta.gradientTo}`}
+                            style={{ height: `${percentage}%` }}
+                          />
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground">
+                            <Icon className="h-3.5 w-3.5" />
+                          </div>
+                          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            {level}
+                          </span>
+                          <span className="text-xs text-foreground">{count}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="grid w-full max-w-xs gap-3 text-sm">
+                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Interval</p>
+                    <p className="text-sm font-medium text-foreground">{intervalDisplayValue}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Levels</p>
+                    <p className="text-sm font-medium text-foreground">{levelsFilterValue}</p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground/80">Namespaces</p>
+                    <p className="text-sm font-medium text-foreground">{namespaceFilterValue}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="p-6">
           <LogsTable logs={filteredLogs} columns={columns} />

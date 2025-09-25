@@ -38,6 +38,27 @@ export interface SavedFilter {
     selectedInitialExecution: string;
     triggerIdOperator?: string;
     triggerIdValue?: string;
+    actorValue?: string;
+    selectedActions?: string[];
+    actionsOperator?: string;
+    selectedResources?: string[];
+    resourcesOperator?: string;
+    detailsKey?: string;
+    detailsValue?: string;
+    visibleFilters?: string[];
+    userValue?: string;
+    selectedSuperadminStatuses?: string[];
+    superadminOperator?: string;
+    selectedInvitationStatuses?: string[];
+   invitationStatusOperator?: string;
+    selectedPlugins?: string[];
+    pluginOperator?: string;
+    selectedAnnouncementTypes?: string[];
+    announcementTypeOperator?: string;
+    selectedServiceTypes?: string[];
+    serviceTypeOperator?: string;
+    selectedBindingTypes?: string[];
+
   };
 }
 

@@ -109,7 +109,6 @@ export default function TestsPage() {
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
   const [selectedHierarchy, setSelectedHierarchy] = useState<string>('all');
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
-  const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(false);
 
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
@@ -443,8 +442,8 @@ export default function TestsPage() {
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
           onResetFilters={handleResetFilters}
-          showChart={showChart}
-          onToggleShowChart={setShowChart}
+          showChart={false}
+          onToggleShowChart={() => {}}
           periodicRefresh={periodicRefresh}
           onTogglePeriodicRefresh={setPeriodicRefresh}
           onRefreshData={handleRefreshData}
@@ -505,6 +504,8 @@ export default function TestsPage() {
           filterOptions={TEST_FILTER_OPTIONS}
           namespaceMode="tests"
           flowOptions={TEST_FLOW_OPTIONS}
+          showChartToggleControl={false}
+          searchPlaceholder="Search tests..."
         />
 
         <section className="p-6">
