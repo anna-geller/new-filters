@@ -388,7 +388,7 @@ export default function NamespacesPage() {
         <div className="flex-1 overflow-auto p-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredCards.map((card) => (
-              <Card key={card.name} className="bg-card/60 border border-border/60 shadow-sm p-6 flex flex-col gap-4">
+              <Card key={card.name} className="border border-border/60 shadow-sm p-6 flex flex-col gap-4 bg-[#262A35]">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-lg font-semibold text-foreground">{card.name}</p>
