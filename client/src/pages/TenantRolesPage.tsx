@@ -330,7 +330,7 @@ export default function TenantRolesPage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <p className="text-lg font-semibold text-foreground">{role.name}</p>
-                    <a href="#" className="font-mono text-sm text-primary hover:underline break-all block">
+                    <a href="#" className="font-mono text-sm hover:underline break-all block text-[#A3A4DF]">
                       {role.id}
                     </a>
                   </div>
