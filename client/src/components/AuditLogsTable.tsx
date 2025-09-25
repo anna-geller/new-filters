@@ -18,18 +18,19 @@ export interface AuditLogRow {
   tenant?: string;
 }
 
-export const tenantAuditLogColumns: ColumnConfig[] = [
+const SHARED_COLUMNS = [
   { id: 'resource-type', label: 'Resource Type', description: 'Type of resource affected', visible: true, order: 1 },
   { id: 'action', label: 'Action', description: 'Action type performed', visible: true, order: 2 },
   { id: 'actor', label: 'Actor', description: 'User or Service who performed the action', visible: true, order: 3 },
   { id: 'details', label: 'Details', description: 'Additional details about the action', visible: true, order: 4 },
   { id: 'date', label: 'Date', description: 'When the action occurred', visible: true, order: 5 },
-];
+] as const;
 
-export const instanceAuditLogColumns: ColumnConfig[] = [
-  ...tenantAuditLogColumns,
-  { id: 'tenant', label: 'Tenant', description: 'Associated tenant ID', visible: true, order: 6 },
-];
+const TENANT_COLUMN = { id: 'tenant', label: 'Tenant', description: 'Associated tenant ID', visible: true, order: 6 } as const;
+
+export const tenantAuditLogColumns: ColumnConfig[] = [...SHARED_COLUMNS];
+
+export const instanceAuditLogColumns: ColumnConfig[] = [...SHARED_COLUMNS, TENANT_COLUMN];
 
 interface AuditLogsTableProps {
   rows: AuditLogRow[];
@@ -83,14 +84,7 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                       return (
                         <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                           {row.actor.url ? (
-                            <a
-                              href={row.actor.url}
-                              className="text-primary hover:underline"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {row.actor.label}
-                            </a>
+                            <span className="text-foreground/90">{row.actor.label}</span>
                           ) : (
                             <span className="text-foreground/90">{row.actor.label}</span>
                           )}

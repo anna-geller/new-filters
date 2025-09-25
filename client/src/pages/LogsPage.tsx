@@ -153,8 +153,8 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: "namespace", label: "Namespace", description: "Namespace where the log was generated", visible: true, order: 3 },
   { id: "flow", label: "Flow", description: "Name of the flow associated with the log entry", visible: true, order: 4 },
   { id: "task", label: "Task", description: "Task within the flow that produced the log", visible: true, order: 5 },
-  { id: "scope", label: "Scope", description: "Scope classification for the log (user or system)", visible: true, order: 6 },
-  { id: "executionId", label: "ExecutionId", description: "Execution identifier that produced this log", visible: true, order: 7 },
+  { id: "scope", label: "Scope", description: "Scope classification for the log (user or system)", visible: false, order: 6 },
+  { id: "executionId", label: "ExecutionId", description: "Execution identifier that produced this log", visible: false, order: 7 },
   { id: "message", label: "Message", description: "Content of the log entry", visible: true, order: 8 },
 ];
 

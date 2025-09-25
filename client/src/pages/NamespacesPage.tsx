@@ -390,7 +390,6 @@ export default function NamespacesPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-lg font-semibold text-foreground">{card.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Owner: {card.owner}</p>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{card.description}</p>
