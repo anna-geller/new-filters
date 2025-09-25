@@ -2003,9 +2003,8 @@ export default function FilterInterface({
 
   return (
     <div className="relative">
-      
       {/* First Row: Controls */}
-      <div className="flex items-center gap-3 p-4 pb-2">
+      <div className="flex items-center gap-3 p-4 pb-2 bg-[#1F232D]">
         {/* Left Section: Control buttons and search */}
         <div className="flex items-center gap-3 flex-shrink-0">
           {/* Customize Filters Button */}
@@ -2086,7 +2085,6 @@ export default function FilterInterface({
           </Tooltip>
         </div>
       </div>
-
       {/* Second Row: Overflow Filter Badges */}
       {overflowBadges.length > 0 && (
         <div className="px-4 pb-4">
@@ -2095,7 +2093,6 @@ export default function FilterInterface({
           </div>
         </div>
       )}
-
       {/* Table Options Panel */}
       {tableOptionsOpen && (
         <div className="px-4 py-3 border-b border-border bg-card/30">
@@ -2178,15 +2175,12 @@ export default function FilterInterface({
           </div>
         </div>
       )}
-
-
       {/* Save Filter Dialog */}
       <SaveFilterDialog
         isOpen={saveFilterDialogOpen}
         onClose={() => setSaveFilterDialogOpen(false)}
         onSave={handleSaveFilterSubmit}
       />
-
       {/* Edit Filter Dialog */}
       <SaveFilterDialog
         key={`edit-${editingFilterId ?? 'none'}`}
@@ -2199,8 +2193,6 @@ export default function FilterInterface({
         initialName={editingFilterId ? savedFilters.find(f => f.id === editingFilterId)?.name || '' : ''}
         initialDescription={editingFilterId ? savedFilters.find(f => f.id === editingFilterId)?.description || '' : ''}
       />
-
-
       {/* Hidden measurement container for filter badge width calculation */}
       <div 
         ref={measurementContainerRef}
