@@ -96,7 +96,7 @@ function App() {
           <div className="flex h-screen w-full">
             <AppSidebar />
             <div className="flex flex-col flex-1">
-              <header className="flex items-center justify-between p-2 border-b border-border">
+              <header className="flex items-center justify-between p-2 border-b border-border bg-[#1F232D]">
                 <SidebarTrigger data-testid="button-sidebar-toggle" />
               </header>
               <main className="flex-1 overflow-hidden">
