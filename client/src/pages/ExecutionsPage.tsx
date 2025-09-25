@@ -685,6 +685,8 @@ export default function ExecutionsPage() {
       selectedKinds,
       selectedHierarchy,
       selectedInitialExecution,
+      visibleFilters,
+      columnConfig: columns,
     };
   };
 
