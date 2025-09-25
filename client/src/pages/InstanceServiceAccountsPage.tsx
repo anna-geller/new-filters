@@ -244,7 +244,7 @@ export default function InstanceServiceAccountsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-[#262A35]/80">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Instance Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Service Accounts</h1>
