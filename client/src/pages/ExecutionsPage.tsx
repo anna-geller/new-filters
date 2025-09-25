@@ -495,10 +495,12 @@ export default function ExecutionsPage() {
           if (!execution.labels.some(label => label.toLowerCase().includes(labelsCustomValue.toLowerCase()))) return false;
         } else if (labelsOperator === 'does-not-contain' && labelsCustomValue.trim()) {
           if (execution.labels.some(label => label.toLowerCase().includes(labelsCustomValue.toLowerCase()))) return false;
-        } else if (labelsOperator === 'is-set') {
-          if (execution.labels.length === 0) return false;
-        } else if (labelsOperator === 'is-not-set') {
-          if (execution.labels.length > 0) return false;
+        } else if (labelsOperator === 'is-set' && labelsCustomValue.trim()) {
+          const labelKey = labelsCustomValue.trim();
+          if (!execution.labels.some(label => label.startsWith(labelKey + ':'))) return false;
+        } else if (labelsOperator === 'is-not-set' && labelsCustomValue.trim()) {
+          const labelKey = labelsCustomValue.trim();
+          if (execution.labels.some(label => label.startsWith(labelKey + ':'))) return false;
         }
       }
 
