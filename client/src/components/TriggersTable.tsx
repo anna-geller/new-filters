@@ -110,7 +110,7 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
           </thead>
           <tbody>
             {triggers.map((row) => (
-              <tr key={row.id + row.namespace} className="border-b border-border last:border-b-0 hover:bg-card/40">
+              <tr key={JSON.stringify([row.id, row.namespace])} className="border-b border-border last:border-b-0 hover:bg-card/40">
                 {visibleColumns.map((column) => (
                   <td
                     key={column.id}
