@@ -394,7 +394,7 @@ export default function AppsPage() {
   return (
     <div className="min-h-screen bg-[#1F232D]">
       <header className="border-b border-border bg-[#262A35]/80">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Apps</h1>
             <span className="text-sm text-muted-foreground">Build custom apps to interact with Kestra from the outside world</span>
