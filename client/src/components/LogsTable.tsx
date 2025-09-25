@@ -126,7 +126,7 @@ export default function LogsTable({ logs, columns }: LogsTableProps) {
                 {visibleColumns.map((column) => (
                   <td
                     key={column.id}
-                    className={`px-3 py-3 align-top text-foreground ${columnClasses[column.id] ?? "min-w-[10rem]"}`}
+                    className="px-3 py-3 align-top text-foreground min-w-[4.5rem] max-w-[5.5rem] bg-[#262A35]"
                   >
                     <div className="min-h-[32px] flex items-start">
                       {renderCell(row, column.id)}
