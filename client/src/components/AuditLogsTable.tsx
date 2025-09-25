@@ -106,13 +106,13 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                       );
                     case 'date':
                       return (
-                        <td key={column.id} className="py-3 px-4 align-top whitespace-nowrap text-muted-foreground">
+                        <td key={column.id} className="py-3 px-4 align-top whitespace-nowrap text-muted-foreground bg-[#262A35]">
                           {row.date}
                         </td>
                       );
                     case 'tenant':
                       return (
-                        <td key={column.id} className="py-3 px-4 align-top">
+                        <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                           <Badge variant="outline" className="uppercase tracking-wide">
                             {row.tenant ?? '—'}
                           </Badge>
