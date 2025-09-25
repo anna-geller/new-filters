@@ -425,7 +425,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="pb-4 bg-[#1F232D]">
+      <SidebarHeader className="pb-4 bg-[#1E202A]">
         <img 
           src={kestraLogo} 
           alt="Kestra" 
