@@ -366,7 +366,7 @@ export function BlueprintsLibraryPage({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card/50">
+      <header className="border-b border-border bg-[#262A35]/80">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
@@ -476,7 +476,7 @@ export function BlueprintsLibraryPage({
               {paginatedBlueprints.map((blueprint) => (
                 <Card
                   key={blueprint.id}
-                  className="border border-border/60 bg-card/60 shadow-sm transition hover:border-primary/50 hover:shadow-md"
+                  className="border border-border/60 bg-[#262A35] shadow-sm transition hover:border-primary/50 hover:shadow-md"
                 >
                   <div className="flex h-full flex-col gap-4 p-5">
                     <div className="flex flex-wrap gap-2">
@@ -548,7 +548,7 @@ export function BlueprintsLibraryPage({
           )}
         </section>
 
-        <div className="border-t border-border/60 bg-card/40 px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="border-t border-border/60 bg-[#262A35]/60 px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <span>Per page</span>
             <Select value={pageSize} onValueChange={setPageSize}>
