@@ -585,7 +585,7 @@ export default function TriggersPage() {
   return (
     <div className="min-h-screen bg-[#1F232D]">
       <header className="border-b border-border bg-[#262A35]/80">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-foreground">Triggers</h1>
             <span className="text-sm text-muted-foreground">Tenant Administration</span>
