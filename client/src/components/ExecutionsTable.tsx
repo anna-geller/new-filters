@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
+import { ColumnConfig } from '../types/savedFilters';
 
 interface Execution {
   id: string;
@@ -19,13 +20,6 @@ interface Execution {
   state: 'SUCCESS' | 'FAILED' | 'RUNNING' | 'QUEUED' | 'WARNING' | 'PAUSED' | 'CREATED' | 'RESTARTED' | 'CANCELLED';
 }
 
-export interface ColumnConfig {
-  id: string;
-  label: string;
-  description: string;
-  visible: boolean;
-  order: number;
-}
 
 interface ExecutionsTableProps {
   executions: Execution[];

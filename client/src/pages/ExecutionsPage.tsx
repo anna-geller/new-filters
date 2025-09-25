@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import FilterInterface from '@/components/FilterInterface';
-import ExecutionsTable, { ColumnConfig, defaultColumns } from '@/components/ExecutionsTable';
+import ExecutionsTable, { defaultColumns } from '@/components/ExecutionsTable';
+import { ColumnConfig } from '@/types/savedFilters';
 import ExecutionChart from '@/components/ExecutionChart';
 import { SavedFilter } from '@/types/savedFilters';
 import { savedFiltersStorage } from '@/utils/savedFiltersStorage';
