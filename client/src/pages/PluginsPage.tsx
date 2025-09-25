@@ -276,7 +276,7 @@ export default function PluginsPage() {
   const noop = () => {};
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#1F232D]">
       <header className="border-b border-border bg-card/50">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex flex-col gap-1">
@@ -289,7 +289,6 @@ export default function PluginsPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
