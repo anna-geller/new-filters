@@ -182,14 +182,14 @@ const navigationItems = [
     icon: Server,
     children: [
       {
-        title: "Services",
-        url: "/admin/instance/services",
-        icon: Activity,
-      },
-      {
         title: "System Overview",
         url: "/admin/instance/system-overview",
         icon: Monitor,
+      },
+      {
+        title: "Services",
+        url: "/admin/instance/services",
+        icon: Activity,
       },
       {
         title: "Audit Logs",
