@@ -58,7 +58,7 @@ export default function DashboardBlueprintsPage() {
   return (
     <BlueprintsLibraryPage
       title="Dashboard Blueprints"
-      subtitle="Blueprints Library"
+      subtitle="Explore blueprints to kick-start your next dashboard."
       tagOptions={DASHBOARD_TAG_OPTIONS}
       blueprints={DASHBOARD_BLUEPRINTS}
       savedFilterNamespace="dashboard-blueprints"

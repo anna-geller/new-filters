@@ -72,9 +72,6 @@ export default function ActorFilterEditor({ value, onChange, onClose, onReset, t
           </Button>
         </div>
       </div>
-      <div className="p-4 border-t border-border bg-muted/20 text-xs text-muted-foreground">
-        Filter entries by the filter criteria.
-      </div>
     </Card>
   );
 }

@@ -198,6 +198,9 @@ export default function InstanceWorkerGroupsPage() {
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>Jump to...</span>
             <span>Ctrl+Cmd+K</span>
+            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
+              Create
+            </button>
           </div>
         </div>
       </header>

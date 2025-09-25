@@ -213,6 +213,9 @@ export default function InstanceVersionedPluginsPage() {
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>Jump to...</span>
             <span>Ctrl+Cmd+K</span>
+            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
+              Upload
+            </button>
           </div>
         </div>
       </header>

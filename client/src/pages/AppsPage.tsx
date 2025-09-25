@@ -395,8 +395,9 @@ export default function AppsPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50">
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Apps</h1>
+            <span className="text-sm text-muted-foreground">Build custom apps to interact with Kestra from the outside world</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="text-sm text-muted-foreground hover:text-foreground">Jump to...</button>

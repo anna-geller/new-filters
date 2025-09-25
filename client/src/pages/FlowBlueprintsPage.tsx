@@ -94,7 +94,7 @@ export default function FlowBlueprintsPage() {
   return (
     <BlueprintsLibraryPage
       title="Flow Blueprints"
-      subtitle="Blueprints Library"
+      subtitle="Explore blueprints to kick-start your next flow."
       tagOptions={FLOW_TAG_OPTIONS}
       blueprints={FLOW_BLUEPRINTS}
       savedFilterNamespace="flow-blueprints"

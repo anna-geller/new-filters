@@ -58,7 +58,7 @@ export default function AppBlueprintsPage() {
   return (
     <BlueprintsLibraryPage
       title="App Blueprints"
-      subtitle="Blueprints Library"
+      subtitle="Explore blueprints to kick-start your next app."
       tagOptions={APP_TAG_OPTIONS}
       blueprints={APP_BLUEPRINTS}
       savedFilterNamespace="app-blueprints"

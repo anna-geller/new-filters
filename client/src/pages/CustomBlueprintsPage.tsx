@@ -90,7 +90,7 @@ export default function CustomBlueprintsPage() {
   return (
     <BlueprintsLibraryPage
       title="Custom Blueprints"
-      subtitle="Blueprints Library"
+      subtitle="Build custom blueprints shared across your organization."
       tagOptions={CUSTOM_TAG_OPTIONS}
       blueprints={CUSTOM_BLUEPRINTS}
       savedFilterNamespace="custom-blueprints"

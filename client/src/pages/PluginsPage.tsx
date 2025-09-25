@@ -281,7 +281,7 @@ export default function PluginsPage() {
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-semibold text-foreground">Plugins</h1>
-            <span className="text-sm text-muted-foreground">Browse Kestra integrations</span>
+            <span className="text-sm text-muted-foreground">Search for tasks and triggers to build your flow.</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>Jump to...</span>
