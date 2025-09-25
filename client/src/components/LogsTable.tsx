@@ -111,7 +111,7 @@ export default function LogsTable({ logs, columns }: LogsTableProps) {
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className={`px-3 py-3 text-left font-medium text-muted-foreground align-top ${columnClasses[column.id] ?? "min-w-[10rem]"}`}
+                  className="px-3 py-3 text-left font-medium text-muted-foreground align-top min-w-[8.5rem] max-w-[10rem] bg-[#2F3341]"
                 >
                   <span className="truncate block" title={column.label}>
                     {column.label}
