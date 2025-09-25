@@ -94,7 +94,7 @@ export default function TestsTable({ tests, columns, onRunTest }: TestsTableProp
                 {visibleColumns.map((column) => (
                   <td
                     key={column.id}
-                    className={`px-4 py-3 align-top text-foreground ${columnClasses[column.id] ?? 'w-40'}`}
+                    className="px-4 py-3 align-top text-foreground w-48 max-w-[12rem] bg-[#262A35]"
                   >
                     <div className="min-h-[32px] flex items-start">
                       {renderCell(row, column.id)}
