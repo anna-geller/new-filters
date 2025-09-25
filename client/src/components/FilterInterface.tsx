@@ -2126,6 +2126,7 @@ export default function FilterInterface({
                     checked={periodicRefresh}
                     onCheckedChange={onTogglePeriodicRefresh}
                     data-testid="switch-periodic-refresh"
+                    className="bg-[#8408FF]"
                   />
                   <Label htmlFor="periodic-refresh" className="text-sm cursor-pointer">
                     Periodic refresh
