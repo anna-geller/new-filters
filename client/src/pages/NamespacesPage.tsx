@@ -288,7 +288,6 @@ export default function NamespacesPage() {
           </div>
         </div>
       </header>
-
       <main className="flex-1 overflow-hidden flex flex-col">
         <FilterInterface
           searchValue={searchValue}
@@ -385,7 +384,7 @@ export default function NamespacesPage() {
           showColumnsControl={false}
         />
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredCards.map((card) => (
               <Card key={card.name} className="border border-border/60 shadow-sm p-6 flex flex-col gap-4 bg-[#262A35]">
