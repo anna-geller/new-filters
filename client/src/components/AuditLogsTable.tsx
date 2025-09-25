@@ -73,7 +73,7 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                       );
                     case 'action':
                       return (
-                        <td key={column.id} className="py-3 px-4 align-top">
+                        <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                           <Badge variant="outline" className="uppercase tracking-wide">
                             {row.action}
                           </Badge>
