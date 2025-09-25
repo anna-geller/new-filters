@@ -276,7 +276,6 @@ export default function NamespacesPage() {
       <header className="border-b border-border bg-card/50">
         <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">Namespaces</h1>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">

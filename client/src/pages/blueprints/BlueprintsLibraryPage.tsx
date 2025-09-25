@@ -369,7 +369,6 @@ export function BlueprintsLibraryPage({
       <header className="border-b border-border bg-[#262A35]/80">
         <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
             <h1 className="text-xl font-semibold text-foreground">{title}</h1>
             <span className="text-sm text-muted-foreground">{subtitle}</span>
           </div>
