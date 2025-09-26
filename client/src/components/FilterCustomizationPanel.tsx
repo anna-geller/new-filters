@@ -61,7 +61,7 @@ export default function FilterCustomizationPanel({
         </button>
       </div>
       {/* Filter List */}
-      <div className="max-h-72 overflow-y-auto">
+      <div className="max-h-72 overflow-y-auto bg-[#2F3341]">
         {[...filterOptions]
           .sort((a, b) => a.order - b.order)
           .map((option) => {

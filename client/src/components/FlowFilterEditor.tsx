@@ -278,9 +278,9 @@ export default function FlowFilterEditor({
 
       {/* Flow list - only show for selection-based operators */}
       {showSelectionUI && (
-        <div className="max-h-64 overflow-y-auto" data-testid="flow-options-list">
+        <div className="max-h-64 overflow-y-auto bg-[#2F3341]" data-testid="flow-options-list">
           {filteredFlows.length === 0 ? (
-            <div className="p-4 text-sm text-muted-foreground text-center">
+            <div className="p-4 text-sm text-muted-foreground text-center bg-[#2F3341]">
               No flows found matching "{searchTerm}"
             </div>
           ) : (
@@ -289,7 +289,7 @@ export default function FlowFilterEditor({
               return (
                 <div
                   key={flow.id}
-                  className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer"
+                  className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                   onClick={() => handleToggleFlow(flow.id)}
                   data-testid={`flow-option-${flow.id}`}
                 >

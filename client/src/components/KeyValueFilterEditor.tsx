@@ -272,7 +272,7 @@ export default function KeyValueFilterEditor({
       </div>
 
       {isSelectionBasedOperator && (
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
           {filteredOptions.map((option) => {
             const isSelected = currentValues.includes(option.id);
             const accentColor = option.color ?? 'bg-slate-500';
@@ -281,7 +281,7 @@ export default function KeyValueFilterEditor({
               <div
                 key={option.id}
                 onClick={() => handleToggleValue(option.id)}
-                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer"
+                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 data-testid={`${prefix}-option-${option.id}`}
               >
                 <div

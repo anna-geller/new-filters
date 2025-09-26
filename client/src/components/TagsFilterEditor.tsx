@@ -173,7 +173,7 @@ export default function TagsFilterEditor({
       </div>
 
       {!isTextOperator && (
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
           {filteredTags.map((tag) => {
             const isSelected = currentTags.includes(tag.id);
             return (
