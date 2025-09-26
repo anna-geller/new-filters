@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckSquare, Square, CheckCircle, Workflow, RotateCcw } from "lucide-react";
 
@@ -91,15 +92,31 @@ const defaultFlowOptions: FlowOption[] = [
 
 interface FlowFilterEditorProps {
   selectedFlows: string[];
+  flowOperator: string;
+  customValue: string;
   onSelectionChange: (flows: string[]) => void;
+  onOperatorChange: (operator: string) => void;
+  onCustomValueChange: (value: string) => void;
   onClose: () => void;
   onReset?: () => void;
   options?: FlowOption[];
 }
 
+const operatorOptions = [
+  { value: 'in', label: 'in', description: 'Match any of the selected flows' },
+  { value: 'not-in', label: 'not in', description: 'Exclude any of the selected flows' },
+  { value: 'contains', label: 'contains', description: 'Flow contains the text' },
+  { value: 'starts-with', label: 'starts with', description: 'Flow starts with the text' },
+  { value: 'ends-with', label: 'ends with', description: 'Flow ends with the text' },
+];
+
 export default function FlowFilterEditor({ 
-  selectedFlows, 
-  onSelectionChange, 
+  selectedFlows,
+  flowOperator,
+  customValue,
+  onSelectionChange,
+  onOperatorChange,
+  onCustomValueChange,
   onClose,
   onReset,
   options
@@ -108,12 +125,22 @@ export default function FlowFilterEditor({
   
   // Local state to track current values vs original props
   const [currentFlows, setCurrentFlows] = useState(selectedFlows);
+  const [currentOperator, setCurrentOperator] = useState(flowOperator);
+  const [currentCustomValue, setCurrentCustomValue] = useState(customValue);
   const availableFlows = options ?? defaultFlowOptions;
 
   // Sync local state with props when they change (important for reset functionality)
   useEffect(() => {
     setCurrentFlows(selectedFlows);
   }, [selectedFlows]);
+
+  useEffect(() => {
+    setCurrentOperator(flowOperator);
+  }, [flowOperator]);
+
+  useEffect(() => {
+    setCurrentCustomValue(customValue);
+  }, [customValue]);
 
   const filteredFlows = availableFlows.filter(flow =>
     flow.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -147,6 +174,8 @@ export default function FlowFilterEditor({
   
   const handleApply = () => {
     onSelectionChange(currentFlows);
+    onOperatorChange(currentOperator);
+    onCustomValueChange(currentCustomValue);
     onClose();
   };
   
@@ -155,88 +184,145 @@ export default function FlowFilterEditor({
       onReset();
     } else {
       setCurrentFlows(selectedFlows);
+      setCurrentOperator(flowOperator);
+      setCurrentCustomValue(customValue);
     }
   };
 
+  // Determine if we should show selection-based UI or text input
+  const showSelectionUI = currentOperator === 'in' || currentOperator === 'not-in';
+  const showCustomInput = currentOperator === 'contains' || currentOperator === 'starts-with' || currentOperator === 'ends-with';
+
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header with search */}
+      {/* Header with operator selection */}
       <div className="p-4 border-b border-border">
-        <Input
-          placeholder="Search flows..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-3"
-          data-testid="flow-search-input"
-        />
-        
-        {/* Select/Deselect buttons */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSelectAll}
-            disabled={allVisible}
-            className="flex-1"
-            data-testid="flow-select-all-button"
-          >
-            <CheckSquare className="w-3 h-3 mr-1" />
-            Select All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDeselectAll}
-            disabled={noneVisible}
-            className="flex-1"
-            data-testid="flow-deselect-all-button"
-          >
-            <Square className="w-3 h-3 mr-1" />
-            Deselect All
-          </Button>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Filter Operator
+            </label>
+            <Select value={currentOperator} onValueChange={setCurrentOperator}>
+              <SelectTrigger data-testid="flow-operator-select">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {operatorOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>{option.label}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{option.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {showCustomInput && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                Flow Text
+              </label>
+              <Input
+                placeholder="Enter flow text..."
+                value={currentCustomValue}
+                onChange={(e) => setCurrentCustomValue(e.target.value)}
+                data-testid="flow-custom-input"
+              />
+            </div>
+          )}
+
+          {showSelectionUI && (
+            <>
+              <Input
+                placeholder="Search flows..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                data-testid="flow-search-input"
+              />
+              
+              {/* Select/Deselect buttons */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAll}
+                  disabled={allVisible}
+                  className="flex-1"
+                  data-testid="flow-select-all-button"
+                >
+                  <CheckSquare className="w-3 h-3 mr-1" />
+                  Select All
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeselectAll}
+                  disabled={noneVisible}
+                  className="flex-1"
+                  data-testid="flow-deselect-all-button"
+                >
+                  <Square className="w-3 h-3 mr-1" />
+                  Deselect All
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Flow list */}
-      <div className="max-h-64 overflow-y-auto" data-testid="flow-options-list">
-        {filteredFlows.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground text-center">
-            No flows found matching "{searchTerm}"
-          </div>
-        ) : (
-          filteredFlows.map((flow) => {
-            const isSelected = currentFlows.includes(flow.id);
-            return (
-              <div
-                key={flow.id}
-                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
-                onClick={() => handleToggleFlow(flow.id)}
-                data-testid={`flow-option-${flow.id}`}
-              >
-                <div className="flex items-center gap-2 flex-1">
-                  <Workflow className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{flow.label}</div>
+      {/* Flow list - only show for selection-based operators */}
+      {showSelectionUI && (
+        <div className="max-h-64 overflow-y-auto" data-testid="flow-options-list">
+          {filteredFlows.length === 0 ? (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              No flows found matching "{searchTerm}"
+            </div>
+          ) : (
+            filteredFlows.map((flow) => {
+              const isSelected = currentFlows.includes(flow.id);
+              return (
+                <div
+                  key={flow.id}
+                  className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+                  onClick={() => handleToggleFlow(flow.id)}
+                  data-testid={`flow-option-${flow.id}`}
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <Workflow className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{flow.label}</div>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {isSelected ? (
+                      <CheckCircle className="w-4 h-4 text-green-600" data-testid={`flow-selected-${flow.id}`} />
+                    ) : (
+                      <div className="w-4 h-4 border border-input rounded-sm" data-testid={`flow-unselected-${flow.id}`} />
+                    )}
                   </div>
                 </div>
-                <div className="flex-shrink-0">
-                  {isSelected ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" data-testid={`flow-selected-${flow.id}`} />
-                  ) : (
-                    <div className="w-4 h-4 border border-input rounded-sm" data-testid={`flow-unselected-${flow.id}`} />
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {currentFlows.length} flow{currentFlows.length !== 1 ? 's' : ''} selected
+            {showSelectionUI 
+              ? `${currentFlows.length} flow${currentFlows.length !== 1 ? 's' : ''} selected`
+              : showCustomInput && currentCustomValue
+              ? `Filter: ${currentOperator} "${currentCustomValue}"`
+              : 'No filter set'
+            }
           </span>
           
           <div className="flex items-center gap-2">

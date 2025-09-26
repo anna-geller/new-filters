@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle, SkipForward, XCircle } from 'lucide-react';
 import FilterInterface, { type FilterOption } from '@/components/FilterInterface';
 import TestsTable, { type TestRow } from '@/components/TestsTable';
-import type { ColumnConfig } from '@/components/ExecutionsTable';
+import type { ColumnConfig } from '@/types/savedFilters';
 import { SavedFilter } from '@/types/savedFilters';
 import { testsSavedFiltersStorage } from '@/utils/testsSavedFiltersStorage';
 import type { StateOption } from '@/components/StateFilterEditor';
@@ -89,6 +89,8 @@ export default function TestsPage() {
   const [namespaceOperator, setNamespaceOperator] = useState<string>('in');
   const [namespaceCustomValue, setNamespaceCustomValue] = useState<string>('');
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [flowOperator, setFlowOperator] = useState('in');
+  const [flowCustomValue, setFlowCustomValue] = useState('');
   const [columns, setColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS.map((col) => ({ ...col })));
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
 
@@ -483,7 +485,11 @@ export default function TestsPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           namespaceOptions={TEST_NAMESPACE_OPTIONS}
           selectedFlows={selectedFlows}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
           onFlowsSelectionChange={setSelectedFlows}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}

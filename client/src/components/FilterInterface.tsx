@@ -26,7 +26,8 @@ import IntervalFilterEditor from './TimeRangeFilterEditor';
 import SaveFilterButton from './SaveFilterButton';
 import SavedFiltersDropdown from './SavedFiltersDropdown';
 import SaveFilterDialog from './SaveFilterDialog';
-import { ColumnConfig, defaultColumns } from './ExecutionsTable';
+import { defaultColumns } from './ExecutionsTable';
+import type { ColumnConfig } from '../types/savedFilters';
 import { SavedFilter } from '../types/savedFilters';
 import { filterCustomizationStorage } from '../utils/filterCustomizationStorage';
 import TagsFilterEditor, { type TagOption } from './TagsFilterEditor';
@@ -104,7 +105,11 @@ interface FilterInterfaceProps {
   onNamespaceOperatorChange: (operator: string) => void;
   onNamespaceCustomValueChange: (value: string) => void;
   selectedFlows: string[];
+  flowOperator: string;
+  flowCustomValue: string;
   onFlowsSelectionChange: (flows: string[]) => void;
+  onFlowOperatorChange: (operator: string) => void;
+  onFlowCustomValueChange: (value: string) => void;
   selectedTags?: string[];
   tagsOperator?: string;
   tagsCustomValue?: string;
@@ -264,7 +269,11 @@ export default function FilterInterface({
   onNamespaceOperatorChange,
   onNamespaceCustomValueChange,
   selectedFlows,
+  flowOperator,
+  flowCustomValue,
   onFlowsSelectionChange,
+  onFlowOperatorChange,
+  onFlowCustomValueChange,
   selectedTags = [],
   tagsOperator = 'in',
   tagsCustomValue = '',
@@ -920,6 +929,14 @@ export default function FilterInterface({
     onFlowsSelectionChange(flows);
   };
 
+  const handleFlowOperatorChange = (operator: string) => {
+    onFlowOperatorChange(operator);
+  };
+
+  const handleFlowCustomValueChange = (value: string) => {
+    onFlowCustomValueChange(value);
+  };
+
   const handleTagsSelectionChange = (tags: string[]) => {
     onTagsSelectionChange?.(tags);
   };
@@ -1507,7 +1524,11 @@ export default function FilterInterface({
           <PopoverContent side="bottom" align="start" className="w-80 p-0">
             <FlowFilterEditor
               selectedFlows={selectedFlows}
+              flowOperator={flowOperator}
+              customValue={flowCustomValue}
               onSelectionChange={handleFlowsSelectionChange}
+              onOperatorChange={handleFlowOperatorChange}
+              onCustomValueChange={handleFlowCustomValueChange}
               onClose={handleCloseFlowFilter}
               onReset={() => onResetFilter('flow')}
               options={flowOptions}
