@@ -69,11 +69,7 @@ export default function FilterCustomizationPanel({
             return (
               <div
                 key={option.id}
-                className={`flex items-center gap-3 p-3 border-b border-border/50 ${
-                  isActive 
-                    ? 'opacity-50 cursor-not-allowed bg-muted/20' 
-                    : 'hover:bg-muted/30 cursor-pointer'
-                }`}
+                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer bg-[#2F3341]"
                 onClick={() => handleAddFilter(option.id)}
                 data-testid={`filter-item-${option.id}`}
               >
@@ -84,7 +80,6 @@ export default function FilterCustomizationPanel({
                   }`}>{option.label}</div>
                   <div className="text-xs text-muted-foreground">{option.description}</div>
                 </div>
-
                 {/* Add Button */}
                 {!isActive && (
                   <button
