@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import FilterInterface, { type FilterOption } from '@/components/FilterInterface';
 import UsersTable, { type UserRow } from '@/components/UsersTable';
-import type { ColumnConfig } from '@/components/ExecutionsTable';
+import type { ColumnConfig } from '@/types/savedFilters';
 import { SavedFilter } from '@/types/savedFilters';
 import { tenantServiceAccountsSavedFiltersStorage } from '@/utils/tenantServiceAccountsSavedFiltersStorage';
 

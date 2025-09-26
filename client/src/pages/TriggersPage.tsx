@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import TriggersTable, { type TriggerRow } from "@/components/TriggersTable";
-import type { ColumnConfig } from "@/components/ExecutionsTable";
+import type { ColumnConfig } from "@/types/savedFilters";
 import type { SavedFilter } from "@/types/savedFilters";
 import { triggersSavedFiltersStorage } from "@/utils/triggersSavedFiltersStorage";
 import type { FlowOption } from "@/components/FlowFilterEditor";
@@ -127,7 +127,6 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: "lastTriggeredDate", label: "Last triggered date", description: "When the trigger last executed", visible: true, order: 4 },
   { id: "contextUpdatedDate", label: "Context updated date", description: "Last update of trigger context", visible: false, order: 5 },
   { id: "nextEvaluationDate", label: "Next evaluation date", description: "When the trigger evaluates next", visible: false, order: 6 },
-  { id: "details", label: "Details", description: "Trigger definition details", visible: true, order: 7 },
   { id: "backfillExecutions", label: "Backfill", description: "Backfill options", visible: true, order: 8 },
   { id: "enabled", label: "Enabled", description: "Enable/disable trigger", visible: true, order: 9 },
 ];
@@ -160,6 +159,8 @@ export default function TriggersPage() {
   const [labelsOperator, setLabelsOperator] = useState("has-any-of");
   const [labelsCustomValue, setLabelsCustomValue] = useState("");
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [flowOperator, setFlowOperator] = useState('in');
+  const [flowCustomValue, setFlowCustomValue] = useState('');
   const [selectedLocked, setSelectedLocked] = useState<string | null>(null);
   const [selectedMissingSource, setSelectedMissingSource] = useState<string | null>(null);
   const [columns, setColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS.map((column) => ({ ...column })));
@@ -645,7 +646,11 @@ export default function TriggersPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           namespaceOptions={namespaceOptions}
           selectedFlows={selectedFlows}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
           onFlowsSelectionChange={setSelectedFlows}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           selectedLocked={selectedLocked}
           onLockedChange={setSelectedLocked}
           selectedMissingSource={selectedMissingSource}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import FilterInterface, { type FilterOption } from '@/components/FilterInterface';
 import UsersTable, { type UserRow } from '@/components/UsersTable';
-import type { ColumnConfig } from '@/components/ExecutionsTable';
+import type { ColumnConfig } from '@/types/savedFilters';
 import { SavedFilter } from '@/types/savedFilters';
 import { tenantUsersSavedFiltersStorage } from '@/utils/tenantUsersSavedFiltersStorage';
 
@@ -72,6 +72,8 @@ interface ActiveFilter {
 export default function TenantUsersPage() {
   const [searchValue, setSearchValue] = useState('');
   const [userValue, setUserValue] = useState('');
+  const [flowOperator, setFlowOperator] = useState('in');
+  const [flowCustomValue, setFlowCustomValue] = useState('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [selectedInterval, setSelectedInterval] = useState('all-time');
@@ -277,6 +279,10 @@ export default function TenantUsersPage() {
           onNamespaceCustomValueChange={() => {}}
           selectedFlows={[]}
           onFlowsSelectionChange={() => {}}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           selectedScopes={[]}
           onScopesSelectionChange={() => {}}
           selectedKinds={[]}
@@ -300,10 +306,8 @@ export default function TenantUsersPage() {
           onDetailsChange={() => {}}
           userValue={userValue}
           onUserChange={setUserValue}
-          selectedSuperadminStatuses={[]}
-          superadminOperator="in"
+          selectedSuperadminStatus="all"
           onSuperadminSelectionChange={() => {}}
-          onSuperadminOperatorChange={() => {}}
           userFilterTitle="Username"
           userFilterPlaceholder="Search by username..."
           savedFilters={savedFilters}

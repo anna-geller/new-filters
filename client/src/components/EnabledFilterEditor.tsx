@@ -51,8 +51,8 @@ export default function EnabledFilterEditor({
   };
 
   return (
-    <Card className="w-64 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+    <Card className="w-64 p-0 bg-[#2F3341] border border-popover-border shadow-lg">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="space-y-2">
           {options.map((option) => {
             const isSelected = currentValue === option.id;
@@ -63,7 +63,7 @@ export default function EnabledFilterEditor({
                 className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
                   isSelected
                     ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
-                    : 'border-border hover:bg-muted/40 text-muted-foreground'
+                    : 'border-border hover:bg-[#3A3F4F] text-muted-foreground'
                 }`}
                 data-testid={`enabled-option-${option.id}`}
               >
@@ -77,7 +77,7 @@ export default function EnabledFilterEditor({
             className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
               currentValue === null
                 ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
-                : 'border-border hover:bg-muted/40 text-muted-foreground'
+                : 'border-border hover:bg-[#3A3F4F] text-muted-foreground'
             }`}
             data-testid="enabled-option-any"
           >
@@ -87,7 +87,7 @@ export default function EnabledFilterEditor({
         </div>
       </div>
       <div
-        className={`p-4 border-t border-border bg-muted/20 flex items-center ${
+        className={`p-4 border-t border-border bg-[#2F3341] flex items-center ${
           hideStatusText ? 'justify-end' : 'justify-between'
         }`}
       >

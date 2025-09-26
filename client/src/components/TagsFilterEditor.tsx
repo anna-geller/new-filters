@@ -107,8 +107,8 @@ export default function TagsFilterEditor({
   };
 
   return (
-    <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+    <Card className="w-96 p-0 bg-[#2F3341] border border-popover-border shadow-lg">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
           <Select value={currentOperator} onValueChange={setCurrentOperator}>
@@ -118,7 +118,7 @@ export default function TagsFilterEditor({
                   'Select operator...'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#2F3341]">
               {operatorOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -173,21 +173,21 @@ export default function TagsFilterEditor({
       </div>
 
       {!isTextOperator && (
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
           {filteredTags.map((tag) => {
             const isSelected = currentTags.includes(tag.id);
             return (
               <div
                 key={tag.id}
                 onClick={() => handleToggleTag(tag.id)}
-                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer"
+                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer"
                 data-testid={`tag-option-${tag.id}`}
               >
                 <div
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
                     isSelected
                       ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                      : 'bg-muted border-border text-muted-foreground'
+                      : 'bg-[#2F3341] border-border text-muted-foreground'
                   }`}
                 >
                   <Tag className="h-4 w-4" />
@@ -207,7 +207,7 @@ export default function TagsFilterEditor({
         </div>
       )}
 
-      <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
+      <div className="p-4 border-t border-border bg-[#2F3341] flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {isTextOperator
             ? 'Enter a tag pattern'

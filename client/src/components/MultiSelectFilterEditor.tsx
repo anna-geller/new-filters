@@ -100,12 +100,7 @@ export default function MultiSelectFilterEditor({
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
-        <div className="mb-3">
-          <h3 className="text-sm font-medium">{title}</h3>
-          {description && <p className="text-xs text-muted-foreground">{description}</p>}
-        </div>
-
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="space-y-3">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-2 block">
@@ -115,7 +110,7 @@ export default function MultiSelectFilterEditor({
               <SelectTrigger data-testid={`select-${prefix}-operator`}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#2F3341]">
                 <SelectItem value="in">in</SelectItem>
                 <SelectItem value="not-in">not in</SelectItem>
               </SelectContent>
@@ -156,9 +151,9 @@ export default function MultiSelectFilterEditor({
         </div>
       </div>
 
-      <div className="max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
         {filteredOptions.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground text-center">No options found</div>
+          <div className="p-4 text-sm text-muted-foreground text-center bg-[#2F3341]">No options found</div>
         ) : (
           filteredOptions.map(option => {
             const isSelected = currentSelection.includes(option.id);
@@ -167,9 +162,7 @@ export default function MultiSelectFilterEditor({
                 key={option.id}
                 type="button"
                 onClick={() => handleToggleValue(option.id)}
-                className={`w-full px-4 py-3 flex items-center gap-3 border-b border-border/50 hover:bg-muted/40 transition text-left ${
-                  isSelected ? 'bg-primary/10' : ''
-                }`}
+                className="w-full px-4 py-3 flex items-center gap-3 border-b border-border/50 hover:bg-[#3A3F4F] transition text-left bg-[#2F3341]"
                 data-testid={`option-${prefix}-${option.id}`}
               >
                 <div className="flex-1 min-w-0">
@@ -191,7 +184,7 @@ export default function MultiSelectFilterEditor({
         )}
       </div>
 
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-muted-foreground">
             {currentSelection.length} of {options.length} selected

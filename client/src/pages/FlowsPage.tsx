@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import FilterInterface, { type FilterOption } from '@/components/FilterInterface';
 import FlowsTable, { type FlowRow } from '@/components/FlowsTable';
-import type { ColumnConfig } from '@/components/ExecutionsTable';
+import type { ColumnConfig } from '@/types/savedFilters';
 import { SavedFilter } from '@/types/savedFilters';
 import { flowsSavedFiltersStorage } from '@/utils/flowsSavedFiltersStorage';
 import type { ScopeOption } from '@/components/ScopeFilterEditor';
@@ -195,6 +195,8 @@ export default function FlowsPage() {
   const [labelsCustomValue, setLabelsCustomValue] = useState('');
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [flowOperator, setFlowOperator] = useState('in');
+  const [flowCustomValue, setFlowCustomValue] = useState('');
   const [columns, setColumns] = useState<ColumnConfig[]>(FLOW_COLUMNS.map((col) => ({ ...col })));
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
@@ -569,7 +571,11 @@ export default function FlowsPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           namespaceOptions={FLOW_NAMESPACE_OPTIONS}
           selectedFlows={selectedFlows}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
           onFlowsSelectionChange={setSelectedFlows}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={[]}

@@ -18,7 +18,7 @@ export default function SearchBar({ value, onChange, placeholder = "Search..." }
         placeholder={placeholder}
         className="w-[210px] h-8 rounded-lg border px-[15px] py-[7px] text-sm font-medium text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-10 pr-8"
         style={{
-          border: '1px solid var(--ks-border-primary, #404559)',
+          border: '1px solid var(--ks-border-primary, #2F3342)',
           background: 'var(--ks-background-input, #14181F)'
         }}
         data-testid="input-search"

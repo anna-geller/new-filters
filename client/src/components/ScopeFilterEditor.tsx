@@ -90,12 +90,12 @@ export default function ScopeFilterEditor({
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <Input
           placeholder="Search scopes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-3"
+          className="flex h-9 w-full rounded-md border border-input px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mb-3 bg-[#14181E]"
           data-testid="scope-search-input"
         />
 
@@ -124,7 +124,6 @@ export default function ScopeFilterEditor({
           </Button>
         </div>
       </div>
-
       <div className="max-h-64 overflow-y-auto" data-testid="scope-options-list">
         {filteredScopes.length === 0 ? (
           <div className="p-4 text-sm text-muted-foreground text-center">
@@ -136,7 +135,7 @@ export default function ScopeFilterEditor({
             return (
               <div
                 key={scope.id}
-                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 onClick={() => handleToggleScope(scope.id)}
                 data-testid={`scope-option-${scope.id}`}
               >
@@ -159,8 +158,7 @@ export default function ScopeFilterEditor({
           })
         )}
       </div>
-
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentScopes.length} scope{currentScopes.length !== 1 ? 's' : ''} selected

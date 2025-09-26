@@ -48,8 +48,7 @@ export default function ResourceFilterEditor({
 }: ResourceFilterEditorProps) {
   return (
     <MultiSelectFilterEditor
-      title="Resource"
-      description="Filter by the affected resource type"
+      title=""
       options={RESOURCE_OPTIONS}
       selectedValues={selectedResources}
       selectedOperator={operator}

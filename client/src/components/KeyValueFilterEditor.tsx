@@ -176,8 +176,8 @@ export default function KeyValueFilterEditor({
     valuePlaceholder ?? `Enter text that ${pluralLower} should ${selectedOperatorObj?.label || 'match'}...`;
 
   return (
-    <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+    <Card className="w-96 p-0 bg-[#2F3341] border border-popover-border shadow-lg">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">
             Filter Operator
@@ -188,7 +188,7 @@ export default function KeyValueFilterEditor({
                 {selectedOperatorObj?.label || 'Select operator...'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#2F3341]">
               {operatorOptions.map((operator) => (
                 <SelectItem key={operator.id} value={operator.id}>
                   <div className="flex flex-col">
@@ -272,7 +272,7 @@ export default function KeyValueFilterEditor({
       </div>
 
       {isSelectionBasedOperator && (
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
           {filteredOptions.map((option) => {
             const isSelected = currentValues.includes(option.id);
             const accentColor = option.color ?? 'bg-slate-500';
@@ -281,14 +281,14 @@ export default function KeyValueFilterEditor({
               <div
                 key={option.id}
                 onClick={() => handleToggleValue(option.id)}
-                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer"
+                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 data-testid={`${prefix}-option-${option.id}`}
               >
                 <div
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
                     isSelected
                       ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                      : 'bg-muted border-border text-muted-foreground'
+                      : 'bg-[#2F3341] border-border text-muted-foreground'
                   }`}
                 >
                   <div className={`p-1 rounded ${accentColor}`}>
@@ -310,7 +310,7 @@ export default function KeyValueFilterEditor({
         </div>
       )}
 
-      <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
+      <div className="p-4 border-t border-border bg-[#2F3341] flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {isTextBasedOperator
             ? `Operator: ${selectedOperatorObj?.label || 'None'}`

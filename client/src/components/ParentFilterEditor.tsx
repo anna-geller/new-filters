@@ -36,7 +36,7 @@ export default function ParentFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="flex items-center gap-2 mb-3">
           <PlayCircle className="h-4 w-4 text-primary" />
           <h3 className="font-medium text-sm">Parent</h3>
@@ -86,7 +86,7 @@ export default function ParentFilterEditor({
       </div>
 
       {/* Description */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="text-xs text-muted-foreground">
           Enter the ID of a parent execution to filter results to only executions started from that parent.
         </div>

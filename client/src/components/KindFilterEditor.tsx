@@ -81,7 +81,7 @@ export default function KindFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with search */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <Input
           placeholder="Search kinds..."
           value={searchTerm}
@@ -118,9 +118,9 @@ export default function KindFilterEditor({
       </div>
 
       {/* Kind list */}
-      <div className="max-h-64 overflow-y-auto" data-testid="kind-options-list">
+      <div className="max-h-64 overflow-y-auto bg-[#2F3341]" data-testid="kind-options-list">
         {filteredKinds.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground text-center">
+          <div className="p-4 text-sm text-muted-foreground text-center bg-[#2F3341]">
             No kinds found matching "{searchTerm}"
           </div>
         ) : (
@@ -129,7 +129,7 @@ export default function KindFilterEditor({
             return (
               <div
                 key={kind.id}
-                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 onClick={() => handleToggleKind(kind.id)}
                 data-testid={`kind-option-${kind.id}`}
               >
@@ -154,7 +154,7 @@ export default function KindFilterEditor({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentKinds.length} kind{currentKinds.length !== 1 ? 's' : ''} selected

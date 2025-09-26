@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Bug, Info, OctagonAlert, Radio } from "lucide-react";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import LogsTable, { type LogRow } from "@/components/LogsTable";
-import type { ColumnConfig } from "@/components/ExecutionsTable";
+import type { ColumnConfig } from "@/types/savedFilters";
 import type { SavedFilter } from "@/types/savedFilters";
 import { logsSavedFiltersStorage } from "@/utils/logsSavedFiltersStorage";
 import type { FlowOption } from "@/components/FlowFilterEditor";
@@ -192,6 +192,8 @@ export default function LogsPage() {
   const [namespaceOperator, setNamespaceOperator] = useState("in");
   const [namespaceCustomValue, setNamespaceCustomValue] = useState("");
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [flowOperator, setFlowOperator] = useState('in');
+  const [flowCustomValue, setFlowCustomValue] = useState('');
   const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [levelsOperator, setLevelsOperator] = useState("in");
@@ -715,7 +717,11 @@ export default function LogsPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           namespaceOptions={namespaceOptions}
           selectedFlows={selectedFlows}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
           onFlowsSelectionChange={setSelectedFlows}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}

@@ -28,8 +28,7 @@ export default function ActionFilterEditor({
 }: ActionFilterEditorProps) {
   return (
     <MultiSelectFilterEditor
-      title="Action"
-      description="Filter by action types recorded in the audit log"
+      title=""
       options={ACTION_OPTIONS}
       selectedValues={selectedActions}
       selectedOperator={operator}

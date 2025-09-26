@@ -47,7 +47,7 @@ export default function FilterCustomizationPanel({
   return (
     <Card className="absolute top-full left-0 mt-2 w-80 p-0 bg-popover border border-popover-border shadow-lg z-50">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-4 border-b border-border bg-[#2F3341]">
         <div>
           <h3 className="text-sm font-medium text-foreground">Add Filters</h3>
           <p className="text-xs text-muted-foreground mt-1">Select filters to add</p>
@@ -60,9 +60,8 @@ export default function FilterCustomizationPanel({
           <X className="h-4 w-4" />
         </button>
       </div>
-
       {/* Filter List */}
-      <div className="max-h-72 overflow-y-auto">
+      <div className="max-h-72 overflow-y-auto bg-[#2F3341]">
         {[...filterOptions]
           .sort((a, b) => a.order - b.order)
           .map((option) => {
@@ -70,11 +69,7 @@ export default function FilterCustomizationPanel({
             return (
               <div
                 key={option.id}
-                className={`flex items-center gap-3 p-3 border-b border-border/50 ${
-                  isActive 
-                    ? 'opacity-50 cursor-not-allowed bg-muted/20' 
-                    : 'hover:bg-muted/30 cursor-pointer'
-                }`}
+                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 onClick={() => handleAddFilter(option.id)}
                 data-testid={`filter-item-${option.id}`}
               >
@@ -85,7 +80,6 @@ export default function FilterCustomizationPanel({
                   }`}>{option.label}</div>
                   <div className="text-xs text-muted-foreground">{option.description}</div>
                 </div>
-
                 {/* Add Button */}
                 {!isActive && (
                   <button
@@ -99,9 +93,8 @@ export default function FilterCustomizationPanel({
             );
           })}
       </div>
-
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <p className="text-xs text-muted-foreground text-center">
           {activeFilters.length} of {filterOptions.length} filters added
         </p>

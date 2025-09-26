@@ -57,12 +57,7 @@ export default function HierarchyFilterEditor({
 
   return (
     <Card className="w-80 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="font-medium text-sm mb-1">Select hierarchy level</div>
-        <div className="text-xs text-muted-foreground">Choose which executions to include</div>
-      </div>
-
+      {/* Header removed for cleaner interface */}
       {/* Hierarchy options - radio button style */}
       <div data-testid="hierarchy-options-list">
         {hierarchyOptions.map((hierarchy) => {
@@ -70,7 +65,7 @@ export default function HierarchyFilterEditor({
           return (
             <div
               key={hierarchy.id}
-              className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+              className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
               onClick={() => handleSelectHierarchy(hierarchy.id)}
               data-testid={`hierarchy-option-${hierarchy.id}`}
             >
@@ -82,11 +77,7 @@ export default function HierarchyFilterEditor({
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  isSelected 
-                    ? 'border-blue-500 bg-blue-500' 
-                    : 'border-input bg-background'
-                }`}>
+                <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors border-input bg-[#2F3341]">
                   {isSelected && (
                     <Check className="w-2.5 h-2.5 text-white" data-testid={`hierarchy-selected-${hierarchy.id}`} />
                   )}
@@ -96,9 +87,8 @@ export default function HierarchyFilterEditor({
           );
         })}
       </div>
-
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentHierarchy ? hierarchyOptions.find(h => h.id === currentHierarchy)?.label || 'None' : 'None'} selected
