@@ -72,7 +72,7 @@ export default function TriggerIdFilterEditor({
                 {selectedOperator?.label ?? "Select operator"}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#2F3341]">
               {operatorOptions.map((option) => (
                 <SelectItem key={option.id} value={option.id}>
                   <div className="flex flex-col">

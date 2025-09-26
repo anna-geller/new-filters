@@ -110,7 +110,7 @@ export default function MultiSelectFilterEditor({
               <SelectTrigger data-testid={`select-${prefix}-operator`}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#2F3341]">
                 <SelectItem value="in">in</SelectItem>
                 <SelectItem value="not-in">not in</SelectItem>
               </SelectContent>

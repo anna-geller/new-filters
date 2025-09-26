@@ -188,7 +188,7 @@ export default function KeyValueFilterEditor({
                 {selectedOperatorObj?.label || 'Select operator...'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#2F3341]">
               {operatorOptions.map((operator) => (
                 <SelectItem key={operator.id} value={operator.id}>
                   <div className="flex flex-col">

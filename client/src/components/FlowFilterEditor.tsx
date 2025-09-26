@@ -206,7 +206,7 @@ export default function FlowFilterEditor({
               <SelectTrigger data-testid="flow-operator-select">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#2F3341]">
                 {operatorOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     <Tooltip>

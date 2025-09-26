@@ -48,7 +48,7 @@ export default function SuperadminFilterEditor({
           <SelectTrigger data-testid="select-superadmin-value" className="focus-visible:ring-slate-500 focus-visible:ring-2">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#2F3341]">
             {SUPERADMIN_OPTIONS.map(option => (
               <SelectItem key={option.id} value={option.id}>
                 {option.label}

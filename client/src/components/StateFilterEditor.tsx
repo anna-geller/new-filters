@@ -205,7 +205,7 @@ export default function StateFilterEditor({
                 {selectedOperatorObj?.label || "Select operator..."}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#2F3341]">
               {operatorOptions.map((option) => (
                 <SelectItem key={option.id} value={option.id} data-testid={`states-operator-${option.id}`}>
                   <div className="flex flex-col">

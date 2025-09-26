@@ -193,7 +193,7 @@ export default function IntervalFilterEditor({
           <SelectTrigger data-testid="select-time-range">
             <SelectValue placeholder="Select time range" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#2F3341]">
             {timeRangeOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
