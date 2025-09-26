@@ -204,7 +204,7 @@ export default function IntervalFilterEditor({
       </div>
       {/* Custom Date & Time Range Pickers */}
       {isCustomRange && (
-        <div className="p-4 border-b border-border bg-muted/20">
+        <div className="p-4 border-b border-border bg-[#2F3341]">
           <div className="space-y-4">
             {/* Start Date & Time */}
             <div className="grid grid-cols-2 gap-3">

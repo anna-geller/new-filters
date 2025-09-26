@@ -42,7 +42,7 @@ export default function DetailsFilterEditor({ detailKey, detailValue, onChange, 
 
   return (
     <Card className="w-[26rem] p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="flex items-center gap-2 mb-3">
           <Info className="h-4 w-4 text-primary" />
           <h3 className="font-medium text-sm">Details</h3>
@@ -95,7 +95,7 @@ export default function DetailsFilterEditor({ detailKey, detailValue, onChange, 
           </Button>
         </div>
       </div>
-      <div className="p-4 border-t border-border bg-muted/20 text-xs text-muted-foreground">
+      <div className="p-4 border-t border-border bg-[#2F3341] text-xs text-muted-foreground">
         Provide a key/value pair to match entries in the details payload.
       </div>
     </Card>

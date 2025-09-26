@@ -195,7 +195,7 @@ export default function StateFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with operator and search */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         {/* Operator Selection */}
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">Filter Operator</label>
@@ -290,7 +290,7 @@ export default function StateFilterEditor({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
+      <div className="p-4 border-t border-border bg-[#2F3341] flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {currentStates.length} of {availableStates.length} states selected
         </p>

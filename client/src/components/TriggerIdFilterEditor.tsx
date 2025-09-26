@@ -61,7 +61,7 @@ export default function TriggerIdFilterEditor({
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border space-y-3">
+      <div className="p-4 border-b border-border space-y-3 bg-[#2F3341]">
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-2 block">
             Filter Operator
@@ -98,7 +98,7 @@ export default function TriggerIdFilterEditor({
         </div>
       </div>
 
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-end gap-2">
           <TooltipProvider>
             <Tooltip>

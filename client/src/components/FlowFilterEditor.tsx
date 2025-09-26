@@ -196,7 +196,7 @@ export default function FlowFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with operator selection */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="space-y-3">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">
@@ -314,7 +314,7 @@ export default function FlowFilterEditor({
       )}
 
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {showSelectionUI 

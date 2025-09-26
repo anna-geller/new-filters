@@ -310,7 +310,7 @@ export default function KeyValueFilterEditor({
         </div>
       )}
 
-      <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
+      <div className="p-4 border-t border-border bg-[#2F3341] flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {isTextBasedOperator
             ? `Operator: ${selectedOperatorObj?.label || 'None'}`

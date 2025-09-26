@@ -52,7 +52,7 @@ export default function EnabledFilterEditor({
 
   return (
     <Card className="w-64 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="space-y-2">
           {options.map((option) => {
             const isSelected = currentValue === option.id;
@@ -87,7 +87,7 @@ export default function EnabledFilterEditor({
         </div>
       </div>
       <div
-        className={`p-4 border-t border-border bg-muted/20 flex items-center ${
+        className={`p-4 border-t border-border bg-[#2F3341] flex items-center ${
           hideStatusText ? 'justify-end' : 'justify-between'
         }`}
       >

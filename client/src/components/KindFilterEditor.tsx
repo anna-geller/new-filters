@@ -81,7 +81,7 @@ export default function KindFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header with search */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <Input
           placeholder="Search kinds..."
           value={searchTerm}
@@ -154,7 +154,7 @@ export default function KindFilterEditor({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentKinds.length} kind{currentKinds.length !== 1 ? 's' : ''} selected
