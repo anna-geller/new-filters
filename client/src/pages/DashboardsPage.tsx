@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Menu } from "lucide-react";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import { Card } from "@/components/ui/card";
-import type { ColumnConfig } from "@/components/ExecutionsTable";
+import type { ColumnConfig } from "@/types/savedFilters";
 import type { SavedFilter } from "@/types/savedFilters";
 import { dashboardsSavedFiltersStorage } from "@/utils/dashboardsSavedFiltersStorage";
 import {
@@ -35,6 +35,7 @@ const DASHBOARD_FILTER_OPTIONS: FilterOption[] = [
   { id: "interval", label: "Interval", description: "Filter by dashboard window", enabled: true, order: 1 },
   { id: "namespace", label: "Namespace", description: "Filter by namespace", enabled: true, order: 2 },
   { id: "labels", label: "Labels", description: "Filter by labels", enabled: true, order: 3 },
+  { id: "state", label: "State", description: "Filter by execution state", enabled: true, order: 4 },
 ];
 
 const DEFAULT_VISIBLE_FILTERS = ["interval"];
@@ -79,6 +80,8 @@ const operatorDisplay: Record<string, string> = {
 
 export default function DashboardsPage() {
   const [searchValue, setSearchValue] = useState("");
+  const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [statesOperator, setStatesOperator] = useState("in");
   const [selectedInterval, setSelectedInterval] = useState("last-7-days");
   const [intervalStartDate, setIntervalStartDate] = useState<string | undefined>();
   const [intervalEndDate, setIntervalEndDate] = useState<string | undefined>();
@@ -103,6 +106,9 @@ export default function DashboardsPage() {
   const [selectedKinds, setSelectedKinds] = useState<string[]>(["default"]);
   const [selectedHierarchy, setSelectedHierarchy] = useState("all");
   const [selectedInitialExecution, setSelectedInitialExecution] = useState("");
+  const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [flowOperator, setFlowOperator] = useState("in");
+  const [flowCustomValue, setFlowCustomValue] = useState("");
 
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
 
@@ -168,6 +174,16 @@ export default function DashboardsPage() {
       });
     }
 
+    if (visibleFilters.includes("state") && selectedStates.length > 0) {
+      const operatorLabel = statesOperator === "in" ? "in" : "not in";
+      filters.push({
+        id: "state",
+        label: "State",
+        value: selectedStates.length === 1 ? selectedStates[0] : `${selectedStates.length} selected`,
+        operator: operatorLabel,
+      });
+    }
+
     if (visibleFilters.includes("namespace")) {
       filters.push({
         id: "namespace",
@@ -190,6 +206,8 @@ export default function DashboardsPage() {
   }, [
     visibleFilters,
     intervalDisplayValue,
+    selectedStates,
+    statesOperator,
     namespaceFilterValue,
     namespaceOperator,
     labelsFilterValue,
@@ -211,6 +229,9 @@ export default function DashboardsPage() {
       setSelectedLabels([]);
       setLabelsOperator("has-any-of");
       setLabelsCustomValue("");
+    } else if (filterId === "state") {
+      setSelectedStates([]);
+      setStatesOperator("in");
     }
   };
 
@@ -226,6 +247,8 @@ export default function DashboardsPage() {
 
   const handleResetFilters = () => {
     setSearchValue("");
+    setSelectedStates([]);
+    setStatesOperator("in");
     setSelectedInterval("last-7-days");
     setIntervalStartDate(undefined);
     setIntervalEndDate(undefined);
@@ -251,13 +274,16 @@ export default function DashboardsPage() {
       setSelectedLabels([]);
       setLabelsOperator("has-any-of");
       setLabelsCustomValue("");
+    } else if (filterId === "state") {
+      setSelectedStates([]);
+      setStatesOperator("in");
     }
   };
 
   const getCurrentFilterState = (): SavedFilter["filterState"] => ({
     searchValue,
-    selectedStates: [],
-    statesOperator: "in",
+    selectedStates,
+    statesOperator,
     selectedInterval,
     intervalStartDate,
     intervalEndDate,
@@ -304,6 +330,8 @@ export default function DashboardsPage() {
     const state = filter.filterState;
 
     setSearchValue(state.searchValue ?? "");
+    setSelectedStates(state.selectedStates ?? []);
+    setStatesOperator(state.statesOperator ?? "in");
     setSelectedInterval(state.selectedInterval ?? "last-7-days");
     setIntervalStartDate(state.intervalStartDate);
     setIntervalEndDate(state.intervalEndDate);
@@ -316,6 +344,9 @@ export default function DashboardsPage() {
 
     const filtersToShow = new Set(DEFAULT_VISIBLE_FILTERS);
 
+    if ((state.selectedStates ?? []).length > 0) {
+      filtersToShow.add("state");
+    }
     if ((state.selectedNamespaces ?? []).length > 0 || (state.namespaceCustomValue ?? "").trim()) {
       filtersToShow.add("namespace");
     }
@@ -376,10 +407,10 @@ export default function DashboardsPage() {
           onRefreshData={handleRefreshData}
           columns={columns}
           onColumnsChange={handleColumnsChange}
-          selectedStates={[]}
-          statesOperator="in"
-          onSelectedStatesChange={() => {}}
-          onStatesOperatorChange={() => {}}
+          selectedStates={selectedStates}
+          statesOperator={statesOperator}
+          onSelectedStatesChange={setSelectedStates}
+          onStatesOperatorChange={setStatesOperator}
           selectedInterval={selectedInterval}
           intervalStartDate={intervalStartDate}
           intervalEndDate={intervalEndDate}
@@ -409,8 +440,12 @@ export default function DashboardsPage() {
           onNamespaceOperatorChange={setNamespaceOperator}
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           namespaceOptions={namespaceOptions}
-          selectedFlows={[]}
-          onFlowsSelectionChange={() => {}}
+          selectedFlows={selectedFlows}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
+          onFlowsSelectionChange={setSelectedFlows}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
           selectedKinds={selectedKinds}
