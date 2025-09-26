@@ -57,11 +57,7 @@ export default function HierarchyFilterEditor({
 
   return (
     <Card className="w-80 p-0 bg-popover border border-popover-border shadow-lg">
-      {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="font-medium text-sm mb-1">Select hierarchy level</div>
-        <div className="text-xs text-muted-foreground">Choose which executions to include</div>
-      </div>
+      {/* Header removed for cleaner interface */}
 
       {/* Hierarchy options - radio button style */}
       <div data-testid="hierarchy-options-list">
