@@ -254,7 +254,7 @@ export default function StateFilterEditor({
       </div>
 
       {/* State Options */}
-      <div className="max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
         {filteredStates.map((state) => {
           const isSelected = currentStates.includes(state.id);
           const IconComponent = state.icon;
@@ -263,7 +263,7 @@ export default function StateFilterEditor({
             <div
               key={state.id}
               onClick={() => handleToggleState(state.id)}
-              className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer"
+              className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
               data-testid={`state-option-${state.id.toLowerCase()}`}
             >
               {/* State Badge */}

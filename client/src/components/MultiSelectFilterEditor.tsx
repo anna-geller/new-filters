@@ -151,9 +151,9 @@ export default function MultiSelectFilterEditor({
         </div>
       </div>
 
-      <div className="max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto bg-[#2F3341]">
         {filteredOptions.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground text-center">No options found</div>
+          <div className="p-4 text-sm text-muted-foreground text-center bg-[#2F3341]">No options found</div>
         ) : (
           filteredOptions.map(option => {
             const isSelected = currentSelection.includes(option.id);
@@ -162,7 +162,7 @@ export default function MultiSelectFilterEditor({
                 key={option.id}
                 type="button"
                 onClick={() => handleToggleValue(option.id)}
-                className="w-full px-4 py-3 flex items-center gap-3 border-b border-border/50 hover:bg-[#3A3F4F] transition text-left"
+                className="w-full px-4 py-3 flex items-center gap-3 border-b border-border/50 hover:bg-[#3A3F4F] transition text-left bg-[#2F3341]"
                 data-testid={`option-${prefix}-${option.id}`}
               >
                 <div className="flex-1 min-w-0">
