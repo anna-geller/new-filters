@@ -183,7 +183,7 @@ export default function IntervalFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="flex items-center gap-2 mb-3">
           <Clock className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">Interval</h3>
@@ -202,7 +202,6 @@ export default function IntervalFilterEditor({
           </SelectContent>
         </Select>
       </div>
-
       {/* Custom Date & Time Range Pickers */}
       {isCustomRange && (
         <div className="p-4 border-b border-border bg-muted/20">
@@ -316,7 +315,6 @@ export default function IntervalFilterEditor({
           </div>
         </div>
       )}
-
       {/* Footer */}
       <div className="p-4 bg-muted/20 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
