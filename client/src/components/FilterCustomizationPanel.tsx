@@ -60,7 +60,6 @@ export default function FilterCustomizationPanel({
           <X className="h-4 w-4" />
         </button>
       </div>
-
       {/* Filter List */}
       <div className="max-h-72 overflow-y-auto">
         {[...filterOptions]
@@ -99,9 +98,8 @@ export default function FilterCustomizationPanel({
             );
           })}
       </div>
-
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <p className="text-xs text-muted-foreground text-center">
           {activeFilters.length} of {filterOptions.length} filters added
         </p>
