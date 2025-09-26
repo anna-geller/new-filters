@@ -95,7 +95,7 @@ export default function ScopeFilterEditor({
           placeholder="Search scopes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-3"
+          className="mb-3 bg-[#14181E]"
           data-testid="scope-search-input"
         />
 
