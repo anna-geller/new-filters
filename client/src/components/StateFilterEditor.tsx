@@ -263,14 +263,14 @@ export default function StateFilterEditor({
             <div
               key={state.id}
               onClick={() => handleToggleState(state.id)}
-              className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer"
+              className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer"
               data-testid={`state-option-${state.id.toLowerCase()}`}
             >
               {/* State Badge */}
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
                 isSelected 
                   ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                  : 'bg-muted border-border text-muted-foreground'
+                  : 'bg-[#2F3341] border-border text-muted-foreground'
               }`}>
                 <IconComponent className="h-4 w-4" />
                 <span className="text-sm font-medium">{state.label}</span>

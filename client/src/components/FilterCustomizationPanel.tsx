@@ -69,7 +69,7 @@ export default function FilterCustomizationPanel({
             return (
               <div
                 key={option.id}
-                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-muted/30 cursor-pointer bg-[#2F3341]"
+                className="flex items-center gap-3 p-3 border-b border-border/50 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 onClick={() => handleAddFilter(option.id)}
                 data-testid={`filter-item-${option.id}`}
               >

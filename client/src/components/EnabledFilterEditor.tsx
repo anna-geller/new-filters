@@ -63,7 +63,7 @@ export default function EnabledFilterEditor({
                 className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
                   isSelected
                     ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
-                    : 'border-border hover:bg-muted/40 text-muted-foreground'
+                    : 'border-border hover:bg-[#3A3F4F] text-muted-foreground'
                 }`}
                 data-testid={`enabled-option-${option.id}`}
               >
@@ -77,7 +77,7 @@ export default function EnabledFilterEditor({
             className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
               currentValue === null
                 ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
-                : 'border-border hover:bg-muted/40 text-muted-foreground'
+                : 'border-border hover:bg-[#3A3F4F] text-muted-foreground'
             }`}
             data-testid="enabled-option-any"
           >

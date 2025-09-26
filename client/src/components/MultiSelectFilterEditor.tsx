@@ -162,7 +162,7 @@ export default function MultiSelectFilterEditor({
                 key={option.id}
                 type="button"
                 onClick={() => handleToggleValue(option.id)}
-                className="w-full px-4 py-3 flex items-center gap-3 border-b border-border/50 hover:bg-muted/40 transition text-left"
+                className="w-full px-4 py-3 flex items-center gap-3 border-b border-border/50 hover:bg-[#3A3F4F] transition text-left"
                 data-testid={`option-${prefix}-${option.id}`}
               >
                 <div className="flex-1 min-w-0">

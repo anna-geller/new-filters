@@ -65,7 +65,7 @@ export default function HierarchyFilterEditor({
           return (
             <div
               key={hierarchy.id}
-              className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer bg-[#2F3341]"
+              className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
               onClick={() => handleSelectHierarchy(hierarchy.id)}
               data-testid={`hierarchy-option-${hierarchy.id}`}
             >

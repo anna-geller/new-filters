@@ -129,7 +129,7 @@ export default function KindFilterEditor({
             return (
               <div
                 key={kind.id}
-                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer"
                 onClick={() => handleToggleKind(kind.id)}
                 data-testid={`kind-option-${kind.id}`}
               >

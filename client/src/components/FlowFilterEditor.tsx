@@ -289,7 +289,7 @@ export default function FlowFilterEditor({
               return (
                 <div
                   key={flow.id}
-                  className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+                  className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer"
                   onClick={() => handleToggleFlow(flow.id)}
                   data-testid={`flow-option-${flow.id}`}
                 >

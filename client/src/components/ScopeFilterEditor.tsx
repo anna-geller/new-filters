@@ -135,7 +135,7 @@ export default function ScopeFilterEditor({
             return (
               <div
                 key={scope.id}
-                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer bg-[#2F3341]"
+                className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-[#3A3F4F] cursor-pointer bg-[#2F3341]"
                 onClick={() => handleToggleScope(scope.id)}
                 data-testid={`scope-option-${scope.id}`}
               >
