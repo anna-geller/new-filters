@@ -8,7 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ColumnConfig } from "@/components/ExecutionsTable";
+// Removed unused Collapsible imports
+import { ChevronDown, ChevronRight, Folder, FileText } from "lucide-react";
+import type { ColumnConfig } from "@/types/savedFilters";
 import { SavedFilter } from "@/types/savedFilters";
 import { namespacesSavedFiltersStorage } from "@/utils/namespacesSavedFiltersStorage";
 
@@ -16,6 +18,15 @@ interface NamespaceCard {
   name: string;
   owner: string;
   description: string;
+}
+
+interface NamespaceNode {
+  name: string;
+  fullPath: string;
+  owner: string;
+  description: string;
+  children: NamespaceNode[];
+  isLeaf: boolean;
 }
 
 interface ActiveFilter {
@@ -68,6 +79,97 @@ const PAGE_SIZE_OPTIONS = ["6", "12", "24"];
 
 const NAMESPACE_OPTIONS = MOCK_NAMESPACE_CARDS.map((card) => card.name).sort((a, b) => a.localeCompare(b));
 
+// Function to build tree structure from flat namespace list
+function buildNamespaceTree(namespaces: NamespaceCard[]): NamespaceNode[] {
+  const nodes: NamespaceNode[] = [];
+  const nodeMap = new Map<string, NamespaceNode>();
+
+  // Sort namespaces by name to ensure proper hierarchy
+  const sortedNamespaces = [...namespaces].sort((a, b) => a.name.localeCompare(b.name));
+
+  // Create all nodes first
+  for (const namespace of sortedNamespaces) {
+    const node: NamespaceNode = {
+      name: namespace.name,
+      fullPath: namespace.name,
+      owner: namespace.owner,
+      description: namespace.description,
+      children: [],
+      isLeaf: true, // Will be updated if children are found
+    };
+    nodeMap.set(namespace.name, node);
+  }
+
+  // Build the tree structure
+  for (const namespace of sortedNamespaces) {
+    const node = nodeMap.get(namespace.name)!;
+    const parts = namespace.name.split('.');
+    
+    if (parts.length === 1) {
+      // Root level namespace
+      nodes.push(node);
+    } else {
+      // Find parent
+      for (let i = parts.length - 1; i > 0; i--) {
+        const parentPath = parts.slice(0, i).join('.');
+        const parent = nodeMap.get(parentPath);
+        if (parent) {
+          parent.children.push(node);
+          parent.isLeaf = false;
+          break;
+        }
+      }
+    }
+  }
+
+  return nodes;
+}
+
+// Function to build filtered tree structure that preserves parent-child relationships
+function buildFilteredNamespaceTree(filteredNamespaces: NamespaceCard[], allNamespaces: NamespaceCard[]): NamespaceNode[] {
+  // Create a map of existing namespace data
+  const namespaceDataMap = new Map<string, NamespaceCard>();
+  allNamespaces.forEach(ns => namespaceDataMap.set(ns.name, ns));
+  
+  // Identify all namespaces that should be included (matches + their ancestors)
+  const requiredNamespaces = new Set<string>();
+  
+  // Add all filtered namespaces
+  filteredNamespaces.forEach(ns => requiredNamespaces.add(ns.name));
+  
+  // Add ancestors of filtered namespaces to maintain hierarchy
+  filteredNamespaces.forEach(ns => {
+    const parts = ns.name.split('.');
+    for (let i = 1; i < parts.length; i++) {
+      const ancestorPath = parts.slice(0, i).join('.');
+      requiredNamespaces.add(ancestorPath);
+    }
+  });
+  
+  // Create namespace data for all required namespaces (synthesize missing ones)
+  const requiredNamespaceData: NamespaceCard[] = [];
+  
+  requiredNamespaces.forEach(namespacePath => {
+    const existing = namespaceDataMap.get(namespacePath);
+    if (existing) {
+      // Use existing namespace data
+      requiredNamespaceData.push(existing);
+    } else {
+      // Create virtual namespace node for missing intermediate path
+      const parts = namespacePath.split('.');
+      const lastPart = parts[parts.length - 1];
+      requiredNamespaceData.push({
+        name: namespacePath,
+        owner: "system", // Virtual node
+        description: `Virtual namespace container for ${lastPart}`,
+      });
+    }
+  });
+  
+  // Build tree with required namespaces (both real and virtual)
+  return buildNamespaceTree(requiredNamespaceData);
+}
+
 const NAMESPACES_COLUMNS: ColumnConfig[] = [
   { id: "name", label: "Namespace", description: "Namespace identifier", visible: true, order: 1 },
   { id: "owner", label: "Owner", description: "Team responsible for the namespace", visible: true, order: 2 },
@@ -84,6 +186,7 @@ export default function NamespacesPage() {
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(["company"]));
 
   useEffect(() => {
     setSavedFilters(namespacesSavedFiltersStorage.getAll());
@@ -166,6 +269,43 @@ export default function NamespacesPage() {
       return true;
     });
   }, [namespaceCustomValue, namespaceOperator, searchValue, selectedNamespaces]);
+
+  const namespaceTree = useMemo(() => {
+    return buildFilteredNamespaceTree(filteredCards, MOCK_NAMESPACE_CARDS);
+  }, [filteredCards]);
+
+  // Auto-expand ancestor chains for filtered results
+  useEffect(() => {
+    const ancestorsToExpand = new Set<string>();
+    
+    filteredCards.forEach(ns => {
+      const parts = ns.name.split('.');
+      // Add all ancestor paths that should be expanded
+      for (let i = 1; i < parts.length; i++) {
+        const ancestorPath = parts.slice(0, i).join('.');
+        ancestorsToExpand.add(ancestorPath);
+      }
+    });
+
+    // Merge with existing expanded nodes, keeping user's manual expansions
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      ancestorsToExpand.forEach(ancestor => newSet.add(ancestor));
+      return newSet;
+    });
+  }, [filteredCards]);
+
+  const toggleNodeExpansion = (nodePath: string) => {
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodePath)) {
+        newSet.delete(nodePath);
+      } else {
+        newSet.add(nodePath);
+      }
+      return newSet;
+    });
+  };
 
   const handleClearFilter = (filterId: string) => {
     if (filterId === "namespace") {
@@ -271,6 +411,68 @@ export default function NamespacesPage() {
     console.log("Refreshing namespaces data...");
   };
 
+  const renderTreeNode = (node: NamespaceNode, depth = 0) => {
+    const isExpanded = expandedNodes.has(node.fullPath);
+    const hasChildren = node.children.length > 0;
+    const paddingLeft = depth * 20;
+
+    return (
+      <div key={node.fullPath} className="w-full">
+        <div
+          className="flex items-center p-3 rounded-lg hover:bg-[#2F3341] border border-border/40 mb-2 bg-[#262A35] cursor-pointer transition-colors"
+          style={{ paddingLeft: `${paddingLeft + 12}px` }}
+          data-testid={`namespace-node-${node.fullPath}`}
+          onClick={hasChildren ? () => toggleNodeExpansion(node.fullPath) : undefined}
+        >
+          {hasChildren ? (
+            <>
+              <button
+                className="flex items-center gap-2 flex-1 text-left hover:opacity-80 transition-opacity"
+                data-testid={`expand-toggle-${node.fullPath}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleNodeExpansion(node.fullPath);
+                }}
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Folder className="h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-foreground">{node.name}</span>
+                    <span className="text-xs text-muted-foreground">{node.owner}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">{node.description}</p>
+                </div>
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 flex-1">
+              <div className="w-4" /> {/* Spacer for alignment */}
+              <FileText className="h-4 w-4 text-green-400" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-foreground">{node.name}</span>
+                  <span className="text-xs text-muted-foreground">{node.owner}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{node.description}</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {hasChildren && isExpanded && (
+          <div className="space-y-1">
+            {node.children.map(child => renderTreeNode(child, depth + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card/50">
@@ -336,7 +538,11 @@ export default function NamespacesPage() {
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           namespaceOptions={NAMESPACE_OPTIONS}
           selectedFlows={[]}
+          flowOperator="in"
+          flowCustomValue=""
           onFlowsSelectionChange={() => {}}
+          onFlowOperatorChange={() => {}}
+          onFlowCustomValueChange={() => {}}
           selectedScopes={[]}
           onScopesSelectionChange={() => {}}
           selectedKinds={[]}
@@ -384,17 +590,18 @@ export default function NamespacesPage() {
         />
 
         <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredCards.map((card) => (
-              <Card key={card.name} className="border border-border/60 shadow-sm p-6 flex flex-col gap-4 bg-[#262A35]">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-lg font-semibold text-foreground">{card.name}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{card.description}</p>
-              </Card>
-            ))}
+          <div className="max-w-4xl mx-auto space-y-2">
+            {namespaceTree.length > 0 ? (
+              namespaceTree.map(node => renderTreeNode(node))
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-lg font-medium text-muted-foreground">No namespaces found</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
