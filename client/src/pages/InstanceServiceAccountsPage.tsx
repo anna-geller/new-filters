@@ -62,8 +62,7 @@ const SUPERADMIN_LABEL_MAP: Record<string, string> = {
 export default function InstanceServiceAccountsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [serviceAccountName, setServiceAccountName] = useState('');
-  const [selectedSuperadminStatuses, setSelectedSuperadminStatuses] = useState<string[]>([]);
-  const [superadminOperator, setSuperadminOperator] = useState<'in' | 'not-in'>('in');
+  const [selectedSuperadminStatus, setSelectedSuperadminStatus] = useState('all');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [selectedInterval, setSelectedInterval] = useState('all-time');
@@ -87,20 +86,17 @@ export default function InstanceServiceAccountsPage() {
       });
     }
 
-    if (visibleFilters.includes('superadmin') && selectedSuperadminStatuses.length > 0) {
-      const valueLabel = selectedSuperadminStatuses
-        .map((status) => SUPERADMIN_LABEL_MAP[status as 'true' | 'false'])
-        .join(', ');
+    if (visibleFilters.includes('superadmin') && selectedSuperadminStatus !== 'all') {
+      const valueLabel = selectedSuperadminStatus === 'true' ? 'Superadmin' : 'Non-Superadmin';
       filters.push({
         id: 'superadmin',
         label: 'Superadmin',
         value: valueLabel,
-        operator: superadminOperator === 'not-in' ? 'not in' : 'in',
       });
     }
 
     return filters;
-  }, [visibleFilters, serviceAccountName, selectedSuperadminStatuses, superadminOperator]);
+  }, [visibleFilters, serviceAccountName, selectedSuperadminStatus]);
 
   const filteredRows = useMemo(() => {
     const searchTerm = searchValue.trim().toLowerCase();
@@ -120,21 +116,16 @@ export default function InstanceServiceAccountsPage() {
         return false;
       }
 
-      if (selectedSuperadminStatuses.length > 0) {
+      if (selectedSuperadminStatus !== 'all') {
         const isSuperadmin = row.superadmin === true ? 'true' : 'false';
-        const matchesSelection = selectedSuperadminStatuses.includes(isSuperadmin);
-        if (superadminOperator === 'in') {
-          if (!matchesSelection) {
-            return false;
-          }
-        } else if (matchesSelection) {
+        if (selectedSuperadminStatus !== isSuperadmin) {
           return false;
         }
       }
 
       return true;
     });
-  }, [searchValue, serviceAccountName, selectedSuperadminStatuses, superadminOperator]);
+  }, [searchValue, serviceAccountName, selectedSuperadminStatus]);
 
   const handleClearFilter = (filterId: string) => {
     if (filterId === 'user') {
@@ -150,16 +141,14 @@ export default function InstanceServiceAccountsPage() {
     if (filterId === 'user') {
       setServiceAccountName('');
     } else if (filterId === 'superadmin') {
-      setSelectedSuperadminStatuses([]);
-      setSuperadminOperator('in');
+      setSelectedSuperadminStatus('all');
     }
   };
 
   const handleResetFilters = () => {
     setSearchValue('');
     setServiceAccountName('');
-    setSelectedSuperadminStatuses([]);
-    setSuperadminOperator('in');
+    setSelectedSuperadminStatus('all');
     setShowChart(false);
     setPeriodicRefresh(true);
     setVisibleFilters(DEFAULT_VISIBLE_FILTERS);
@@ -203,8 +192,7 @@ export default function InstanceServiceAccountsPage() {
         detailsValue: '',
         visibleFilters,
         userValue: serviceAccountName,
-        selectedSuperadminStatuses,
-        superadminOperator,
+        selectedSuperadminStatus,
       },
     };
 
@@ -330,10 +318,8 @@ export default function InstanceServiceAccountsPage() {
           onDetailsChange={() => {}}
           userValue={serviceAccountName}
           onUserChange={setServiceAccountName}
-          selectedSuperadminStatuses={selectedSuperadminStatuses}
-          superadminOperator={superadminOperator}
-          onSuperadminSelectionChange={setSelectedSuperadminStatuses}
-          onSuperadminOperatorChange={setSuperadminOperator}
+          selectedSuperadminStatus={selectedSuperadminStatus}
+          onSuperadminSelectionChange={setSelectedSuperadminStatus}
           userFilterTitle="Name"
           userFilterPlaceholder="Search..."
           savedFilters={savedFilters}

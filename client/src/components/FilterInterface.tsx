@@ -38,6 +38,7 @@ import ActionFilterEditor from './ActionFilterEditor';
 import ResourceFilterEditor from './ResourceFilterEditor';
 import DetailsFilterEditor from './DetailsFilterEditor';
 import MultiSelectFilterEditor, { type MultiSelectOption } from './MultiSelectFilterEditor';
+import SuperadminFilterEditor from './SuperadminFilterEditor';
 
 export interface FilterOption {
   id: string;
@@ -148,10 +149,8 @@ interface FilterInterfaceProps {
   onDetailsChange?: (detailKey: string, detailValue: string) => void;
   userValue?: string;
   onUserChange?: (value: string) => void;
-  selectedSuperadminStatuses?: string[];
-  superadminOperator?: 'in' | 'not-in';
-  onSuperadminSelectionChange?: (statuses: string[]) => void;
-  onSuperadminOperatorChange?: (operator: 'in' | 'not-in') => void;
+  selectedSuperadminStatus?: string;
+  onSuperadminSelectionChange?: (status: string) => void;
   selectedInvitationStatuses?: string[];
   invitationStatusOperator?: 'in' | 'not-in';
   onInvitationStatusesChange?: (statuses: string[]) => void;
@@ -309,10 +308,8 @@ export default function FilterInterface({
   onDetailsChange,
   userValue = '',
   onUserChange,
-  selectedSuperadminStatuses = [],
-  superadminOperator = 'in',
+  selectedSuperadminStatus = 'all',
   onSuperadminSelectionChange,
-  onSuperadminOperatorChange,
   selectedInvitationStatuses = [],
   invitationStatusOperator = 'in',
   onInvitationStatusesChange,
@@ -399,13 +396,6 @@ export default function FilterInterface({
   const levelsOptionsList = useMemo(
     () => levelsFilterOptions ?? [],
     [levelsFilterOptions],
-  );
-  const superadminOptionsList = useMemo(
-    () => [
-      { id: 'true', label: 'Superadmin' },
-      { id: 'false', label: 'Non-Superadmin' },
-    ],
-    [],
   );
   const invitationStatusOptionsList = useMemo(
     () => {
@@ -718,8 +708,7 @@ export default function FilterInterface({
       if (!currentlyVisible) {
         setSuperadminFilterOpen(true);
       } else {
-        onSuperadminSelectionChange?.([]);
-        onSuperadminOperatorChange?.('in');
+        onSuperadminSelectionChange?.('all');
       }
     } else if (filterId === 'service-type') {
       if (!currentlyVisible) {
@@ -1001,12 +990,8 @@ export default function FilterInterface({
     onUserChange?.(value);
   };
 
-  const handleSuperadminSelectionChangeInternal = (statuses: string[]) => {
-    onSuperadminSelectionChange?.(statuses);
-  };
-
-  const handleSuperadminOperatorSelectionChange = (operator: 'in' | 'not-in') => {
-    onSuperadminOperatorChange?.(operator);
+  const handleSuperadminSelectionChangeInternal = (status: string) => {
+    onSuperadminSelectionChange?.(status);
   };
 
   const handleInvitationStatusesSelectionChangeInternal = (statuses: string[]) => {
@@ -1854,24 +1839,18 @@ export default function FilterInterface({
               <FilterBadge
                 label={filter.label}
                 value={filter.value}
-                operator={filter.operator || (superadminOperator === 'not-in' ? 'not in' : 'in')}
+                operator={''}
                 onClear={() => onClearFilter(filter.id)}
                 onEdit={() => handleEditFilter(filter.id)}
               />
             </div>
           </PopoverTrigger>
           <PopoverContent side="bottom" align="start" className="w-80 p-0">
-            <MultiSelectFilterEditor
-              title="Superadmin"
-              options={superadminOptionsList}
-              selectedValues={selectedSuperadminStatuses}
-              selectedOperator={superadminOperator}
+            <SuperadminFilterEditor
+              selectedValue={selectedSuperadminStatus}
               onSelectionChange={handleSuperadminSelectionChangeInternal}
-              onOperatorChange={handleSuperadminOperatorSelectionChange}
               onClose={handleCloseSuperadminFilter}
               onReset={() => onResetFilter('superadmin')}
-              searchPlaceholder="Search statuses..."
-              dataTestIdPrefix="superadmin"
             />
           </PopoverContent>
         </Popover>
