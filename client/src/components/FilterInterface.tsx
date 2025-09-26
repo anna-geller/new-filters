@@ -1844,7 +1844,7 @@ export default function FilterInterface({
               />
             </div>
           </PopoverTrigger>
-          <PopoverContent side="bottom" align="start" className="w-80 p-0">
+          <PopoverContent side="bottom" align="start" className="w-80 p-0 bg-[#2F3341]">
             <EnabledFilterEditor
               options={[
                 { id: "true", label: "Superadmin" },
