@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RotateCcw } from "lucide-react";
-import type { ColumnConfig } from "./ExecutionsTable";
+import { RotateCcw, Calendar, Info } from "lucide-react";
+import type { ColumnConfig } from "@/types/savedFilters";
 
 export interface TriggerRow {
   id: string;
@@ -16,6 +16,10 @@ export interface TriggerRow {
   labels: string[];
   locked: "true" | "false";
   missingSource: "true" | "false";
+  cron?: string;
+  tenantId?: string;
+  type?: string;
+  disabledInFlow?: boolean;
 }
 
 interface TriggersTableProps {
@@ -30,7 +34,6 @@ const columnClasses: Record<string, string> = {
   lastTriggeredDate: "w-48 max-w-[12rem]",
   contextUpdatedDate: "w-48 max-w-[12rem]",
   nextEvaluationDate: "w-48 max-w-[12rem]",
-  details: "w-28 max-w-[7rem]",
   backfillExecutions: "w-16 max-w-[4rem]",
   enabled: "w-20 max-w-[5rem]",
 };
@@ -44,9 +47,65 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
     switch (columnId) {
       case "id":
         return (
-          <span className="font-mono text-sm text-foreground" title={row.id}>
-            {row.id}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm text-foreground" title={row.id}>
+              {row.id}
+            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-1 hover:bg-muted rounded-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  <div className="space-y-1 text-xs">
+                    <div className="font-semibold text-sm">Trigger details: {row.id}</div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                      <span className="font-medium">Name</span>
+                      <span>{row.id}</span>
+                      <span className="font-medium">Id</span>
+                      <span>{row.id}</span>
+                      <span className="font-medium">Type</span>
+                      <span>{row.type || 'io.kestra.plugin.core.trigger.Schedule'}</span>
+                      <span className="font-medium">Disabled</span>
+                      <span>{!row.enabled ? 'true' : 'false'}</span>
+                      {row.cron && (
+                        <>
+                          <span className="font-medium">Cron</span>
+                          <span>{row.cron}</span>
+                        </>
+                      )}
+                      {row.tenantId && (
+                        <>
+                          <span className="font-medium">Tenant ID</span>
+                          <span>{row.tenantId}</span>
+                        </>
+                      )}
+                      <span className="font-medium">Namespace</span>
+                      <span>{row.namespace}</span>
+                      <span className="font-medium">Flow</span>
+                      <span>{row.flow}</span>
+                      <span className="font-medium">Trigger ID</span>
+                      <span>{row.id}</span>
+                      <span className="font-medium">Last triggered date</span>
+                      <span>{row.lastTriggeredDate}</span>
+                      <span className="font-medium">Next evaluation date</span>
+                      <span>{row.nextEvaluationDate || '—'}</span>
+                      {row.disabledInFlow !== undefined && (
+                        <>
+                          <span className="font-medium">Disabled in Flow</span>
+                          <span>{row.disabledInFlow ? 'true' : 'false'}</span>
+                        </>
+                      )}
+                      <span className="font-medium">Missing source</span>
+                      <span>{row.missingSource === 'true' ? 'true' : 'false'}</span>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         );
       case "flow":
         return <span className="text-sm text-foreground">{row.flow}</span>;
@@ -58,8 +117,6 @@ export default function TriggersTable({ triggers, columns }: TriggersTableProps)
         return <span className="text-sm text-foreground">{row.contextUpdatedDate || "—"}</span>;
       case "nextEvaluationDate":
         return <span className="text-sm text-foreground">{row.nextEvaluationDate || "—"}</span>;
-      case "details":
-        return <span className="text-sm text-foreground">{row.details}</span>;
       case "backfillExecutions":
         return (
           <TooltipProvider>

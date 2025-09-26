@@ -148,8 +148,8 @@ interface FilterInterfaceProps {
   onDetailsChange?: (detailKey: string, detailValue: string) => void;
   userValue?: string;
   onUserChange?: (value: string) => void;
-  selectedSuperadminStatus?: string;
-  onSuperadminSelectionChange?: (status: string) => void;
+  selectedSuperadminStatus?: string | null;
+  onSuperadminSelectionChange?: (status: string | null) => void;
   selectedInvitationStatuses?: string[];
   invitationStatusOperator?: 'in' | 'not-in';
   onInvitationStatusesChange?: (statuses: string[]) => void;
@@ -307,7 +307,7 @@ export default function FilterInterface({
   onDetailsChange,
   userValue = '',
   onUserChange,
-  selectedSuperadminStatus = 'all',
+  selectedSuperadminStatus = null,
   onSuperadminSelectionChange,
   selectedInvitationStatuses = [],
   invitationStatusOperator = 'in',
@@ -707,7 +707,7 @@ export default function FilterInterface({
       if (!currentlyVisible) {
         setSuperadminFilterOpen(true);
       } else {
-        onSuperadminSelectionChange?.('all');
+        onSuperadminSelectionChange?.(null);
       }
     } else if (filterId === 'service-type') {
       if (!currentlyVisible) {
@@ -989,7 +989,7 @@ export default function FilterInterface({
     onUserChange?.(value);
   };
 
-  const handleSuperadminSelectionChangeInternal = (status: string) => {
+  const handleSuperadminSelectionChangeInternal = (status: string | null) => {
     onSuperadminSelectionChange?.(status);
   };
 
@@ -1850,8 +1850,8 @@ export default function FilterInterface({
                 { id: "true", label: "Superadmin" },
                 { id: "false", label: "Non-Superadmin" },
               ]}
-              selectedValue={selectedSuperadminStatus === 'all' ? null : selectedSuperadminStatus}
-              onSelectionChange={(value) => handleSuperadminSelectionChangeInternal(value || 'all')}
+              selectedValue={selectedSuperadminStatus}
+              onSelectionChange={handleSuperadminSelectionChangeInternal}
               onClose={handleCloseSuperadminFilter}
               onReset={() => onResetFilter('superadmin')}
               hideStatusText={true}

@@ -82,7 +82,7 @@ export default function TenantInvitationsPage() {
   const [userValue, setUserValue] = useState("");
   const [selectedInvitationStatuses, setSelectedInvitationStatuses] = useState<string[]>([]);
   const [invitationStatusOperator, setInvitationStatusOperator] = useState<"in" | "not-in">("in");
-  const [selectedSuperadminStatus, setSelectedSuperadminStatus] = useState<string>('all');
+  const [selectedSuperadminStatus, setSelectedSuperadminStatus] = useState<string | null>(null);
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [selectedInterval, setSelectedInterval] = useState("all-time");
@@ -109,7 +109,7 @@ export default function TenantInvitationsPage() {
       });
     }
 
-    if (visibleFilters.includes("superadmin") && selectedSuperadminStatus !== 'all') {
+    if (visibleFilters.includes("superadmin") && selectedSuperadminStatus !== null) {
       const valueLabel = selectedSuperadminStatus === 'true' ? 'Superadmin' : 'Non-Superadmin';
       filters.push({
         id: "superadmin",
@@ -174,7 +174,7 @@ export default function TenantInvitationsPage() {
         }
       }
 
-      if (selectedSuperadminStatus !== 'all') {
+      if (selectedSuperadminStatus !== null) {
         const isSuperadmin = row.superadmin;
         if ((selectedSuperadminStatus === 'true' && !isSuperadmin) || 
             (selectedSuperadminStatus === 'false' && isSuperadmin)) {
@@ -197,7 +197,7 @@ export default function TenantInvitationsPage() {
       setSelectedInvitationStatuses([]);
       setInvitationStatusOperator("in");
     } else if (filterId === "superadmin") {
-      setSelectedSuperadminStatus('all');
+      setSelectedSuperadminStatus(null);
     } else if (filterId === "user") {
       setUserValue("");
     }
@@ -209,7 +209,7 @@ export default function TenantInvitationsPage() {
       setSelectedInvitationStatuses([]);
       setInvitationStatusOperator("in");
     } else if (filterId === "superadmin") {
-      setSelectedSuperadminStatus('all');
+      setSelectedSuperadminStatus(null);
     } else if (filterId === "user") {
       setUserValue("");
     }
@@ -220,7 +220,7 @@ export default function TenantInvitationsPage() {
     setUserValue("");
     setSelectedInvitationStatuses([]);
     setInvitationStatusOperator("in");
-    setSelectedSuperadminStatus('all');
+    setSelectedSuperadminStatus(null);
     setShowChart(false);
     setPeriodicRefresh(true);
     setSelectedInterval("all-time");
@@ -267,7 +267,7 @@ export default function TenantInvitationsPage() {
         userValue,
         selectedInvitationStatuses,
         invitationStatusOperator,
-        selectedSuperadminStatuses: selectedSuperadminStatus === 'all' ? [] : [selectedSuperadminStatus],
+        selectedSuperadminStatuses: selectedSuperadminStatus ? [selectedSuperadminStatus] : [],
         superadminOperator: 'in',
       },
     };
@@ -285,7 +285,7 @@ export default function TenantInvitationsPage() {
     setSelectedSuperadminStatus(
       state.selectedSuperadminStatuses && state.selectedSuperadminStatuses.length > 0 
         ? state.selectedSuperadminStatuses[0] 
-        : 'all'
+        : null
     );
     setSelectedInterval(state.selectedInterval ?? "all-time");
 

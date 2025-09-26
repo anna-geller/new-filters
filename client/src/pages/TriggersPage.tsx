@@ -127,7 +127,6 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { id: "lastTriggeredDate", label: "Last triggered date", description: "When the trigger last executed", visible: true, order: 4 },
   { id: "contextUpdatedDate", label: "Context updated date", description: "Last update of trigger context", visible: false, order: 5 },
   { id: "nextEvaluationDate", label: "Next evaluation date", description: "When the trigger evaluates next", visible: false, order: 6 },
-  { id: "details", label: "Details", description: "Trigger definition details", visible: true, order: 7 },
   { id: "backfillExecutions", label: "Backfill", description: "Backfill options", visible: true, order: 8 },
   { id: "enabled", label: "Enabled", description: "Enable/disable trigger", visible: true, order: 9 },
 ];
