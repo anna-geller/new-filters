@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import InvitationsTable, { type InvitationRow } from "@/components/InvitationsTable";
-import type { ColumnConfig } from "@/components/ExecutionsTable";
+import type { ColumnConfig } from "@/types/savedFilters";
 import { SavedFilter } from "@/types/savedFilters";
 import { tenantInvitationsSavedFiltersStorage } from "@/utils/tenantInvitationsSavedFiltersStorage";
 
@@ -82,8 +82,7 @@ export default function TenantInvitationsPage() {
   const [userValue, setUserValue] = useState("");
   const [selectedInvitationStatuses, setSelectedInvitationStatuses] = useState<string[]>([]);
   const [invitationStatusOperator, setInvitationStatusOperator] = useState<"in" | "not-in">("in");
-  const [selectedSuperadminStatuses, setSelectedSuperadminStatuses] = useState<string[]>([]);
-  const [superadminOperator, setSuperadminOperator] = useState<"in" | "not-in">("in");
+  const [selectedSuperadminStatus, setSelectedSuperadminStatus] = useState<string>('all');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [selectedInterval, setSelectedInterval] = useState("all-time");
@@ -110,15 +109,13 @@ export default function TenantInvitationsPage() {
       });
     }
 
-    if (visibleFilters.includes("superadmin") && selectedSuperadminStatuses.length > 0) {
-      const valueLabel = selectedSuperadminStatuses
-        .map((status) => SUPERADMIN_LABEL_MAP[status])
-        .join(", ");
+    if (visibleFilters.includes("superadmin") && selectedSuperadminStatus !== 'all') {
+      const valueLabel = selectedSuperadminStatus === 'true' ? 'Superadmin' : 'Non-Superadmin';
       filters.push({
         id: "superadmin",
         label: "Superadmin",
         value: valueLabel,
-        operator: superadminOperator === "not-in" ? "not in" : "in",
+        operator: "is",
       });
     }
 
@@ -135,8 +132,7 @@ export default function TenantInvitationsPage() {
   }, [
     invitationStatusOperator,
     selectedInvitationStatuses,
-    selectedSuperadminStatuses,
-    superadminOperator,
+    selectedSuperadminStatus,
     userValue,
     visibleFilters,
   ]);
@@ -178,14 +174,10 @@ export default function TenantInvitationsPage() {
         }
       }
 
-      if (selectedSuperadminStatuses.length > 0) {
-        const isSuperadmin = row.superadmin ? "true" : "false";
-        const matchesSuperadmin = selectedSuperadminStatuses.includes(isSuperadmin);
-        if (superadminOperator === "in") {
-          if (!matchesSuperadmin) {
-            return false;
-          }
-        } else if (matchesSuperadmin) {
+      if (selectedSuperadminStatus !== 'all') {
+        const isSuperadmin = row.superadmin;
+        if ((selectedSuperadminStatus === 'true' && !isSuperadmin) || 
+            (selectedSuperadminStatus === 'false' && isSuperadmin)) {
           return false;
         }
       }
@@ -196,8 +188,7 @@ export default function TenantInvitationsPage() {
     invitationStatusOperator,
     searchValue,
     selectedInvitationStatuses,
-    selectedSuperadminStatuses,
-    superadminOperator,
+    selectedSuperadminStatus,
     userValue,
   ]);
 
@@ -206,8 +197,7 @@ export default function TenantInvitationsPage() {
       setSelectedInvitationStatuses([]);
       setInvitationStatusOperator("in");
     } else if (filterId === "superadmin") {
-      setSelectedSuperadminStatuses([]);
-      setSuperadminOperator("in");
+      setSelectedSuperadminStatus('all');
     } else if (filterId === "user") {
       setUserValue("");
     }
@@ -219,8 +209,7 @@ export default function TenantInvitationsPage() {
       setSelectedInvitationStatuses([]);
       setInvitationStatusOperator("in");
     } else if (filterId === "superadmin") {
-      setSelectedSuperadminStatuses([]);
-      setSuperadminOperator("in");
+      setSelectedSuperadminStatus('all');
     } else if (filterId === "user") {
       setUserValue("");
     }
@@ -231,8 +220,7 @@ export default function TenantInvitationsPage() {
     setUserValue("");
     setSelectedInvitationStatuses([]);
     setInvitationStatusOperator("in");
-    setSelectedSuperadminStatuses([]);
-    setSuperadminOperator("in");
+    setSelectedSuperadminStatus('all');
     setShowChart(false);
     setPeriodicRefresh(true);
     setSelectedInterval("all-time");
@@ -279,8 +267,8 @@ export default function TenantInvitationsPage() {
         userValue,
         selectedInvitationStatuses,
         invitationStatusOperator,
-        selectedSuperadminStatuses,
-        superadminOperator,
+        selectedSuperadminStatuses: selectedSuperadminStatus === 'all' ? [] : [selectedSuperadminStatus],
+        superadminOperator: 'in',
       },
     };
 
@@ -294,8 +282,11 @@ export default function TenantInvitationsPage() {
     setUserValue(state.userValue ?? "");
     setSelectedInvitationStatuses(state.selectedInvitationStatuses ?? []);
     setInvitationStatusOperator((state.invitationStatusOperator as "in" | "not-in") || "in");
-    setSelectedSuperadminStatuses(state.selectedSuperadminStatuses ?? []);
-    setSuperadminOperator((state.superadminOperator as "in" | "not-in") || "in");
+    setSelectedSuperadminStatus(
+      state.selectedSuperadminStatuses && state.selectedSuperadminStatuses.length > 0 
+        ? state.selectedSuperadminStatuses[0] 
+        : 'all'
+    );
     setSelectedInterval(state.selectedInterval ?? "all-time");
 
     const restoredVisibleFilters = state.visibleFilters && state.visibleFilters.length > 0
@@ -408,10 +399,12 @@ export default function TenantInvitationsPage() {
           onDetailsChange={() => {}}
           userValue={userValue}
           onUserChange={setUserValue}
-          selectedSuperadminStatuses={selectedSuperadminStatuses}
-          superadminOperator={superadminOperator}
-          onSuperadminSelectionChange={setSelectedSuperadminStatuses}
-          onSuperadminOperatorChange={setSuperadminOperator}
+          selectedSuperadminStatus={selectedSuperadminStatus}
+          onSuperadminSelectionChange={setSelectedSuperadminStatus}
+          flowOperator="in"
+          flowCustomValue=""
+          onFlowOperatorChange={() => {}}
+          onFlowCustomValueChange={() => {}}
           selectedInvitationStatuses={selectedInvitationStatuses}
           invitationStatusOperator={invitationStatusOperator}
           onInvitationStatusesChange={setSelectedInvitationStatuses}

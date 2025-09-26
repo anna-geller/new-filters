@@ -38,7 +38,6 @@ import ActionFilterEditor from './ActionFilterEditor';
 import ResourceFilterEditor from './ResourceFilterEditor';
 import DetailsFilterEditor from './DetailsFilterEditor';
 import MultiSelectFilterEditor, { type MultiSelectOption } from './MultiSelectFilterEditor';
-import SuperadminFilterEditor from './SuperadminFilterEditor';
 
 export interface FilterOption {
   id: string;
@@ -1846,11 +1845,16 @@ export default function FilterInterface({
             </div>
           </PopoverTrigger>
           <PopoverContent side="bottom" align="start" className="w-80 p-0">
-            <SuperadminFilterEditor
-              selectedValue={selectedSuperadminStatus}
-              onSelectionChange={handleSuperadminSelectionChangeInternal}
+            <EnabledFilterEditor
+              options={[
+                { id: "true", label: "Superadmin" },
+                { id: "false", label: "Non-Superadmin" },
+              ]}
+              selectedValue={selectedSuperadminStatus === 'all' ? null : selectedSuperadminStatus}
+              onSelectionChange={(value) => handleSuperadminSelectionChangeInternal(value || 'all')}
               onClose={handleCloseSuperadminFilter}
               onReset={() => onResetFilter('superadmin')}
+              hideStatusText={true}
             />
           </PopoverContent>
         </Popover>
