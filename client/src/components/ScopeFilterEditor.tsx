@@ -158,7 +158,7 @@ export default function ScopeFilterEditor({
           })
         )}
       </div>
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentScopes.length} scope{currentScopes.length !== 1 ? 's' : ''} selected
