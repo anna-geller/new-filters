@@ -300,3 +300,26 @@
     inset: -1px;
   }
 }
+
+/* Dark mode scrollbar styling */
+.dark {
+  scrollbar-color: hsl(var(--border)) transparent;
+  scrollbar-width: thin;
+}
+
+.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}

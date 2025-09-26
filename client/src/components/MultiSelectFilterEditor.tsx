@@ -101,11 +101,6 @@ export default function MultiSelectFilterEditor({
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
       <div className="p-4 border-b border-border">
-        <div className="mb-3">
-          <h3 className="text-sm font-medium">{title}</h3>
-          {description && <p className="text-xs text-muted-foreground">{description}</p>}
-        </div>
-
         <div className="space-y-3">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-2 block">
