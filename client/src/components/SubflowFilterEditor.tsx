@@ -92,7 +92,7 @@ export default function HierarchyFilterEditor({
         })}
       </div>
       {/* Footer */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 border-t border-border bg-[#2F3341]">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {currentHierarchy ? hierarchyOptions.find(h => h.id === currentHierarchy)?.label || 'None' : 'None'} selected
