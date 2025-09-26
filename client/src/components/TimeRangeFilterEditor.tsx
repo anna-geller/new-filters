@@ -316,7 +316,7 @@ export default function IntervalFilterEditor({
         </div>
       )}
       {/* Footer */}
-      <div className="p-4 bg-muted/20 flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between bg-[#2F3341]">
         <p className="text-xs text-muted-foreground">
           {isCustomRange && currentStartDate && currentEndDate 
             ? formatCustomRangeSummary()
