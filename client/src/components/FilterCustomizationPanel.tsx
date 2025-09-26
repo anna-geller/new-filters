@@ -47,7 +47,7 @@ export default function FilterCustomizationPanel({
   return (
     <Card className="absolute top-full left-0 mt-2 w-80 p-0 bg-popover border border-popover-border shadow-lg z-50">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-4 border-b border-border bg-[#2F3341]">
         <div>
           <h3 className="text-sm font-medium text-foreground">Add Filters</h3>
           <p className="text-xs text-muted-foreground mt-1">Select filters to add</p>
