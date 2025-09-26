@@ -42,10 +42,10 @@ export default function SuperadminFilterEditor({
   };
 
   return (
-    <Card className="w-64 p-0 bg-popover border border-popover-border shadow-lg">
+    <Card className="w-64 p-0 bg-[#2F3341] border border-popover-border shadow-lg">
       <div className="p-4 space-y-4 bg-[#2F3341]">
         <Select value={currentValue} onValueChange={setCurrentValue}>
-          <SelectTrigger data-testid="select-superadmin-value">
+          <SelectTrigger data-testid="select-superadmin-value" className="focus-visible:ring-slate-500 focus-visible:ring-2">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

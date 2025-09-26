@@ -176,8 +176,8 @@ export default function KeyValueFilterEditor({
     valuePlaceholder ?? `Enter text that ${pluralLower} should ${selectedOperatorObj?.label || 'match'}...`;
 
   return (
-    <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
-      <div className="p-4 border-b border-border">
+    <Card className="w-96 p-0 bg-[#2F3341] border border-popover-border shadow-lg">
+      <div className="p-4 border-b border-border bg-[#2F3341]">
         <div className="mb-3">
           <label className="text-xs font-medium text-muted-foreground mb-2 block">
             Filter Operator
