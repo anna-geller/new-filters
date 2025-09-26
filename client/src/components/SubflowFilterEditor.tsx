@@ -77,11 +77,7 @@ export default function HierarchyFilterEditor({
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  isSelected 
-                    ? 'border-blue-500 bg-blue-500' 
-                    : 'border-input bg-background'
-                }`}>
+                <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors border-input bg-[#2F3341]">
                   {isSelected && (
                     <Check className="w-2.5 h-2.5 text-white" data-testid={`hierarchy-selected-${hierarchy.id}`} />
                   )}
