@@ -95,7 +95,7 @@ export default function ScopeFilterEditor({
           placeholder="Search scopes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-3 bg-[#14181E]"
+          className="flex h-9 w-full rounded-md border border-input px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mb-3 bg-[#14181E]"
           data-testid="scope-search-input"
         />
 

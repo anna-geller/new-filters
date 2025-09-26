@@ -220,7 +220,7 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className={`px-4 py-3 text-left font-medium text-muted-foreground align-top ${columnClasses[column.id] ?? 'w-40'}`}
+                  className="px-4 py-3 text-left font-medium text-muted-foreground align-top w-40 max-w-[10rem] bg-[#2F3341]"
                 >
                   <span className="truncate block" title={column.label}>
                     {column.label}
