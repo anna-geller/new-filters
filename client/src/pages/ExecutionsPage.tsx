@@ -173,6 +173,8 @@ export default function ExecutionsPage() {
   const [namespaceOperator, setNamespaceOperator] = useState('in');
   const [namespaceCustomValue, setNamespaceCustomValue] = useState('');
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
+  const [flowOperator, setFlowOperator] = useState('in');
+  const [flowCustomValue, setFlowCustomValue] = useState('');
   const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
   const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
   const [selectedHierarchy, setSelectedHierarchy] = useState<string>('all');
@@ -396,13 +398,27 @@ export default function ExecutionsPage() {
       filters.push(namespaceFilter);
     }
 
-    // Add flow filter if flows are selected AND visible
-    if (visibleFilters.includes('flow') && selectedFlows.length > 0) {
+    // Add flow filter if flows are selected OR custom value is provided AND visible
+    const isTextBasedFlowOperator = ['contains', 'starts-with', 'ends-with'].includes(flowOperator);
+    const hasFlowTextValue = isTextBasedFlowOperator && flowCustomValue.trim();
+    const hasSelectedFlows = selectedFlows.length > 0;
+    
+    if (visibleFilters.includes('flow') && (hasSelectedFlows || hasFlowTextValue)) {
+      const operatorLabels = {
+        'in': 'in',
+        'not-in': 'not in', 
+        'contains': 'contains',
+        'starts-with': 'starts with',
+        'ends-with': 'ends with'
+      };
+      
       const flowFilter = {
         id: 'flow',
         label: 'Flow',
-        value: `${selectedFlows.length}`,
-        operator: 'in'
+        value: isTextBasedFlowOperator 
+          ? `"${flowCustomValue}"` 
+          : `${selectedFlows.length}`,
+        operator: operatorLabels[flowOperator as keyof typeof operatorLabels] || flowOperator
       };
       filters.push(flowFilter);
     }
@@ -436,6 +452,8 @@ export default function ExecutionsPage() {
     namespaceOperator,
     namespaceCustomValue,
     selectedFlows,
+    flowOperator,
+    flowCustomValue,
     selectedInitialExecution,
   ]);
   
@@ -962,7 +980,11 @@ export default function ExecutionsPage() {
           onNamespaceOperatorChange={setNamespaceOperator}
           onNamespaceCustomValueChange={setNamespaceCustomValue}
           selectedFlows={selectedFlows}
+          flowOperator={flowOperator}
+          flowCustomValue={flowCustomValue}
           onFlowsSelectionChange={setSelectedFlows}
+          onFlowOperatorChange={setFlowOperator}
+          onFlowCustomValueChange={setFlowCustomValue}
           flowOptions={flowOptions}
           selectedScopes={selectedScopes}
           onScopesSelectionChange={setSelectedScopes}
