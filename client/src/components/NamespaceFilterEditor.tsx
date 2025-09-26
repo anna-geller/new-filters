@@ -49,8 +49,8 @@ export default function NamespaceFilterEditor({
   // Convert namespace strings to MultiSelectOption objects
   const namespaceMultiSelectOptions: MultiSelectOption[] = availableNamespaces.map(namespace => ({
     id: namespace,
-    label: namespace,
-    description: `Namespace: ${namespace}`
+    label: namespace
+    // No description needed
   }));
 
   // Convert operator to 'in' | 'not-in' for MultiSelectFilterEditor
@@ -63,7 +63,6 @@ export default function NamespaceFilterEditor({
   return (
     <MultiSelectFilterEditor
       title="Namespace"
-      description="Filter by namespace to which the execution belongs"
       options={namespaceMultiSelectOptions}
       selectedValues={selectedNamespaces}
       selectedOperator={convertedOperator}
