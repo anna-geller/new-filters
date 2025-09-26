@@ -58,7 +58,6 @@ export default function HierarchyFilterEditor({
   return (
     <Card className="w-80 p-0 bg-popover border border-popover-border shadow-lg">
       {/* Header removed for cleaner interface */}
-
       {/* Hierarchy options - radio button style */}
       <div data-testid="hierarchy-options-list">
         {hierarchyOptions.map((hierarchy) => {
@@ -66,7 +65,7 @@ export default function HierarchyFilterEditor({
           return (
             <div
               key={hierarchy.id}
-              className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer"
+              className="flex items-center gap-3 p-4 border-b border-border last:border-b-0 hover:bg-muted/50 cursor-pointer bg-[#2F3341]"
               onClick={() => handleSelectHierarchy(hierarchy.id)}
               data-testid={`hierarchy-option-${hierarchy.id}`}
             >
@@ -92,7 +91,6 @@ export default function HierarchyFilterEditor({
           );
         })}
       </div>
-
       {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/20">
         <div className="flex items-center justify-between">
