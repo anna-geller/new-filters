@@ -441,24 +441,22 @@ export default function NamespacesPage() {
                 )}
                 <Folder className="h-4 w-4 text-blue-400" />
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">{node.name}</span>
-                    <span className="text-xs text-muted-foreground">{node.owner}</span>
+                    <span className="text-xs text-muted-foreground">{node.description}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">{node.description}</p>
                 </div>
               </button>
             </>
           ) : (
             <div className="flex items-center gap-2 flex-1">
               <div className="w-4" /> {/* Spacer for alignment */}
-              <FileText className="h-4 w-4 text-green-400" />
+              <Folder className="h-4 w-4 text-blue-400" />
               <div className="flex-1">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground">{node.name}</span>
-                  <span className="text-xs text-muted-foreground">{node.owner}</span>
+                  <span className="text-xs text-muted-foreground">{node.description}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{node.description}</p>
               </div>
             </div>
           )}
@@ -590,7 +588,7 @@ export default function NamespacesPage() {
         />
 
         <div className="flex-1 overflow-auto p-6 bg-[#1F232D]">
-          <div className="max-w-4xl mx-auto space-y-2">
+          <div className="space-y-2">
             {namespaceTree.length > 0 ? (
               namespaceTree.map(node => renderTreeNode(node))
             ) : (
