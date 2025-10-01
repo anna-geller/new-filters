@@ -286,9 +286,6 @@ export default function InstanceVersionedPluginsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -314,7 +311,7 @@ export default function InstanceVersionedPluginsPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={INSTANCE_VERSIONED_PLUGINS_FILTER_OPTIONS}
-          searchPlaceholder="Search plugins..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

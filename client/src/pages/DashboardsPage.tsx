@@ -463,7 +463,7 @@ export default function DashboardsPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={DASHBOARD_FILTER_OPTIONS}
-          searchPlaceholder="Search dashboards..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
           showColumnsControl={false}
         />

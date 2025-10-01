@@ -331,9 +331,6 @@ export default function TenantSecretsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -354,7 +351,7 @@ export default function TenantSecretsPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_SECRETS_FILTER_OPTIONS}
-          searchPlaceholder="Search secrets..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
 

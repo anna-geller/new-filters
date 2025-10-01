@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { ColumnConfig } from './ExecutionsTable';
+import type { DetailFilter } from "@/types/auditLogs";
+import { extractDetailPairs } from "@/utils/auditLogFilterUtils";
 
 export interface AuditLogActor {
   label: string;
@@ -35,9 +37,10 @@ export const instanceAuditLogColumns: ColumnConfig[] = [...SHARED_COLUMNS, TENAN
 interface AuditLogsTableProps {
   rows: AuditLogRow[];
   columns: ColumnConfig[];
+  onDetailClick?: (detail: DetailFilter) => void;
 }
 
-export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
+export default function AuditLogsTable({ rows, columns, onDetailClick }: AuditLogsTableProps) {
   const visibleColumns = useMemo(
     () =>
       columns
@@ -90,7 +93,39 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                           )}
                         </td>
                       );
-                    case 'details':
+                    case 'details': {
+                      const detailPairs = extractDetailPairs(row.details);
+                      if (detailPairs.length > 0) {
+                        return (
+                          <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
+                            <div className="flex flex-wrap gap-1">
+                              {detailPairs.map((pair, index) => {
+                                const isClickable = typeof onDetailClick === 'function';
+                                const content = `${pair.key}:${pair.value}`;
+                                const keyToken = pair.key.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '').toLowerCase();
+                                const valueToken = pair.value.replace(/\s+/g, '-').replace(/[^A-Za-z0-9_-]/g, '').toLowerCase();
+                                const badgeClasses = `text-xs font-mono whitespace-nowrap transition-all duration-200 ${
+                                  isClickable
+                                    ? 'cursor-pointer hover:bg-blue-500/20 hover:border-blue-400 hover:text-blue-200 border-border/40 text-foreground/80 hover:scale-105 active:scale-95'
+                                    : 'border-border/50 text-foreground/80'
+                                }`;
+                                return (
+                                  <Badge
+                                    key={`${row.id}-detail-${pair.key}-${pair.value}-${index}`}
+                                    variant="outline"
+                                    className={badgeClasses}
+                                    onClick={isClickable ? () => onDetailClick(pair) : undefined}
+                                    data-testid={`audit-detail-${keyToken}-${valueToken}`}
+                                  >
+                                    {content}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                          </td>
+                        );
+                      }
+
                       return (
                         <td key={column.id} className="py-3 px-4 align-top bg-[#262A35]">
                           <div className="text-xs text-foreground/80 whitespace-pre-line font-mono leading-relaxed">
@@ -98,6 +133,7 @@ export default function AuditLogsTable({ rows, columns }: AuditLogsTableProps) {
                           </div>
                         </td>
                       );
+                    }
                     case 'date':
                       return (
                         <td key={column.id} className="py-3 px-4 align-top whitespace-nowrap text-muted-foreground bg-[#262A35]">

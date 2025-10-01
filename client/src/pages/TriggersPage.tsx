@@ -676,7 +676,7 @@ export default function TriggersPage() {
           filterOptions={TRIGGERS_FILTER_OPTIONS}
           flowOptions={flowOptions}
           showChartToggleControl={false}
-          searchPlaceholder="Search triggers..."
+          searchPlaceholder="Search..."
         />
 
         <section className="p-6">

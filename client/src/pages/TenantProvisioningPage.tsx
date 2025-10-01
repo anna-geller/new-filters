@@ -212,7 +212,7 @@ export default function TenantProvisioningPage() {
         <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">Tenant Administration</span>
-            <h1 className="text-xl font-semibold text-foreground">SCIM Provisioning</h1>
+            <h1 className="text-xl font-semibold text-foreground">Provisioning</h1>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>Jump to...</span>
@@ -290,9 +290,6 @@ export default function TenantProvisioningPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -317,7 +314,7 @@ export default function TenantProvisioningPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_PROVISIONING_FILTER_OPTIONS}
-          searchPlaceholder="Search integrations..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

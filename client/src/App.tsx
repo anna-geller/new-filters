@@ -52,7 +52,7 @@ function Router() {
       <Route path="/plugins" component={PluginsPage} />
       <Route path="/admin/tenant/system-overview" component={TenantSystemOverviewPage} />
       <Route path="/admin/tenant/triggers" component={TriggersPage} />
-      <Route path="/admin/tenant/auditlogs" component={TenantAuditLogsPage} />
+      <Route path="/admin/tenant/audit-logs" component={TenantAuditLogsPage} />
       <Route path="/admin/tenant/iam/users" component={TenantUsersPage} />
       <Route path="/admin/tenant/iam/invitations" component={TenantInvitationsPage} />
       <Route path="/admin/tenant/iam/provisioning" component={TenantProvisioningPage} />
@@ -63,7 +63,7 @@ function Router() {
       <Route path="/admin/tenant/iam/roles" component={TenantRolesPage} />
       <Route path="/admin/tenant/iam/service-accounts" component={TenantServiceAccountsPage} />
       <Route path="/admin/instance/system-overview" component={InstanceSystemOverviewPage} />
-      <Route path="/admin/instance/auditlogs" component={InstanceAuditLogsPage} />
+      <Route path="/admin/instance/audit-logs" component={InstanceAuditLogsPage} />
       <Route path="/admin/instance/services" component={InstanceServicesPage} />
       <Route path="/instance-admin/services" component={InstanceServicesPage} />
       <Route path="/admin/instance/iam/users" component={InstanceUsersPage} />

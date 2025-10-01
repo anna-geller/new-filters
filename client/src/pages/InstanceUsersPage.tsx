@@ -324,9 +324,6 @@ export default function InstanceUsersPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={userValue}
           onUserChange={setUserValue}
           selectedSuperadminStatuses={selectedSuperadminStatuses}
@@ -344,7 +341,7 @@ export default function InstanceUsersPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={INSTANCE_USERS_FILTER_OPTIONS}
-          searchPlaceholder="Search users..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

@@ -301,9 +301,6 @@ export default function TenantUsersPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={userValue}
           onUserChange={setUserValue}
           selectedSuperadminStatus="all"
@@ -319,7 +316,7 @@ export default function TenantUsersPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_USERS_FILTER_OPTIONS}
-          searchPlaceholder="Search users..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

@@ -746,7 +746,7 @@ export default function LogsPage() {
           triggerIdOperator={triggerIdOperator}
           onTriggerIdValueChange={setTriggerIdValue}
           onTriggerIdOperatorChange={setTriggerIdOperator}
-          searchPlaceholder="Search logs..."
+          searchPlaceholder="Search..."
         />
 
         {showChart && (

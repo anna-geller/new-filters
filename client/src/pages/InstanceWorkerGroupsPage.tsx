@@ -271,9 +271,6 @@ export default function InstanceWorkerGroupsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={keyValue}
           onUserChange={setKeyValue}
           selectedSuperadminStatuses={[]}
@@ -296,7 +293,7 @@ export default function InstanceWorkerGroupsPage() {
           filterOptions={INSTANCE_WORKER_GROUPS_FILTER_OPTIONS}
           userFilterTitle="Key"
           userFilterPlaceholder="Search by key..."
-          searchPlaceholder="Search worker groups..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

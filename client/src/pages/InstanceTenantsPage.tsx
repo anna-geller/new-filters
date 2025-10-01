@@ -271,9 +271,6 @@ export default function InstanceTenantsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={tenantIdValue}
           onUserChange={setTenantIdValue}
           selectedSuperadminStatuses={[]}
@@ -296,7 +293,7 @@ export default function InstanceTenantsPage() {
           filterOptions={INSTANCE_TENANTS_FILTER_OPTIONS}
           userFilterTitle="Tenant ID"
           userFilterPlaceholder="Search by tenant id..."
-          searchPlaceholder="Search tenants..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

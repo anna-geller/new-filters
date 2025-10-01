@@ -394,9 +394,6 @@ export default function TenantInvitationsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={userValue}
           onUserChange={setUserValue}
           selectedSuperadminStatus={selectedSuperadminStatus}
@@ -421,7 +418,7 @@ export default function TenantInvitationsPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_INVITATIONS_FILTER_OPTIONS}
-          searchPlaceholder="Search invitations..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">
