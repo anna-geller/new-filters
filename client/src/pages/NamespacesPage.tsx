@@ -559,9 +559,6 @@ export default function NamespacesPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -582,7 +579,7 @@ export default function NamespacesPage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={NAMESPACES_FILTER_OPTIONS}
-          searchPlaceholder="Search namespaces..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
           showColumnsControl={false}
         />

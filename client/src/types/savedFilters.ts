@@ -1,3 +1,5 @@
+import type { DetailFilter } from "./auditLogs";
+
 export interface ColumnConfig {
   id: string;
   label: string;
@@ -53,6 +55,7 @@ export interface SavedFilter {
     resourcesOperator?: string;
     detailsKey?: string;
     detailsValue?: string;
+    detailsFilters?: DetailFilter[];
     visibleFilters?: string[];
     userValue?: string;
     selectedSuperadminStatuses?: string[];

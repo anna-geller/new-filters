@@ -70,7 +70,7 @@ export default function NamespaceFilterEditor({
       onOperatorChange={handleOperatorChange}
       onClose={onClose}
       onReset={onReset}
-      searchPlaceholder="Search namespaces..."
+      searchPlaceholder="Search..."
       dataTestIdPrefix="namespaces"
     />
   );

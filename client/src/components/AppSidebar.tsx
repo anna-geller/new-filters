@@ -138,7 +138,7 @@ const navigationItems = [
       },
       {
         title: "Audit Logs",
-        url: "/admin/tenant/auditlogs",
+        url: "/admin/tenant/audit-logs",
         icon: FileText,
       },
       {
@@ -170,7 +170,7 @@ const navigationItems = [
             url: "/admin/tenant/iam/invitations",
           },
           {
-            title: "SCIM Provisioning",
+            title: "Provisioning",
             url: "/admin/tenant/iam/provisioning",
           },
         ],
@@ -193,7 +193,7 @@ const navigationItems = [
       },
       {
         title: "Audit Logs",
-        url: "/admin/instance/auditlogs",
+        url: "/admin/instance/audit-logs",
         icon: FileText,
       },
       {

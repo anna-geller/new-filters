@@ -12,8 +12,8 @@ interface FilterBadgeProps {
 
 export default function FilterBadge({ label, value, operator = "in", onClear, onEdit }: FilterBadgeProps) {
   return (
-    <Badge 
-      variant="secondary" 
+    <Badge
+      variant="secondary"
       className="flex items-center gap-2 px-3 py-1 text-primary-foreground hover-elevate"
       style={{
         background: 'var(--ks-button-background-secondary, #2F3342)',
@@ -23,12 +23,17 @@ export default function FilterBadge({ label, value, operator = "in", onClear, on
     >
       <button
         onClick={onEdit}
-        className="flex items-center gap-1 hover:opacity-80"
+        className="flex min-w-0 items-center gap-1 hover:opacity-80 text-left"
         data-testid={`button-edit-filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
       >
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <span className="text-xs font-medium text-green-500">{operator}</span>
-        <span className="text-xs text-white">{value}</span>
+        <span
+          className="text-xs text-white max-w-[14rem] truncate"
+          title={value}
+        >
+          {value}
+        </span>
         <Edit2 className="h-3 w-3 opacity-70" />
       </button>
       <Button

@@ -41,7 +41,7 @@ const INSTANCE_SERVICE_ACCOUNT_ROWS: UserRow[] = [
     id: '14g3f14c',
     username: 'default-service-account',
     name: '',
-    description: 'Default service account created for SCIM Provisioning',
+    description: 'Default service account created for Provisioning',
     tenants: ['demo'],
     superadmin: false,
   },
@@ -313,9 +313,6 @@ export default function InstanceServiceAccountsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={serviceAccountName}
           onUserChange={setServiceAccountName}
           selectedSuperadminStatus={selectedSuperadminStatus}

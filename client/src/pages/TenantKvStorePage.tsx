@@ -325,9 +325,6 @@ export default function TenantKvStorePage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -348,7 +345,7 @@ export default function TenantKvStorePage() {
           onVisibleFiltersChange={setVisibleFilters}
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_KV_FILTER_OPTIONS}
-          searchPlaceholder="Search KV entries..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
 

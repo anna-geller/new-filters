@@ -488,7 +488,7 @@ export default function AppsPage() {
           namespaceOptions={NAMESPACE_OPTIONS}
           tagOptions={APP_TAG_OPTIONS}
           showChartToggleControl={false}
-          searchPlaceholder="Search apps..."
+          searchPlaceholder="Search..."
         />
 
         <section className="p-6">

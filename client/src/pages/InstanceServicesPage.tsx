@@ -640,9 +640,6 @@ export default function InstanceServicesPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -679,7 +676,7 @@ export default function InstanceServicesPage() {
           onServiceTypesSelectionChange={setSelectedServiceTypes}
           onServiceTypeOperatorChange={(operator) => setServiceTypeOperator(operator)}
           serviceTypeOptions={SERVICE_TYPE_OPTIONS}
-          searchPlaceholder="Search services..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">

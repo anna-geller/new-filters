@@ -364,7 +364,7 @@ export default function PluginsPage() {
           onResetFilter={handleResetFilter}
           filterOptions={PLUGIN_FILTER_OPTIONS}
           tagOptions={PLUGIN_CATEGORY_OPTIONS}
-          searchPlaceholder="Search plugins..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
           showColumnsControl={false}
           showPeriodicRefreshControl={false}

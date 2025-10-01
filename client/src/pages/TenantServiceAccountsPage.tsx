@@ -270,9 +270,6 @@ export default function TenantServiceAccountsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={serviceAccountName}
           onUserChange={setServiceAccountName}
           selectedSuperadminStatuses={[]}

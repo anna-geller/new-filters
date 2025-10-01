@@ -373,9 +373,6 @@ export default function TenantAccessPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue=""
           onUserChange={() => {}}
           selectedSuperadminStatuses={[]}
@@ -397,7 +394,7 @@ export default function TenantAccessPage() {
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_ACCESS_FILTER_OPTIONS}
           namespaceOptions={ACCESS_NAMESPACE_OPTIONS}
-          searchPlaceholder="Search access entries..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
         />
 

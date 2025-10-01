@@ -293,9 +293,6 @@ export default function TenantRolesPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={nameValue}
           onUserChange={setNameValue}
           selectedSuperadminStatuses={[]}
@@ -317,8 +314,8 @@ export default function TenantRolesPage() {
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_ROLES_FILTER_OPTIONS}
           userFilterTitle="Role name"
-          userFilterPlaceholder="Search role name..."
-          searchPlaceholder="Search roles..."
+          userFilterPlaceholder="Search..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
           showColumnsControl={false}
         />

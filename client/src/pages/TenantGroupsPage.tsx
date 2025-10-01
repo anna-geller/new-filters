@@ -288,9 +288,6 @@ export default function TenantGroupsPage() {
           resourcesOperator="in"
           onResourcesSelectionChange={() => {}}
           onResourcesOperatorChange={() => {}}
-          detailsKey=""
-          detailsValue=""
-          onDetailsChange={() => {}}
           userValue={nameValue}
           onUserChange={setNameValue}
           selectedSuperadminStatuses={[]}
@@ -312,8 +309,8 @@ export default function TenantGroupsPage() {
           onResetFilter={handleResetFilter}
           filterOptions={TENANT_GROUPS_FILTER_OPTIONS}
           userFilterTitle="Group name"
-          userFilterPlaceholder="Search group name..."
-          searchPlaceholder="Search groups..."
+          userFilterPlaceholder="Search..."
+          searchPlaceholder="Search..."
           showChartToggleControl={false}
           showColumnsControl={false}
         />

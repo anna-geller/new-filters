@@ -9,7 +9,7 @@ export default function SearchBarExample() {
       <SearchBar 
         value={searchValue}
         onChange={setSearchValue}
-        placeholder="Search executions..."
+        placeholder="Search..."
       />
       <div className="text-sm text-muted-foreground">
         Current search: "{searchValue}"

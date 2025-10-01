@@ -4,7 +4,8 @@ import AuditLogsTable, { tenantAuditLogColumns, type AuditLogRow } from '@/compo
 import type { ColumnConfig } from '@/components/ExecutionsTable';
 import { SavedFilter } from '@/types/savedFilters';
 import { tenantAuditLogsSavedFiltersStorage } from '@/utils/tenantAuditLogsSavedFiltersStorage';
-import { normalizeActionForFilter, detailsIncludeKeyValue } from '@/utils/auditLogFilterUtils';
+import { normalizeActionForFilter, detailsIncludeAllKeyValues } from '@/utils/auditLogFilterUtils';
+import type { DetailFilter } from '@/types/auditLogs';
 
 interface ActiveFilter {
   id: string;
@@ -69,13 +70,16 @@ export default function TenantAuditLogsPage() {
   const [actionsOperator, setActionsOperator] = useState<'in' | 'not-in'>('in');
   const [selectedResources, setSelectedResources] = useState<string[]>([]);
   const [resourcesOperator, setResourcesOperator] = useState<'in' | 'not-in'>('in');
-  const [detailsKey, setDetailsKey] = useState('');
-  const [detailsValue, setDetailsValue] = useState('');
+  const [detailsFilters, setDetailsFilters] = useState<DetailFilter[]>([]);
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
   const [columns, setColumns] = useState<ColumnConfig[]>(tenantAuditLogColumns.map((column) => ({ ...column })));
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+
+  const ensureDetailsFilterVisible = () => {
+    setVisibleFilters(prev => (prev.includes('details') ? prev : [...prev, 'details']));
+  };
 
   useEffect(() => {
     const stored = tenantAuditLogsSavedFiltersStorage.getAll();
@@ -129,12 +133,13 @@ export default function TenantAuditLogsPage() {
       });
     }
 
-    if (visibleFilters.includes('details') && detailsKey.trim() && detailsValue.trim()) {
+    if (visibleFilters.includes('details') && detailsFilters.length > 0) {
+      const summary = detailsFilters.map(pair => `${pair.key}=${pair.value}`).join(', ');
       filters.push({
         id: 'details',
         label: 'Details',
-        value: `${detailsKey.trim()}=${detailsValue.trim()}`,
-        operator: 'matches',
+        value: summary,
+        operator: detailsFilters.length > 1 ? 'matches all' : 'matches',
       });
     }
 
@@ -146,8 +151,7 @@ export default function TenantAuditLogsPage() {
     actionsOperator,
     selectedResources,
     resourcesOperator,
-    detailsKey,
-    detailsValue,
+    detailsFilters,
     selectedInterval,
     intervalStartDate,
     intervalEndDate,
@@ -170,8 +174,7 @@ export default function TenantAuditLogsPage() {
   };
 
   const resetDetailsFilter = () => {
-    setDetailsKey('');
-    setDetailsValue('');
+    setDetailsFilters([]);
   };
 
   const handleResetFilter = (filterId: string) => {
@@ -211,38 +214,45 @@ export default function TenantAuditLogsPage() {
     if (state.selectedResources && state.selectedResources.length > 0) {
       required.add('resource');
     }
-    if (state.detailsKey && state.detailsValue) {
+    if (state.detailsFilters && state.detailsFilters.length > 0) {
+      required.add('details');
+    } else if (state.detailsKey && state.detailsValue) {
       required.add('details');
     }
 
     return Array.from(required);
   };
 
-  const getCurrentFilterState = (): SavedFilter['filterState'] => ({
-    searchValue,
-    selectedStates: [],
-    statesOperator: 'in',
-    selectedInterval,
-    intervalStartDate,
-    intervalEndDate,
-    selectedLabels: [],
-    labelsOperator: 'has-any-of',
-    labelsCustomValue: '',
-    selectedNamespaces: [],
-    selectedFlows: [],
-    selectedScopes: [],
-    selectedKinds: [],
-    selectedHierarchy: 'all',
-    selectedInitialExecution: '',
-    actorValue,
-    selectedActions,
-    actionsOperator,
-    selectedResources,
-    resourcesOperator,
-    detailsKey,
-    detailsValue,
-    visibleFilters,
-  });
+  const getCurrentFilterState = (): SavedFilter['filterState'] => {
+    const primaryDetail = detailsFilters[detailsFilters.length - 1];
+
+    return {
+      searchValue,
+      selectedStates: [],
+      statesOperator: 'in',
+      selectedInterval,
+      intervalStartDate,
+      intervalEndDate,
+      selectedLabels: [],
+      labelsOperator: 'has-any-of',
+      labelsCustomValue: '',
+      selectedNamespaces: [],
+      selectedFlows: [],
+      selectedScopes: [],
+      selectedKinds: [],
+      selectedHierarchy: 'all',
+      selectedInitialExecution: '',
+      actorValue,
+      selectedActions,
+      actionsOperator,
+      selectedResources,
+      resourcesOperator,
+      detailsKey: primaryDetail?.key ?? '',
+      detailsValue: primaryDetail?.value ?? '',
+      detailsFilters,
+      visibleFilters,
+    };
+  };
 
   const handleSaveFilter = (name: string, description: string) => {
     const now = new Date().toISOString();
@@ -270,8 +280,12 @@ export default function TenantAuditLogsPage() {
     setActionsOperator((state.actionsOperator as 'in' | 'not-in') || 'in');
     setSelectedResources(state.selectedResources ?? []);
     setResourcesOperator((state.resourcesOperator as 'in' | 'not-in') || 'in');
-    setDetailsKey(state.detailsKey ?? '');
-    setDetailsValue(state.detailsValue ?? '');
+    const loadedDetails: DetailFilter[] = state.detailsFilters && state.detailsFilters.length > 0
+      ? state.detailsFilters
+      : state.detailsKey && state.detailsValue
+        ? [{ key: state.detailsKey, value: state.detailsValue }]
+        : [];
+    setDetailsFilters(loadedDetails);
 
     const derivedVisibleFilters = buildVisibleFiltersFromState(state);
     setVisibleFilters(derivedVisibleFilters.length > 0 ? derivedVisibleFilters : ['interval']);
@@ -302,9 +316,37 @@ export default function TenantAuditLogsPage() {
     setPeriodicRefresh(true);
   };
 
-  const handleDetailsChange = (key: string, value: string) => {
-    setDetailsKey(key);
-    setDetailsValue(value);
+  const handleDetailsChange = (nextDetails: DetailFilter[]) => {
+    setDetailsFilters(nextDetails);
+    if (nextDetails.length > 0) {
+      ensureDetailsFilterVisible();
+    }
+  };
+
+  const handleDetailBadgeClick = (pair: DetailFilter) => {
+    const normalizedPair = {
+      key: pair.key.trim(),
+      value: pair.value.trim(),
+    };
+
+    if (!normalizedPair.key || !normalizedPair.value) {
+      return;
+    }
+
+    setDetailsFilters(prev => {
+      const exists = prev.some(existing =>
+        existing.key.toLowerCase() === normalizedPair.key.toLowerCase() &&
+        existing.value.toLowerCase() === normalizedPair.value.toLowerCase(),
+      );
+
+      if (exists) {
+        return prev;
+      }
+
+      return [...prev, normalizedPair];
+    });
+
+    ensureDetailsFilterVisible();
   };
 
   const handleToggleShowChart = (enabled: boolean) => {
@@ -326,8 +368,7 @@ export default function TenantAuditLogsPage() {
   const filteredRows = useMemo(() => {
     const searchTerm = searchValue.trim().toLowerCase();
     const actorTerm = actorValue.trim().toLowerCase();
-    const detailsKeyTrimmed = detailsKey.trim();
-    const detailsValueTrimmed = detailsValue.trim();
+    const hasDetailsFilters = detailsFilters.length > 0;
     const actionSet = new Set(selectedActions.map(normalizeActionForFilter));
     const resourceSet = new Set(selectedResources.map(resource => resource.toLowerCase()));
 
@@ -365,8 +406,8 @@ export default function TenantAuditLogsPage() {
         }
       }
 
-      if (detailsKeyTrimmed && detailsValueTrimmed) {
-        if (!detailsIncludeKeyValue(row.details, detailsKeyTrimmed, detailsValueTrimmed)) {
+      if (hasDetailsFilters) {
+        if (!detailsIncludeAllKeyValues(row.details, detailsFilters)) {
           return false;
         }
       }
@@ -380,8 +421,7 @@ export default function TenantAuditLogsPage() {
     actionsOperator,
     selectedResources,
     resourcesOperator,
-    detailsKey,
-    detailsValue,
+    detailsFilters,
   ]);
 
   return (
@@ -465,8 +505,7 @@ export default function TenantAuditLogsPage() {
           resourcesOperator={resourcesOperator}
           onResourcesSelectionChange={setSelectedResources}
           onResourcesOperatorChange={setResourcesOperator}
-          detailsKey={detailsKey}
-          detailsValue={detailsValue}
+          detailsFilters={detailsFilters}
           onDetailsChange={handleDetailsChange}
           savedFilters={savedFilters}
           onSaveFilter={handleSaveFilter}
@@ -481,7 +520,7 @@ export default function TenantAuditLogsPage() {
           showChartToggleControl={false}
         />
         <div className="flex-1 overflow-auto p-4 bg-[#1F232D]">
-          <AuditLogsTable rows={filteredRows} columns={columns} />
+          <AuditLogsTable rows={filteredRows} columns={columns} onDetailClick={handleDetailBadgeClick} />
         </div>
       </main>
     </div>

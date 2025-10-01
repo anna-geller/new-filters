@@ -37,6 +37,7 @@ import ActorFilterEditor from './ActorFilterEditor';
 import ActionFilterEditor from './ActionFilterEditor';
 import ResourceFilterEditor from './ResourceFilterEditor';
 import DetailsFilterEditor from './DetailsFilterEditor';
+import type { DetailFilter } from "@/types/auditLogs";
 import MultiSelectFilterEditor, { type MultiSelectOption } from './MultiSelectFilterEditor';
 
 export interface FilterOption {
@@ -143,9 +144,8 @@ interface FilterInterfaceProps {
   resourcesOperator?: 'in' | 'not-in';
   onResourcesSelectionChange?: (resources: string[]) => void;
   onResourcesOperatorChange?: (operator: 'in' | 'not-in') => void;
-  detailsKey?: string;
-  detailsValue?: string;
-  onDetailsChange?: (detailKey: string, detailValue: string) => void;
+  detailsFilters?: DetailFilter[];
+  onDetailsChange?: (details: DetailFilter[]) => void;
   userValue?: string;
   onUserChange?: (value: string) => void;
   selectedSuperadminStatus?: string | null;
@@ -302,8 +302,7 @@ export default function FilterInterface({
   resourcesOperator = 'in',
   onResourcesSelectionChange,
   onResourcesOperatorChange,
-  detailsKey = '',
-  detailsValue = '',
+  detailsFilters = [],
   onDetailsChange,
   userValue = '',
   onUserChange,
@@ -350,7 +349,7 @@ export default function FilterInterface({
   triggerIdOperator = 'equals',
   onTriggerIdValueChange,
   onTriggerIdOperatorChange,
-  searchPlaceholder = 'Search executions...',
+  searchPlaceholder = 'Search...',
   showChartToggleControl = true,
   showColumnsControl = true,
   showPeriodicRefreshControl = true,
@@ -695,7 +694,7 @@ export default function FilterInterface({
       if (!currentlyVisible) {
         setDetailsFilterOpen(true);
       } else {
-        onDetailsChange?.('', '');
+        onDetailsChange?.([]);
       }
     } else if (filterId === 'user') {
       if (!currentlyVisible) {
@@ -981,8 +980,8 @@ export default function FilterInterface({
     onResourcesOperatorChange?.(operator);
   };
 
-  const handleDetailsChangeInternal = (key: string, value: string) => {
-    onDetailsChange?.(key, value);
+  const handleDetailsChangeInternal = (nextDetails: DetailFilter[]) => {
+    onDetailsChange?.(nextDetails);
   };
 
   const handleUserValueChangeInternal = (value: string) => {
@@ -1670,8 +1669,7 @@ export default function FilterInterface({
           </PopoverTrigger>
           <PopoverContent side="bottom" align="start" className="w-[26rem] p-0">
             <DetailsFilterEditor
-              detailKey={detailsKey}
-              detailValue={detailsValue}
+              details={detailsFilters}
               onChange={handleDetailsChangeInternal}
               onClose={handleCloseDetailsFilter}
               onReset={() => onResetFilter('details')}
@@ -1761,7 +1759,7 @@ export default function FilterInterface({
               onOperatorChange={handleServiceTypeOperatorSelectionChange}
               onClose={handleCloseServiceTypeFilter}
               onReset={() => onResetFilter('service-type')}
-              searchPlaceholder="Search service types..."
+              searchPlaceholder="Search..."
               dataTestIdPrefix="service-type"
             />
           </PopoverContent>
@@ -1792,7 +1790,7 @@ export default function FilterInterface({
               onOperatorChange={handlePluginOperatorSelectionChange}
               onClose={handleClosePluginFilter}
               onReset={() => onResetFilter('plugin')}
-              searchPlaceholder="Search plugins..."
+              searchPlaceholder="Search..."
               dataTestIdPrefix="plugin"
             />
           </PopoverContent>

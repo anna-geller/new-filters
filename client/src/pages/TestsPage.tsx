@@ -511,7 +511,7 @@ export default function TestsPage() {
           namespaceMode="tests"
           flowOptions={TEST_FLOW_OPTIONS}
           showChartToggleControl={false}
-          searchPlaceholder="Search tests..."
+          searchPlaceholder="Search..."
         />
 
         <section className="p-6">
