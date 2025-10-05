@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import { Card } from "@/components/ui/card";
 import {
@@ -13,6 +13,7 @@ import { ChevronDown, ChevronRight, Folder, FileText } from "lucide-react";
 import type { ColumnConfig } from "@/types/savedFilters";
 import { SavedFilter } from "@/types/savedFilters";
 import { namespacesSavedFiltersStorage } from "@/utils/namespacesSavedFiltersStorage";
+import { useLocation } from "wouter";
 
 interface NamespaceCard {
   name: string;
@@ -187,6 +188,7 @@ export default function NamespacesPage() {
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(["company"]));
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     setSavedFilters(namespacesSavedFiltersStorage.getAll());
@@ -411,6 +413,11 @@ export default function NamespacesPage() {
     console.log("Refreshing namespaces data...");
   };
 
+  const handleNavigateToNamespace = (event: MouseEvent, fullPath: string) => {
+    event.stopPropagation();
+    navigate(`/namespaces/${encodeURIComponent(fullPath)}`);
+  };
+
   const renderTreeNode = (node: NamespaceNode, depth = 0) => {
     const isExpanded = expandedNodes.has(node.fullPath);
     const hasChildren = node.children.length > 0;
@@ -419,38 +426,44 @@ export default function NamespacesPage() {
     return (
       <div key={node.fullPath} className="w-full">
         <div
-          className="flex items-center p-3 rounded-lg hover:bg-[#2F3341] border border-border/40 mb-2 bg-[#262A35] cursor-pointer transition-colors"
+          className="flex items-center p-3 rounded-lg hover:bg-[#2F3341] border border-border/40 mb-2 bg-[#262A35] transition-colors"
           style={{ paddingLeft: `${paddingLeft + 12}px` }}
           data-testid={`namespace-node-${node.fullPath}`}
-          onClick={hasChildren ? () => toggleNodeExpansion(node.fullPath) : undefined}
         >
           {hasChildren ? (
-            <>
+            <div className="flex w-full items-center gap-2">
               <button
-                className="flex items-center gap-2 flex-1 text-left hover:opacity-80 transition-opacity"
+                type="button"
+                className="flex h-6 w-6 items-center justify-center rounded-md border border-border/50 bg-[#1F2330] text-muted-foreground hover:bg-[#222838]"
                 data-testid={`expand-toggle-${node.fullPath}`}
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   toggleNodeExpansion(node.fullPath);
                 }}
               >
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4" />
                 )}
-                <Folder className="h-4 w-4 text-blue-400" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{node.name}</span>
-                    <span className="text-xs text-muted-foreground">{node.description}</span>
-                  </div>
-                </div>
               </button>
-            </>
+              <Folder className="h-4 w-4 text-blue-400" />
+              <button
+                type="button"
+                className="flex flex-1 items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-[#2F364B]"
+                onClick={(event) => handleNavigateToNamespace(event, node.fullPath)}
+              >
+                <span className="font-medium text-foreground">{node.name}</span>
+                <span className="text-xs text-muted-foreground">{node.description}</span>
+              </button>
+            </div>
           ) : (
-            <div className="flex items-center gap-2 flex-1">
-              <div className="w-4" /> {/* Spacer for alignment */}
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-[#2F364B]"
+              onClick={(event) => handleNavigateToNamespace(event, node.fullPath)}
+            >
+              <div className="w-6" />
               <Folder className="h-4 w-4 text-blue-400" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -458,7 +471,7 @@ export default function NamespacesPage() {
                   <span className="text-xs text-muted-foreground">{node.description}</span>
                 </div>
               </div>
-            </div>
+            </button>
           )}
         </div>
         
@@ -622,4 +635,3 @@ export default function NamespacesPage() {
     </div>
   );
 }
-

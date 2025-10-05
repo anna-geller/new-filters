@@ -31,6 +31,7 @@ import TenantGroupsPage from "@/pages/TenantGroupsPage";
 import TenantRolesPage from "@/pages/TenantRolesPage";
 import TenantAccessPage from "@/pages/TenantAccessPage";
 import NamespacesPage from "@/pages/NamespacesPage";
+import NamespaceDetailsPage from "@/pages/NamespaceDetailsPage";
 import TenantSecretsPage from "@/pages/TenantSecretsPage";
 import TenantKvStorePage from "@/pages/TenantKvStorePage";
 import CustomBlueprintsPage from "@/pages/CustomBlueprintsPage";
@@ -72,6 +73,7 @@ function Router() {
       <Route path="/admin/instance/tenants" component={InstanceTenantsPage} />
       <Route path="/admin/instance/worker-groups" component={InstanceWorkerGroupsPage} />
       <Route path="/admin/instance/announcements" component={InstanceAnnouncementsPage} />
+      <Route path="/namespaces/:namespaceId" component={NamespaceDetailsPage} />
       <Route path="/namespaces" component={NamespacesPage} />
       <Route path="/blueprints/custom" component={CustomBlueprintsPage} />
       <Route path="/blueprints/flow" component={FlowBlueprintsPage} />
