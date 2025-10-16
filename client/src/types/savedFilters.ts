@@ -42,6 +42,8 @@ export interface SavedFilter {
     namespaceOperator?: string;
     namespaceCustomValue?: string;
     selectedFlows: string[];
+    flowOperator?: string;
+    flowCustomValue?: string;
     selectedScopes: string[];
     selectedKinds: string[];
     selectedHierarchy: string;

@@ -1,0 +1,177 @@
+import type { AssetRecord } from "@/types/assets";
+
+export const ASSETS: AssetRecord[] = [
+  {
+    id: "my_ec2",
+    type: "VM",
+    displayName: "My VM",
+    values: {
+      namespace: "company.team",
+      primaryFlow: "provisionVM",
+      status: "ON",
+      cloud: "AWS",
+      region: "us-east-1",
+      maintainer: "faizan",
+      createdAt: "2024-02-14T11:32:00Z",
+      ip: "192.0.2.10",
+    },
+    relatedAssets: ["cluster_1", "region_us_east_1"],
+    relatedApps: ["request_data_form"],
+    relatedFlows: [
+      { namespace: "company.team", flow: "provisionVM" },
+      { namespace: "company.team", flow: "hardenVM" },
+      { namespace: "company.team", flow: "shutDownVM" },
+    ],
+    executions: [
+      {
+        id: "exec_90231",
+        namespace: "company.team",
+        flow: "provisionVM",
+        taskId: "launch_ec2",
+        status: "SUCCESS",
+        timestamp: "2024-06-02T18:42:00Z",
+        note: "Provisioned instance and registered asset",
+      },
+      {
+        id: "exec_88741",
+        namespace: "company.team",
+        flow: "hardenVM",
+        taskId: "apply_patches",
+        status: "RUNNING",
+        timestamp: "2024-05-30T20:13:00Z",
+        note: "Security patches running",
+      },
+      {
+        id: "exec_86103",
+        namespace: "company.team",
+        flow: "shutDownVM",
+        taskId: "stop_instance",
+        status: "FAILED",
+        timestamp: "2024-05-14T16:08:00Z",
+        note: "Shutdown skipped – VM flagged as critical",
+      },
+    ],
+  },
+  {
+    id: "products_csv_s3",
+    type: "Dataset",
+    displayName: "Products CSV on S3",
+    values: {
+      namespace: "company.team",
+      primaryFlow: "csv_to_s3_lineage",
+      cloud: "AWS",
+      bucket: "s3://my-bucket",
+      key: "data/products.csv",
+      status: "ON",
+      lastShipped: "2024-05-27T12:45:00Z",
+    },
+    relatedAssets: ["products_csv_source"],
+    relatedApps: ["data_quality_dashboard"],
+    relatedFlows: [
+      { namespace: "company.team", flow: "csv_to_s3_lineage" },
+      { namespace: "company.analytics", flow: "refreshProductInventory" },
+    ],
+    executions: [
+      {
+        id: "exec_90511",
+        namespace: "company.team",
+        flow: "csv_to_s3_lineage",
+        taskId: "load_to_s3",
+        status: "SUCCESS",
+        timestamp: "2024-05-27T12:45:00Z",
+        note: "Dataset synced to S3 bucket",
+      },
+      {
+        id: "exec_89942",
+        namespace: "company.analytics",
+        flow: "refreshProductInventory",
+        taskId: "quality_gate",
+        status: "SUCCESS",
+        timestamp: "2024-05-24T09:26:00Z",
+        note: "Quality checks passed before publishing",
+      },
+    ],
+  },
+  {
+    id: "cluster_1",
+    type: "Cluster",
+    displayName: "Production Compute Cluster",
+    values: {
+      namespace: "company.platform",
+      primaryFlow: "scaleOutCluster",
+      status: "DEGRADED",
+      cloud: "AWS",
+      region: "us-east-1",
+      nodes: "24",
+      lastAudit: "2024-05-30T05:30:00Z",
+    },
+    relatedAssets: ["region_us_east_1", "my_ec2"],
+    relatedApps: ["capacity_alerts"],
+    relatedFlows: [
+      { namespace: "company.platform", flow: "bootstrapCluster" },
+      { namespace: "company.platform", flow: "scaleOutCluster" },
+    ],
+    executions: [
+      {
+        id: "exec_81234",
+        namespace: "company.platform",
+        flow: "scaleOutCluster",
+        taskId: "add_nodes",
+        status: "RUNNING",
+        timestamp: "2024-06-03T09:15:00Z",
+        note: "Waiting for new nodes to register",
+      },
+      {
+        id: "exec_80555",
+        namespace: "company.platform",
+        flow: "bootstrapCluster",
+        taskId: "init_cluster",
+        status: "SUCCESS",
+        timestamp: "2023-11-10T11:33:00Z",
+        note: "Cluster created",
+      },
+    ],
+  },
+  {
+    id: "products_csv_source",
+    type: "Dataset",
+    displayName: "Products CSV Source",
+    values: {
+      namespace: "company.analytics",
+      primaryFlow: "downloadProducts",
+      sourceUri: "https://huggingface.co/datasets/kestra/datasets/resolve/main/csv/cache_demo/products.csv",
+      refreshCadence: "24h",
+      format: "CSV",
+    },
+    relatedAssets: ["products_csv_s3"],
+    relatedApps: ["lineage_observer"],
+    relatedFlows: [
+      { namespace: "company.analytics", flow: "downloadProducts" },
+      { namespace: "company.team", flow: "csv_to_s3_lineage" },
+    ],
+  },
+  {
+    id: "region_us_east_1",
+    type: "Region",
+    displayName: "Region us-east-1",
+    values: {
+      namespace: "company.platform",
+      primaryFlow: "registerRegion",
+      cloud: "AWS",
+      accounts: "15",
+      compliance: "SOC 2 Type II",
+      regionsLinked: "3",
+    },
+    relatedAssets: ["cluster_1", "my_ec2"],
+    relatedApps: ["cost_monitoring"],
+    relatedFlows: [
+      { namespace: "company.platform", flow: "registerRegion" },
+      { namespace: "company.platform", flow: "scaleOutCluster" },
+    ],
+  },
+];
+
+export const assetsById = ASSETS.reduce<Record<string, AssetRecord>>((acc, asset) => {
+  acc[asset.id] = asset;
+  return acc;
+}, {});

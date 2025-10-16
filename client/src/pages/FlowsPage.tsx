@@ -6,6 +6,7 @@ import { SavedFilter } from '@/types/savedFilters';
 import { flowsSavedFiltersStorage } from '@/utils/flowsSavedFiltersStorage';
 import type { ScopeOption } from '@/components/ScopeFilterEditor';
 import type { FlowOption } from '@/components/FlowFilterEditor';
+import { FLOWS } from '@/data/flows';
 
 interface ActiveFilter {
   id: string;
@@ -34,16 +35,11 @@ const FLOW_FILTER_OPTIONS: FilterOption[] = [
   { id: 'flow', label: 'Flow', description: 'Filter by flow id', enabled: false, order: 4 },
 ];
 
-const FLOW_OPTIONS: FlowOption[] = [
-  { id: 'data_pipeline', label: 'data_pipeline', description: 'Data processing pipeline' },
-  { id: 'microservices_and_apis', label: 'microservices_and_apis', description: 'Microservices integration flow' },
-  { id: 'notification_system', label: 'notification_system', description: 'Notification system flow' },
-  { id: 'payment_processing', label: 'payment_processing', description: 'Payment processing flow' },
-  { id: 'user_authentication', label: 'user_authentication', description: 'User authentication flow' },
-  { id: 'security_scan', label: 'security_scan', description: 'Security scan flow' },
-  { id: 'email_notifications', label: 'email_notifications', description: 'Email notifications flow' },
-  { id: 'payment_gateway', label: 'payment_gateway', description: 'Payment gateway flow' },
-];
+const FLOW_OPTIONS: FlowOption[] = FLOWS.map((flow) => ({
+  id: flow.id,
+  label: flow.id,
+  description: flow.description ?? 'Flow',
+}));
 
 const FLOW_COLUMNS: ColumnConfig[] = [
   { id: 'id', label: 'Id', description: 'Unique flow identifier', visible: true, order: 1 },
@@ -57,118 +53,7 @@ const FLOW_COLUMNS: ColumnConfig[] = [
   { id: 'description', label: 'Description', description: 'Text description provided for the flow', visible: false, order: 9 },
 ];
 
-const FLOW_ROWS: FlowRow[] = [
-  {
-    id: 'data_pipeline',
-    labels: ['env:production', 'team:backend'],
-    namespace: 'company',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:37 PM',
-    lastExecutionStatus: 'SUCCESS',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 5, color: '#22c55e' },
-      { state: 'FAILED', count: 0, color: '#ef4444' },
-    ],
-    triggers: ['Schedule'],
-    revision: '42',
-    description: 'Primary data ingestion pipeline',
-  },
-  {
-    id: 'microservices_and_apis',
-    labels: ['env:production', 'team:backend'],
-    namespace: 'company.team',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:37 PM',
-    lastExecutionStatus: 'SUCCESS',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 4, color: '#22c55e' },
-      { state: 'FAILED', count: 1, color: '#ef4444' },
-    ],
-    triggers: ['Webhook'],
-    revision: '18',
-    description: 'Validates microservices and API interactions',
-  },
-  {
-    id: 'notification_system',
-    labels: ['env:production', 'team:backend'],
-    namespace: 'company.team.backend',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:36 PM',
-    lastExecutionStatus: 'SUCCESS',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 6, color: '#22c55e' },
-    ],
-    triggers: ['S3'],
-    revision: '12',
-    description: 'Dispatches customer notifications',
-  },
-  {
-    id: 'payment_processing',
-    labels: ['env:production', 'team:backend'],
-    namespace: 'company.team.frontend',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:36 PM',
-    lastExecutionStatus: 'SUCCESS',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 3, color: '#22c55e' },
-      { state: 'FAILED', count: 1, color: '#ef4444' },
-    ],
-    triggers: [],
-    revision: '27',
-    description: 'Handles checkout flows',
-  },
-  {
-    id: 'user_authentication',
-    labels: ['env:production', 'team:analytics'],
-    namespace: 'company.analytics',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:36 PM',
-    lastExecutionStatus: 'SUCCESS',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 5, color: '#22c55e' },
-    ],
-    triggers: [],
-    revision: '9',
-    description: 'Authenticates end-users into the analytics portal',
-  },
-  {
-    id: 'security_scan',
-    labels: ['action:cvescan', 'team:security'],
-    namespace: 'company.security',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:36 PM',
-    lastExecutionStatus: 'SUCCESS',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 2, color: '#22c55e' },
-      { state: 'FAILED', count: 1, color: '#ef4444' },
-    ],
-    triggers: [],
-    revision: '33',
-    description: 'Runs scheduled vulnerability scans',
-  },
-  {
-    id: 'email_notifications',
-    labels: ['action:test', 'team:frontend'],
-    namespace: 'company.team.api',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:36 PM',
-    lastExecutionStatus: 'FAILED',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 1, color: '#22c55e' },
-      { state: 'FAILED', count: 2, color: '#ef4444' },
-    ],
-    triggers: [],
-    revision: '5',
-    description: 'Sends transactional emails to customers',
-  },
-  {
-    id: 'payment_gateway',
-    labels: ['priority:critical', 'type:user-facing'],
-    namespace: 'company.team.database',
-    lastExecutionDate: 'Fri, Sep 12, 2025 6:36 PM',
-    lastExecutionStatus: 'FAILED',
-    executionStatistics: [
-      { state: 'SUCCESS', count: 2, color: '#22c55e' },
-      { state: 'FAILED', count: 3, color: '#ef4444' },
-    ],
-    triggers: [],
-    revision: '11',
-    description: 'Processes gateway settlement tasks',
-  },
-];
+const FLOW_ROWS: FlowRow[] = FLOWS;
 
 const FLOW_NAMESPACE_OPTIONS = Array.from(new Set(FLOW_ROWS.map((row) => row.namespace)));
 

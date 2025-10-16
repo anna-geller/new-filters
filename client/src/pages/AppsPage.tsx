@@ -5,6 +5,7 @@ import type { ColumnConfig } from '@/components/ExecutionsTable';
 import { SavedFilter } from '@/types/savedFilters';
 import { appsSavedFiltersStorage } from '@/utils/appsSavedFiltersStorage';
 import type { TagOption } from '@/components/TagsFilterEditor';
+import { APPS } from '@/data/apps';
 
 interface ActiveFilter {
   id: string;
@@ -37,37 +38,21 @@ const APP_COLUMNS: ColumnConfig[] = [
   { id: 'flow', label: 'Flow', description: 'Name of the flow associated with the app', visible: true, order: 5 },
 ];
 
-const APP_ROWS: AppRow[] = [
-  {
-    name: 'Form to request and download data',
-    type: 'Execution',
-    tags: ['Reporting', 'Analytics'],
-    namespace: 'company.team',
-    flow: 'get_data',
-  },
-  {
-    name: 'Form to sign up for Kestra Cloud',
-    type: 'Execution',
-    tags: ['Public', 'Form', 'Cloud'],
-    namespace: 'company.team',
-    flow: 'kestra_cloud_form',
-  },
-  {
-    name: "Interact with Kestra's AI Agent",
-    type: 'Execution',
-    tags: ['AI'],
-    namespace: 'company.sales',
-    flow: 'kestra_mcp_docker',
-  },
-];
+const APP_ROWS: AppRow[] = APPS.map((app) => ({
+  name: app.name,
+  type: app.type,
+  tags: app.tags,
+  namespace: app.namespace,
+  flow: app.flow,
+}));
 
-const FLOW_OPTIONS = [
-  { id: 'get_data', label: 'get_data', description: 'Data retrieval flow' },
-  { id: 'kestra_cloud_form', label: 'kestra_cloud_form', description: 'Kestra Cloud signup flow' },
-  { id: 'kestra_mcp_docker', label: 'kestra_mcp_docker', description: 'AI agent flow' },
-];
+const FLOW_OPTIONS = APPS.map((app) => ({
+  id: app.flow,
+  label: app.flow,
+  description: `${app.name} flow`,
+}));
 
-const NAMESPACE_OPTIONS = ['company.team', 'company.sales'];
+const NAMESPACE_OPTIONS = Array.from(new Set(APPS.map((app) => app.namespace)));
 
 const DEFAULT_VISIBLE_FILTERS: string[] = [];
 
