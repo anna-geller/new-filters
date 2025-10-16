@@ -27,6 +27,7 @@ import InstanceWorkerGroupsPage from "@/pages/InstanceWorkerGroupsPage";
 import InstanceAnnouncementsPage from "@/pages/InstanceAnnouncementsPage";
 import InstanceServicesPage from "@/pages/InstanceServicesPage";
 import InstanceSystemOverviewPage from "@/pages/InstanceSystemOverviewPage";
+import InstanceKillSwitchPage from "@/pages/InstanceKillSwitchPage";
 import TenantSystemOverviewPage from "@/pages/TenantSystemOverviewPage";
 import TenantInvitationsPage from "@/pages/TenantInvitationsPage";
 import TenantProvisioningPage from "@/pages/TenantProvisioningPage";
@@ -79,6 +80,7 @@ function Router() {
       <Route path="/admin/instance/tenants" component={InstanceTenantsPage} />
       <Route path="/admin/instance/worker-groups" component={InstanceWorkerGroupsPage} />
       <Route path="/admin/instance/announcements" component={InstanceAnnouncementsPage} />
+      <Route path="/admin/instance/kill-switch" component={InstanceKillSwitchPage} />
       <Route path="/namespaces/:namespaceId" component={NamespaceDetailsPage} />
       <Route path="/namespaces" component={NamespacesPage} />
       <Route path="/blueprints/custom" component={CustomBlueprintsPage} />

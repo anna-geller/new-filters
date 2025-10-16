@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import kestraLogo from "../../../images/Kestra.full.logo.light.png";
+import kestraLogo from "@/assets/Kestra.full.logo.light.png";
 import type { LucideIcon } from "lucide-react";
 import {
   Box,
@@ -26,6 +26,7 @@ import {
   Waves,
   Shapes,
   Shield,
+  ShieldAlert,
   TrendingUp,
   Workflow,
   Wrench,
@@ -240,6 +241,11 @@ const navigationItems: NavItem[] = [
         title: "Worker Groups",
         url: "/admin/instance/worker-groups",
         icon: ServerCog,
+      },
+      {
+        title: "Kill Switch",
+        url: "/admin/instance/kill-switch",
+        icon: ShieldAlert,
       },
       {
         title: "Announcements",

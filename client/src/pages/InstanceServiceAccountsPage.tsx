@@ -131,8 +131,7 @@ export default function InstanceServiceAccountsPage() {
     if (filterId === 'user') {
       setServiceAccountName('');
     } else if (filterId === 'superadmin') {
-      setSelectedSuperadminStatuses([]);
-      setSuperadminOperator('in');
+      setSelectedSuperadminStatus('all');
     }
     setVisibleFilters((prev) => prev.filter((id) => id !== filterId));
   };
@@ -204,8 +203,11 @@ export default function InstanceServiceAccountsPage() {
     const state = filter.filterState;
     setSearchValue(state.searchValue);
     setServiceAccountName(state.userValue ?? '');
-    setSelectedSuperadminStatuses(state.selectedSuperadminStatuses ?? []);
-    setSuperadminOperator((state.superadminOperator as 'in' | 'not-in') || 'in');
+    const storedSuperadmin = (state.selectedSuperadminStatus as string | null)
+      ?? (state.selectedSuperadminStatuses && state.selectedSuperadminStatuses.length > 0
+        ? state.selectedSuperadminStatuses[0]
+        : null);
+    setSelectedSuperadminStatus(storedSuperadmin ?? 'all');
     setSelectedInterval(state.selectedInterval ?? 'all-time');
 
     const restoredVisibleFilters = state.visibleFilters && state.visibleFilters.length > 0
@@ -316,7 +318,7 @@ export default function InstanceServiceAccountsPage() {
           userValue={serviceAccountName}
           onUserChange={setServiceAccountName}
           selectedSuperadminStatus={selectedSuperadminStatus}
-          onSuperadminSelectionChange={setSelectedSuperadminStatus}
+          onSuperadminSelectionChange={(status) => setSelectedSuperadminStatus(status ?? 'all')}
           userFilterTitle="Name"
           userFilterPlaceholder="Search..."
           savedFilters={savedFilters}

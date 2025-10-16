@@ -61,6 +61,7 @@ export interface SavedFilter {
     visibleFilters?: string[];
     userValue?: string;
     selectedSuperadminStatuses?: string[];
+    selectedSuperadminStatus?: string | null;
     superadminOperator?: string;
     selectedInvitationStatuses?: string[];
    invitationStatusOperator?: string;
