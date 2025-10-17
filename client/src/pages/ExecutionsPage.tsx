@@ -14,7 +14,173 @@ interface ActiveFilter {
 }
 
 // todo: remove mock functionality
-const mockExecutions = [
+export interface ExecutionRecord {
+  id: string;
+  startDate: string;
+  endDate: string;
+  duration: string;
+  namespace: string;
+  flow: string;
+  labels: string[];
+  revision: string;
+  inputs: string[];
+  outputs: string[];
+  taskId: string;
+  state: 'SUCCESS' | 'FAILED' | 'RUNNING' | 'QUEUED' | 'WARNING' | 'PAUSED' | 'CREATED' | 'RESTARTED' | 'CANCELLED';
+  assets?: string[];
+}
+
+export const EXECUTION_FIXTURES: ExecutionRecord[] = [
+  {
+    id: 'exec_90231',
+    startDate: 'Sun, Jun 2, 2024 6:42 PM',
+    endDate: 'Sun, Jun 2, 2024 6:43 PM',
+    duration: '1.0s',
+    namespace: 'company.team',
+    flow: 'provisionVM',
+    labels: ['asset:my_ec2', 'cloud:AWS'],
+    revision: '18',
+    inputs: ['vm_type:m5.large', 'region:us-east-1'],
+    outputs: ['status:success', 'instance_id:i-0acme1234'],
+    taskId: 'launch_ec2',
+    state: 'SUCCESS',
+    assets: ['my_ec2'],
+  },
+  {
+    id: 'exec_88741',
+    startDate: 'Thu, May 30, 2024 8:13 PM',
+    endDate: 'Thu, May 30, 2024 8:14 PM',
+    duration: '58s',
+    namespace: 'company.team',
+    flow: 'hardenVM',
+    labels: ['asset:my_ec2', 'maintenance:patch'],
+    revision: '6',
+    inputs: ['playbook:security-baseline'],
+    outputs: ['status:running'],
+    taskId: 'apply_patches',
+    state: 'RUNNING',
+    assets: ['my_ec2'],
+  },
+  {
+    id: 'exec_86103',
+    startDate: 'Tue, May 14, 2024 4:08 PM',
+    endDate: 'Tue, May 14, 2024 4:08 PM',
+    duration: '0.4s',
+    namespace: 'company.team',
+    flow: 'shutDownVM',
+    labels: ['asset:my_ec2', 'lifecycle:cleanup'],
+    revision: '3',
+    inputs: ['reason:maintenance'],
+    outputs: ['status:failed', 'message:critical-asset'],
+    taskId: 'stop_instance',
+    state: 'FAILED',
+    assets: ['my_ec2'],
+  },
+  {
+    id: 'exec_90511',
+    startDate: 'Mon, May 27, 2024 12:45 PM',
+    endDate: 'Mon, May 27, 2024 12:47 PM',
+    duration: '2.4s',
+    namespace: 'company.team',
+    flow: 'csv_to_s3_lineage',
+    labels: ['asset:products_csv_s3', 'cloud:AWS'],
+    revision: '11',
+    inputs: ['source:products_csv_source'],
+    outputs: ['status:success', 'records_processed:14210'],
+    taskId: 'load_to_s3',
+    state: 'SUCCESS',
+    assets: ['products_csv_s3', 'products_csv_source'],
+  },
+  {
+    id: 'exec_89942',
+    startDate: 'Fri, May 24, 2024 9:26 AM',
+    endDate: 'Fri, May 24, 2024 9:27 AM',
+    duration: '1.2s',
+    namespace: 'company.analytics',
+    flow: 'refreshProductInventory',
+    labels: ['asset:products_csv_s3', 'quality:passed'],
+    revision: '5',
+    inputs: ['dataset:products_csv_s3'],
+    outputs: ['status:success', 'quality_gate:passed'],
+    taskId: 'quality_gate',
+    state: 'SUCCESS',
+    assets: ['products_csv_s3'],
+  },
+  {
+    id: 'exec_90510',
+    startDate: 'Mon, May 27, 2024 12:00 PM',
+    endDate: 'Mon, May 27, 2024 12:01 PM',
+    duration: '1.1s',
+    namespace: 'company.analytics',
+    flow: 'downloadProducts',
+    labels: ['asset:products_csv_source', 'source:huggingface'],
+    revision: '9',
+    inputs: ['uri:products.csv'],
+    outputs: ['status:success', 'bytes_downloaded:20480'],
+    taskId: 'products',
+    state: 'SUCCESS',
+    assets: ['products_csv_source'],
+  },
+  {
+    id: 'exec_81234',
+    startDate: 'Mon, Jun 3, 2024 9:15 AM',
+    endDate: 'Mon, Jun 3, 2024 9:18 AM',
+    duration: '3.3s',
+    namespace: 'company.platform',
+    flow: 'scaleOutCluster',
+    labels: ['asset:cluster_1', 'scaling:auto'],
+    revision: '22',
+    inputs: ['target_nodes:28'],
+    outputs: ['status:running', 'nodes_pending:4'],
+    taskId: 'add_nodes',
+    state: 'RUNNING',
+    assets: ['cluster_1', 'region_us_east_1'],
+  },
+  {
+    id: 'exec_80555',
+    startDate: 'Fri, Nov 10, 2023 11:33 AM',
+    endDate: 'Fri, Nov 10, 2023 11:34 AM',
+    duration: '1.5s',
+    namespace: 'company.platform',
+    flow: 'bootstrapCluster',
+    labels: ['asset:cluster_1', 'cloud:AWS'],
+    revision: '1',
+    inputs: ['nodes:24', 'region:us-east-1'],
+    outputs: ['status:success'],
+    taskId: 'init_cluster',
+    state: 'SUCCESS',
+    assets: ['cluster_1', 'region_us_east_1'],
+  },
+  {
+    id: 'exec_79012',
+    startDate: 'Sun, Jan 5, 2020 12:00 AM',
+    endDate: 'Sun, Jan 5, 2020 12:01 AM',
+    duration: '1.2s',
+    namespace: 'company.platform',
+    flow: 'registerRegion',
+    labels: ['asset:region_us_east_1', 'cloud:AWS'],
+    revision: '1',
+    inputs: ['account_count:15'],
+    outputs: ['status:success'],
+    taskId: 'register_region',
+    state: 'SUCCESS',
+    assets: ['region_us_east_1'],
+  },
+  {
+    id: 'exec_88021',
+    startDate: 'Wed, May 1, 2024 10:15 AM',
+    endDate: 'Wed, May 1, 2024 10:17 AM',
+    duration: '2.0s',
+    namespace: 'company.platform',
+    flow: 'auditRegionCompliance',
+    labels: ['asset:region_us_east_1', 'compliance:SOC2'],
+    revision: '4',
+    inputs: ['framework:SOC2'],
+    outputs: ['status:success', 'issues_found:0'],
+    taskId: 'audit_status',
+    state: 'SUCCESS',
+    assets: ['region_us_east_1'],
+  },
   {
     id: 'a1b2c3d4',
     startDate: 'Thu, Jul 24, 2025 3:38 PM',
@@ -27,7 +193,8 @@ const mockExecutions = [
     inputs: ['customer_id:98213', 'region:us-east-1', 'priority:high'],
     outputs: ['status:success', 'records_processed:4201', 'duration_ms:3150'],
     taskId: 'finalize-report',
-    state: 'SUCCESS' as const
+    state: 'SUCCESS',
+    assets: [],
   },
   {
     id: 'b2c3d4e5',
@@ -41,7 +208,8 @@ const mockExecutions = [
     inputs: ['customer_id:10342', 'feature_flag:new-filters'],
     outputs: ['status:failed', 'error_code:timeout'],
     taskId: 'resolve-dependencies',
-    state: 'FAILED' as const
+    state: 'FAILED',
+    assets: [],
   },
   {
     id: 'c3d4e5f6',
@@ -55,7 +223,8 @@ const mockExecutions = [
     inputs: ['correlation_id:12ab-45cd', 'trigger:api'],
     outputs: ['status:running', 'records_processed:128'],
     taskId: 'aggregate-events',
-    state: 'RUNNING' as const
+    state: 'RUNNING',
+    assets: [],
   },
   {
     id: 'd4e5f6g7',
@@ -69,7 +238,8 @@ const mockExecutions = [
     inputs: ['dataset:daily-sync', 'retry_count:0'],
     outputs: ['status:queued', 'records_processed:0'],
     taskId: 'queue-run',
-    state: 'QUEUED' as const
+    state: 'QUEUED',
+    assets: [],
   },
   {
     id: 'e5f6g7h8',
@@ -83,7 +253,8 @@ const mockExecutions = [
     inputs: ['source:cli', 'plan:enterprise'],
     outputs: ['status:warning', 'alerts_sent:true'],
     taskId: 'notify-observers',
-    state: 'WARNING' as const
+    state: 'WARNING',
+    assets: [],
   },
   {
     id: 'f6g7h8i9',
@@ -97,7 +268,8 @@ const mockExecutions = [
     inputs: ['source:cli', 'retry_count:0'],
     outputs: ['status:paused', 'retry_scheduled:false'],
     taskId: 'pause-checkpoint',
-    state: 'PAUSED' as const
+    state: 'PAUSED',
+    assets: [],
   },
   {
     id: 'g7h8i9j0',
@@ -111,7 +283,8 @@ const mockExecutions = [
     inputs: ['dataset:daily-sync', 'priority:high'],
     outputs: ['status:created', 'records_processed:0'],
     taskId: 'create-run-record',
-    state: 'CREATED' as const
+    state: 'CREATED',
+    assets: [],
   },
   {
     id: 'h8i9j0k1',
@@ -125,7 +298,8 @@ const mockExecutions = [
     inputs: ['customer_id:98213', 'trigger:api'],
     outputs: ['status:restarted', 'records_failed:1'],
     taskId: 'restart-checkpoint',
-    state: 'RESTARTED' as const
+    state: 'RESTARTED',
+    assets: [],
   },
   {
     id: 'i9j0k1l2',
@@ -139,20 +313,43 @@ const mockExecutions = [
     inputs: ['customer_id:10342', 'priority:high'],
     outputs: ['status:cancelled', 'alerts_sent:false'],
     taskId: 'cancel-run',
-    state: 'CANCELLED' as const
-  }
+    state: 'CANCELLED',
+    assets: [],
+  },
 ];
 
-export default function ExecutionsPage() {
-  // Generate dynamic flow options from execution data
+interface ExecutionsPageProps {
+  assetId?: string;
+  embedded?: boolean;
+  heading?: string;
+  params?: Record<string, string | undefined> | { [param: number]: string | undefined };
+}
+
+
+export default function ExecutionsPage({ assetId, embedded = false, heading = 'Executions' }: ExecutionsPageProps = {}) {
+  const executionDataset = useMemo(() => {
+    if (!assetId) {
+      return EXECUTION_FIXTURES;
+    }
+    return EXECUTION_FIXTURES.filter((execution) => execution.assets?.includes(assetId));
+  }, [assetId]);
+
   const flowOptions = useMemo(() => {
-    const uniqueFlows = Array.from(new Set(mockExecutions.map(exec => exec.flow)));
-    return uniqueFlows.map(flow => ({
+    const uniqueFlows = Array.from(new Set(executionDataset.map((exec) => exec.flow)));
+    return uniqueFlows.map((flow) => ({
       id: flow,
       label: flow,
-      description: '' // No descriptions needed
+      description: ''
     }));
-  }, []);
+  }, [executionDataset]);
+
+  const defaultVisibleFilters = useMemo(
+    () => (embedded ? [] : ['scope', 'kind', 'hierarchy', 'interval']),
+    [embedded]
+  );
+  const defaultScopeSelection = useMemo(() => (embedded ? [] : ['user']), [embedded]);
+  const defaultKindSelection = useMemo(() => (embedded ? [] : ['default']), [embedded]);
+  const defaultHierarchySelection = 'all';
 
   const [searchValue, setSearchValue] = useState('');
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
@@ -175,9 +372,9 @@ export default function ExecutionsPage() {
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
   const [flowOperator, setFlowOperator] = useState('in');
   const [flowCustomValue, setFlowCustomValue] = useState('');
-  const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
-  const [selectedKinds, setSelectedKinds] = useState<string[]>(['default']);
-  const [selectedHierarchy, setSelectedHierarchy] = useState<string>('all');
+  const [selectedScopes, setSelectedScopes] = useState<string[]>(() => [...defaultScopeSelection]);
+  const [selectedKinds, setSelectedKinds] = useState<string[]>(() => [...defaultKindSelection]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState<string>(defaultHierarchySelection);
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
@@ -187,7 +384,21 @@ export default function ExecutionsPage() {
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
 
   // Visible filters state - tracks which filters should be displayed
-  const [visibleFilters, setVisibleFilters] = useState<string[]>(['scope', 'kind', 'hierarchy', 'interval']);
+  const [visibleFilters, setVisibleFilters] = useState<string[]>(
+    () => [...defaultVisibleFilters],
+  );
+
+  useEffect(() => {
+    setVisibleFilters([...defaultVisibleFilters]);
+  }, [defaultVisibleFilters]);
+
+  useEffect(() => {
+    setSelectedScopes([...defaultScopeSelection]);
+  }, [defaultScopeSelection]);
+
+  useEffect(() => {
+    setSelectedKinds([...defaultKindSelection]);
+  }, [defaultKindSelection]);
 
   // Load saved filters on component mount
   useEffect(() => {
@@ -459,10 +670,20 @@ export default function ExecutionsPage() {
   
   // Combine all active filters
   const allActiveFilters = [...additionalFilters, ...activeFilters];
+  const composedActiveFilters = assetId
+    ? [
+        {
+          id: 'asset',
+          label: 'Asset',
+          value: assetId,
+        },
+        ...allActiveFilters,
+      ]
+    : allActiveFilters;
 
   // Apply filtering logic to executions
   const filteredExecutions = useMemo(() => {
-    return mockExecutions.filter(execution => {
+    return executionDataset.filter(execution => {
       // Search filter - search across multiple fields
       if (searchValue.trim()) {
         const searchTerm = searchValue.toLowerCase();
@@ -530,9 +751,12 @@ export default function ExecutionsPage() {
 
       return true;
     });
-  }, [mockExecutions, searchValue, selectedStates, statesOperator, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedLabels, labelsOperator, labelsCustomValue, selectedFlows]);
+  }, [executionDataset, searchValue, selectedStates, statesOperator, selectedNamespaces, namespaceOperator, namespaceCustomValue, selectedLabels, labelsOperator, labelsCustomValue, selectedFlows]);
 
   const handleClearFilter = (filterId: string) => {
+    if (filterId === 'asset') {
+      return;
+    }
     // Remove filter from visibleFilters array to hide it completely
     setVisibleFilters(prev => prev.filter(id => id !== filterId));
     
@@ -559,11 +783,11 @@ export default function ExecutionsPage() {
     } else if (filterId === 'flow') {
       setSelectedFlows([]);
     } else if (filterId === 'scope') {
-      setSelectedScopes(['user']); // Reset to default
+      setSelectedScopes([...defaultScopeSelection]);
     } else if (filterId === 'kind') {
-      setSelectedKinds(['default']); // Reset to default
+      setSelectedKinds([...defaultKindSelection]);
     } else if (filterId === 'hierarchy') {
-      setSelectedHierarchy('all'); // Reset to default
+      setSelectedHierarchy(defaultHierarchySelection);
     } else if (filterId === 'initial-execution') {
       setSelectedInitialExecution('');
     } else if (filterId === 'interval') {
@@ -598,12 +822,12 @@ export default function ExecutionsPage() {
     // Reset search to empty
     setSearchValue('');
     // Reset visible filters to default 4 (restore initial page load state)
-    setVisibleFilters(['scope', 'kind', 'hierarchy', 'interval']);
+    setVisibleFilters([...defaultVisibleFilters]);
     
     // Reset default filters to their default values
-    setSelectedScopes(['user']);
-    setSelectedKinds(['default']);
-    setSelectedHierarchy('all');
+    setSelectedScopes([...defaultScopeSelection]);
+    setSelectedKinds([...defaultKindSelection]);
+    setSelectedHierarchy(defaultHierarchySelection);
     setSelectedInterval('last-7-days');
     setIntervalStartDate(undefined);
     setIntervalEndDate(undefined);
@@ -631,16 +855,16 @@ export default function ExecutionsPage() {
 
   // Individual filter reset function - different behavior for default vs non-default filters
   const handleResetFilter = (filterId: string) => {
-    const defaultFilters = ['scope', 'kind', 'hierarchy', 'interval'];
+    const defaultFilters = defaultVisibleFilters;
     
     if (defaultFilters.includes(filterId)) {
       // Default filters: reset to default values
       if (filterId === 'scope') {
-        setSelectedScopes(['user']);
+        setSelectedScopes([...defaultScopeSelection]);
       } else if (filterId === 'kind') {
-        setSelectedKinds(['default']);
+        setSelectedKinds([...defaultKindSelection]);
       } else if (filterId === 'hierarchy') {
-        setSelectedHierarchy('all');
+        setSelectedHierarchy(defaultHierarchySelection);
       } else if (filterId === 'interval') {
         setSelectedInterval('last-7-days');
         setIntervalStartDate(undefined);
@@ -762,10 +986,9 @@ export default function ExecutionsPage() {
     const requiredFilters = new Set<string>();
     
     // Always include default filters
-    requiredFilters.add('scope');
-    requiredFilters.add('kind');
-    requiredFilters.add('hierarchy');
-    requiredFilters.add('interval');
+    defaultVisibleFilters.forEach((filterId) => {
+      requiredFilters.add(filterId);
+    });
     
     // Check for non-default filters that have meaningful values
     if (state.selectedStates && state.selectedStates.length > 0) {
@@ -909,34 +1132,43 @@ export default function ExecutionsPage() {
     console.log('Label clicked:', clickedLabel, '-> transformed to:', transformedLabel, '- added to Labels filter with has-all-of operator');
   };
 
+  const containerClass = embedded ? 'bg-transparent space-y-4' : 'min-h-screen bg-[#1F232D]';
+  const headerWrapperClass = 'border-b border-border bg-card/50';
+  const headerInnerClass = 'flex items-center justify-between px-6 py-4 bg-[#2F3341]';
+  const contentPaddingClass = embedded ? 'p-0' : 'p-4';
+  const showExecuteButton = !embedded;
+  const headingText = heading;
+
   return (
-    <div className="min-h-screen bg-[#1F232D]">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50">
-        <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-foreground">Executions</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="text-sm text-muted-foreground hover:text-foreground">
-              Jump to...
-            </button>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Ctrl+Cmd+K</span>
+    <div className={containerClass}>
+      {!embedded && (
+        <header className={headerWrapperClass}>
+          <div className={headerInnerClass}>
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-semibold text-foreground">{headingText}</h1>
             </div>
-            <button className="px-3 py-1 text-sm text-primary-foreground rounded-md hover-elevate bg-[#8408FF]">
-              Execute
-            </button>
+            <div className="flex items-center gap-3">
+              <button className="text-sm text-muted-foreground hover:text-foreground">
+                Jump to...
+              </button>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Ctrl+Cmd+K</span>
+              </div>
+              {showExecuteButton && (
+                <button className="px-3 py-1 text-sm text-primary-foreground rounded-md hover-elevate bg-[#8408FF]">
+                  Execute
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
-      {/* Main Content */}
-      <main className="flex-1">
+        </header>
+      )}
+      <main className={embedded ? 'space-y-4' : 'flex-1'}>
         {/* Filter Interface */}
         <FilterInterface
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          activeFilters={allActiveFilters}
+          activeFilters={composedActiveFilters}
           onClearFilter={handleClearFilter}
           onEditFilter={handleEditFilter}
           onResetFilters={handleResetFilters}
@@ -1010,7 +1242,7 @@ export default function ExecutionsPage() {
         )}
 
         {/* Table */}
-        <div className="p-4">
+        <div className={contentPaddingClass}>
           <ExecutionsTable 
             executions={filteredExecutions} 
             columns={columns}

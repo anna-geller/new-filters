@@ -106,11 +106,11 @@ interface FilterInterfaceProps {
   onNamespaceOperatorChange: (operator: string) => void;
   onNamespaceCustomValueChange: (value: string) => void;
   selectedFlows: string[];
-  flowOperator: string;
-  flowCustomValue: string;
+  flowOperator?: string;
+  flowCustomValue?: string;
   onFlowsSelectionChange: (flows: string[]) => void;
-  onFlowOperatorChange: (operator: string) => void;
-  onFlowCustomValueChange: (value: string) => void;
+  onFlowOperatorChange?: (operator: string) => void;
+  onFlowCustomValueChange?: (value: string) => void;
   selectedTags?: string[];
   tagsOperator?: string;
   tagsCustomValue?: string;
@@ -149,7 +149,11 @@ interface FilterInterfaceProps {
   userValue?: string;
   onUserChange?: (value: string) => void;
   selectedSuperadminStatus?: string | null;
+  selectedSuperadminStatuses?: string[];
+  superadminOperator?: 'in' | 'not-in';
   onSuperadminSelectionChange?: (status: string | null) => void;
+  onSuperadminStatusesChange?: (statuses: string[]) => void;
+  onSuperadminOperatorChange?: (operator: 'in' | 'not-in') => void;
   selectedInvitationStatuses?: string[];
   invitationStatusOperator?: 'in' | 'not-in';
   onInvitationStatusesChange?: (statuses: string[]) => void;
@@ -267,8 +271,8 @@ export default function FilterInterface({
   onNamespaceOperatorChange,
   onNamespaceCustomValueChange,
   selectedFlows,
-  flowOperator,
-  flowCustomValue,
+  flowOperator = 'in',
+  flowCustomValue = '',
   onFlowsSelectionChange,
   onFlowOperatorChange,
   onFlowCustomValueChange,
@@ -307,7 +311,11 @@ export default function FilterInterface({
   userValue = '',
   onUserChange,
   selectedSuperadminStatus = null,
+  selectedSuperadminStatuses = [],
+  superadminOperator = 'in',
   onSuperadminSelectionChange,
+  onSuperadminStatusesChange,
+  onSuperadminOperatorChange,
   selectedInvitationStatuses = [],
   invitationStatusOperator = 'in',
   onInvitationStatusesChange,
@@ -491,6 +499,13 @@ export default function FilterInterface({
   const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
   const [editFilterDialogOpen, setEditFilterDialogOpen] = useState(false);
   const [editingFilterId, setEditingFilterId] = useState<string | null>(null);
+
+  const effectiveSuperadminStatus = (() => {
+    const primary = selectedSuperadminStatus ?? (selectedSuperadminStatuses.length > 0
+      ? selectedSuperadminStatuses[0]
+      : null);
+    return primary === 'all' ? null : primary;
+  })();
   
   // Refs for measuring widths (keeping for potential future use)
   const firstRowContainerRef = useRef<HTMLDivElement>(null);
@@ -917,11 +932,11 @@ export default function FilterInterface({
   };
 
   const handleFlowOperatorChange = (operator: string) => {
-    onFlowOperatorChange(operator);
+    onFlowOperatorChange?.(operator);
   };
 
   const handleFlowCustomValueChange = (value: string) => {
-    onFlowCustomValueChange(value);
+    onFlowCustomValueChange?.(value);
   };
 
   const handleTagsSelectionChange = (tags: string[]) => {
@@ -990,6 +1005,10 @@ export default function FilterInterface({
 
   const handleSuperadminSelectionChangeInternal = (status: string | null) => {
     onSuperadminSelectionChange?.(status);
+    onSuperadminStatusesChange?.(status ? [status] : []);
+    if (status === null) {
+      onSuperadminOperatorChange?.('in');
+    }
   };
 
   const handleInvitationStatusesSelectionChangeInternal = (statuses: string[]) => {
@@ -1836,7 +1855,7 @@ export default function FilterInterface({
               <FilterBadge
                 label={filter.label}
                 value={filter.value}
-                operator={''}
+                operator={superadminOperator === 'not-in' ? 'not in' : 'in'}
                 onClear={() => onClearFilter(filter.id)}
                 onEdit={() => handleEditFilter(filter.id)}
               />
@@ -1848,7 +1867,7 @@ export default function FilterInterface({
                 { id: "true", label: "Superadmin" },
                 { id: "false", label: "Non-Superadmin" },
               ]}
-              selectedValue={selectedSuperadminStatus}
+              selectedValue={effectiveSuperadminStatus}
               onSelectionChange={handleSuperadminSelectionChangeInternal}
               onClose={handleCloseSuperadminFilter}
               onReset={() => onResetFilter('superadmin')}

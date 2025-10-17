@@ -3,7 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
-import { ColumnConfig } from '../types/savedFilters';
+import type { ColumnConfig } from "@/types/savedFilters";
+
+export type { ColumnConfig } from "@/types/savedFilters";
 
 interface Execution {
   id: string;

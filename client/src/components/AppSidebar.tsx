@@ -1,36 +1,37 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import kestraLogo from "../../../images/Kestra.full.logo.light.png";
-import { 
-  Home, 
-  Eye, 
-  Workflow, 
-  Layers, 
-  Play, 
-  FileText, 
-  TestTube, 
-  FolderOpen, 
-  Database, 
-  Lock, 
-  Package, 
-  Puzzle, 
-  Settings,
+import kestraLogo from "@/assets/Kestra.full.logo.light.png";
+import type { LucideIcon } from "lucide-react";
+import {
+  Box,
+  Building,
+  Building2,
   ChevronDown,
   ChevronRight,
-  BarChart3,
-  Users,
-  Shield,
-  UserCheck,
-  UsersRound,
-  Key,
-  Mail,
-  Activity,
-  Server,
-  Monitor,
-  Cpu,
-  HardDrive,
+  Database,
+  FileText,
+  FlaskConical,
+  Folder,
+  Grid2x2,
+  LayoutDashboard,
+  LayoutGrid,
   Megaphone,
-  Zap
+  Monitor,
+  MonitorCog,
+  MonitorDot,
+  Play,
+  Puzzle,
+  Server,
+  ServerCog,
+  Waves,
+  Shapes,
+  Shield,
+  ShieldAlert,
+  TrendingUp,
+  Workflow,
+  Wrench,
+  Zap,
+  Lock,
 } from "lucide-react";
 
 import {
@@ -48,22 +49,29 @@ import {
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
+type NavItem = {
+  title: string;
+  url?: string;
+  icon?: LucideIcon;
+  children?: NavItem[];
+};
+
 // Hierarchical navigation structure
-const navigationItems = [
+const navigationItems: NavItem[] = [
   {
     title: "Dashboards",
     url: "/dashboards",
-    icon: BarChart3,
+    icon: TrendingUp,
   },
   {
     title: "Flows",
     url: "/flows",
-    icon: Workflow,
+    icon: Grid2x2,
   },
   {
     title: "Apps",
     url: "/apps",
-    icon: Layers,
+    icon: LayoutGrid,
   },
   {
     title: "Executions",
@@ -78,12 +86,17 @@ const navigationItems = [
   {
     title: "Tests",
     url: "/tests",
-    icon: TestTube,
+    icon: FlaskConical,
+  },
+  {
+    title: "Assets",
+    url: "/assets",
+    icon: Box,
   },
   {
     title: "Namespaces",
     url: "/namespaces",
-    icon: FolderOpen,
+    icon: Folder,
   },
   {
     title: "Plugins",
@@ -92,34 +105,38 @@ const navigationItems = [
   },
   {
     title: "Blueprints",
-    icon: Package,
+    icon: LayoutDashboard,
     children: [
       {
         title: "Custom Blueprints",
         url: "/blueprints/custom",
+        icon: Wrench,
       },
       {
         title: "Flow Blueprints",
         url: "/blueprints/flow",
+        icon: Grid2x2,
       },
       {
         title: "App Blueprints",
         url: "/blueprints/app",
+        icon: LayoutGrid,
       },
       {
         title: "Dashboard Blueprints",
         url: "/blueprints/dashboard",
+        icon: TrendingUp,
       },
     ],
   },
   {
     title: "Tenant Administration",
-    icon: Settings,
+    icon: Building,
     children: [
       {
         title: "System Overview",
         url: "/admin/tenant/system-overview",
-        icon: Monitor,
+        icon: MonitorDot,
       },
       {
         title: "KV Store",
@@ -179,7 +196,7 @@ const navigationItems = [
   },
   {
     title: "Instance Administration",
-    icon: Server,
+    icon: MonitorCog,
     children: [
       {
         title: "System Overview",
@@ -189,7 +206,7 @@ const navigationItems = [
       {
         title: "Services",
         url: "/admin/instance/services",
-        icon: Activity,
+        icon: Waves,
       },
       {
         title: "Audit Logs",
@@ -213,17 +230,22 @@ const navigationItems = [
       {
         title: "Versioned Plugins",
         url: "/admin/instance/versioned-plugins",
-        icon: Package,
+        icon: Puzzle,
       },
       {
         title: "Tenants",
         url: "/admin/instance/tenants",
-        icon: UsersRound,
+        icon: Building2,
       },
       {
         title: "Worker Groups",
         url: "/admin/instance/worker-groups",
-        icon: Cpu,
+        icon: ServerCog,
+      },
+      {
+        title: "Kill Switch",
+        url: "/admin/instance/kill-switch",
+        icon: ShieldAlert,
       },
       {
         title: "Announcements",
@@ -239,13 +261,13 @@ export function AppSidebar() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   // Generate unique key for each navigation item
-  const generateNodeKey = (item: any, parentKey: string = ""): string => {
-    const key = item.url || item.title;
-    return parentKey ? `${parentKey}/${key}` : key;
-  };
+const generateNodeKey = (item: NavItem, parentKey: string = ""): string => {
+  const key = item.url || item.title;
+  return parentKey ? `${parentKey}/${key}` : key;
+};
 
-  const toggleExpanded = (nodeKey: string) => {
-    setExpandedItems(prev => {
+const toggleExpanded = (nodeKey: string) => {
+  setExpandedItems(prev => {
       const newSet = new Set(prev);
       
       // Check if this is a top-level menu item
@@ -282,7 +304,7 @@ export function AppSidebar() {
 
   // Auto-expand ancestors of active route
   useEffect(() => {
-    const findActiveItemPath = (items: any[], parentKey: string = ""): string[] => {
+    const findActiveItemPath = (items: NavItem[], parentKey: string = ""): string[] => {
       for (const item of items) {
         const nodeKey = generateNodeKey(item, parentKey);
         if (item.url && location === item.url) {
@@ -320,23 +342,33 @@ export function AppSidebar() {
     }
   }, [location]);
 
-  const isItemActive = (item: any): boolean => {
-    if (item.url && location === item.url) return true;
+  const isItemActive = (item: NavItem): boolean => {
+    if (item.url) {
+      if (location === item.url) return true;
+      if (location.startsWith(`${item.url}/`)) return true;
+      if (location.startsWith(`${item.url}?`)) return true;
+    }
     if (item.children) {
-      return item.children.some((child: any) => isItemActive(child));
+      return item.children.some((child: NavItem) => isItemActive(child));
     }
     return false;
   };
 
-  const renderMenuItem = (item: any, level: number = 0, parentKey: string = "") => {
+  const renderMenuItem = (item: NavItem, level: number = 0, parentKey: string = "") => {
     const nodeKey = generateNodeKey(item, parentKey);
-    const hasChildren = item.children && item.children.length > 0;
+    const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+    const children = hasChildren ? item.children! : [];
+    const Icon = item.icon;
     const isExpanded = expandedItems.has(nodeKey);
     const isActive = isItemActive(item);
     const testId = `nav-${nodeKey.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
     if (level === 0) {
       // Top-level items
+      if (!Icon) {
+        return null;
+      }
+
       return (
         <SidebarMenuItem key={nodeKey}>
           {hasChildren ? (
@@ -346,27 +378,29 @@ export function AppSidebar() {
                 isActive={isActive}
                 data-testid={testId}
               >
-                <item.icon />
+                <Icon />
                 <span>{item.title}</span>
                 {isExpanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
               </SidebarMenuButton>
               {isExpanded && (
                 <SidebarMenuSub>
-                  {item.children.map((child: any) => renderMenuItem(child, level + 1, nodeKey))}
+                  {children.map(child => renderMenuItem(child, level + 1, nodeKey))}
                 </SidebarMenuSub>
               )}
             </>
           ) : (
-            <SidebarMenuButton
-              asChild
-              isActive={isActive}
-              data-testid={testId}
-            >
-              <Link href={item.url}>
-                <item.icon />
-                <span>{item.title}</span>
-              </Link>
-            </SidebarMenuButton>
+            item.url ? (
+              <SidebarMenuButton
+                asChild
+                isActive={isActive}
+                data-testid={testId}
+              >
+                <Link href={item.url}>
+                  <Icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            ) : null
           )}
         </SidebarMenuItem>
       );
@@ -381,32 +415,38 @@ export function AppSidebar() {
                 isActive={isActive}
                 data-testid={testId}
               >
-                {item.icon && <item.icon className="h-4 w-4" />}
+                {Icon && <Icon className="h-4 w-4" />}
                 <span>{item.title}</span>
                 {isExpanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
               </SidebarMenuSubButton>
               {isExpanded && (
                 <SidebarMenuSub>
-                  {item.children.map((child: any) => renderMenuItem(child, level + 1, nodeKey))}
+                  {children.map(child => renderMenuItem(child, level + 1, nodeKey))}
                 </SidebarMenuSub>
               )}
             </>
           ) : (
-            <SidebarMenuSubButton
-              asChild
-              isActive={isActive}
-              data-testid={testId}
-            >
-              <Link href={item.url}>
-                {item.icon && <item.icon className="h-4 w-4" />}
-                <span>{item.title}</span>
-              </Link>
-            </SidebarMenuSubButton>
+            item.url ? (
+              <SidebarMenuSubButton
+                asChild
+                isActive={isActive}
+                data-testid={testId}
+              >
+                <Link href={item.url}>
+                  {Icon && <Icon className="h-4 w-4" />}
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuSubButton>
+            ) : null
           )}
         </SidebarMenuSubItem>
       );
     } else {
       // Third-level items (deepest nesting)
+      if (!item.url) {
+        return null;
+      }
+
       return (
         <SidebarMenuSubItem key={nodeKey}>
           <SidebarMenuSubButton

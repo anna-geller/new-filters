@@ -42,6 +42,8 @@ export interface SavedFilter {
     namespaceOperator?: string;
     namespaceCustomValue?: string;
     selectedFlows: string[];
+    flowOperator?: string;
+    flowCustomValue?: string;
     selectedScopes: string[];
     selectedKinds: string[];
     selectedHierarchy: string;
@@ -59,6 +61,7 @@ export interface SavedFilter {
     visibleFilters?: string[];
     userValue?: string;
     selectedSuperadminStatuses?: string[];
+    selectedSuperadminStatus?: string | null;
     superadminOperator?: string;
     selectedInvitationStatuses?: string[];
    invitationStatusOperator?: string;

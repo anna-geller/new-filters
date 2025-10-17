@@ -328,7 +328,10 @@ export default function InstanceUsersPage() {
           onUserChange={setUserValue}
           selectedSuperadminStatuses={selectedSuperadminStatuses}
           superadminOperator={superadminOperator}
-          onSuperadminSelectionChange={setSelectedSuperadminStatuses}
+          onSuperadminSelectionChange={(status) => {
+            setSelectedSuperadminStatuses(status ? [status] : []);
+          }}
+          onSuperadminStatusesChange={setSelectedSuperadminStatuses}
           onSuperadminOperatorChange={setSuperadminOperator}
           userFilterTitle="Username"
           userFilterPlaceholder="Search by username..."
