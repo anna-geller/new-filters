@@ -44,6 +44,8 @@ import AppBlueprintsPage from "@/pages/AppBlueprintsPage";
 import DashboardBlueprintsPage from "@/pages/DashboardBlueprintsPage";
 import PluginsPage from "@/pages/PluginsPage";
 import NotFound from "@/pages/not-found";
+import ActiveKillSwitchBanner from "@/components/ActiveKillSwitchBanner";
+import ActiveMaintenanceBanner from "@/components/ActiveMaintenanceBanner";
 
 function Router() {
   return (
@@ -109,6 +111,8 @@ function App() {
               <header className="flex items-center justify-between p-2 border-b border-border bg-[#1F232D]">
                 <SidebarTrigger data-testid="button-sidebar-toggle" />
               </header>
+              <ActiveMaintenanceBanner />
+              <ActiveKillSwitchBanner />
               <main className="flex-1 overflow-hidden">
                 <Router />
               </main>

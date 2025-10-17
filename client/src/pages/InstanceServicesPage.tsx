@@ -7,6 +7,22 @@ import type { MultiSelectOption } from "@/components/MultiSelectFilterEditor";
 import { Button } from "@/components/ui/button";
 import { SavedFilter } from "@/types/savedFilters";
 import { instanceServicesSavedFiltersStorage } from "@/utils/instanceServicesSavedFiltersStorage";
+import type { MaintenanceState } from "@/types/maintenanceMode";
+import {
+  getMaintenanceState as getMaintenanceModeState,
+  setMaintenanceState as setMaintenanceModeState,
+  subscribeToMaintenanceState,
+} from "@/lib/maintenanceModeStore";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   AlertOctagon,
   CheckCircle,
@@ -239,9 +255,13 @@ export default function InstanceServicesPage() {
   const [columns, setColumns] = useState<ColumnConfig[]>(INSTANCE_SERVICES_COLUMNS.map((column) => ({ ...column })));
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [maintenanceState, setMaintenanceState] = useState<MaintenanceState | null>(() => getMaintenanceModeState());
+  const [maintenanceDialog, setMaintenanceDialog] = useState<"enter" | "exit" | null>(null);
 
   useEffect(() => {
     setSavedFilters(instanceServicesSavedFiltersStorage.getAll());
+    const unsubscribe = subscribeToMaintenanceState(setMaintenanceState);
+    return unsubscribe;
   }, []);
 
   const getIntervalDisplayValue = () => {
@@ -546,6 +566,36 @@ export default function InstanceServicesPage() {
     console.log("Refreshing services data...");
   };
 
+  const maintenanceActive = Boolean(maintenanceState?.active);
+
+  const handleMaintenanceButtonClick = () => {
+    setMaintenanceDialog(maintenanceActive ? "exit" : "enter");
+  };
+
+  const handleConfirmMaintenance = () => {
+    if (!maintenanceDialog) {
+      return;
+    }
+
+    if (maintenanceDialog === "enter") {
+      const state: MaintenanceState = {
+        active: true,
+        startedAt: new Date().toISOString(),
+      };
+      setMaintenanceModeState(state);
+      setMaintenanceState(state);
+    } else {
+      setMaintenanceModeState(null);
+      setMaintenanceState(null);
+    }
+
+    setMaintenanceDialog(null);
+  };
+
+  const handleCancelMaintenanceAction = () => {
+    setMaintenanceDialog(null);
+  };
+
   const handleIntervalChange = (interval: string, startDate?: string, endDate?: string) => {
     setSelectedInterval(interval);
     setIntervalStartDate(startDate);
@@ -567,8 +617,13 @@ export default function InstanceServicesPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Ctrl+Cmd+K</span>
             </div>
-            <Button data-testid="button-enter-maintenance" size="sm" className="px-3 py-1 text-sm">
-              Enter maintenance mode
+            <Button
+              data-testid={maintenanceActive ? "button-exit-maintenance" : "button-enter-maintenance"}
+              size="sm"
+              className="px-3 py-1 text-sm"
+              onClick={handleMaintenanceButtonClick}
+            >
+              {maintenanceActive ? "Exit maintenance mode" : "Enter maintenance mode"}
             </Button>
           </div>
         </div>
@@ -683,6 +738,27 @@ export default function InstanceServicesPage() {
           <ServicesTable rows={filteredRows} columns={columns} />
         </div>
       </main>
+
+      <AlertDialog open={maintenanceDialog !== null} onOpenChange={(open) => (!open ? handleCancelMaintenanceAction() : undefined)}>
+        <AlertDialogContent className="border border-border bg-[#1F232D]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {maintenanceDialog === "exit" ? "Exit maintenance mode" : "Enter maintenance mode"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {maintenanceDialog === "exit"
+                ? "Exit maintenance mode? Normal task scheduling will resume."
+                : "Enter maintenance mode? No new task runs will start; in-progress task runs will finish."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelMaintenanceAction}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmMaintenance}>
+              {maintenanceDialog === "exit" ? "Exit" : "Enter"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

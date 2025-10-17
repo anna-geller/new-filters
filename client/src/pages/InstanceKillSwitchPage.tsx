@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import type { ColumnConfig } from "@/components/ExecutionsTable";
 import type { SavedFilter } from "@/types/savedFilters";
@@ -16,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -48,21 +48,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { FLOWS } from "@/data/flows";
-import { ShieldAlert, Search } from "lucide-react";
+import { ShieldAlert, Edit2, Trash2 } from "lucide-react";
 
-type KillSwitchType = "KILL" | "GRACEFULLY_KILL" | "IGNORE";
-type KillSwitchScope = "tenant" | "namespace" | "flow" | "execution";
-type KillSwitchBehavior = "existing" | "existing_and_future";
+import {
+  getKillSwitchBehaviorLabel,
+  getKillSwitchScopeLabel,
+  type KillSwitchBehavior,
+  type KillSwitchScope,
+  type KillSwitchType,
+} from "@/types/killSwitch";
+import { setKillSwitchBanners } from "@/lib/killSwitchBannerStore";
 
 interface KillSwitchRecord {
   id: string;
@@ -82,7 +85,49 @@ interface KillSwitchTableProps {
   rows: KillSwitchRecord[];
   columns: ColumnConfig[];
   onToggle: (record: KillSwitchRecord, desiredStatus: "enabled" | "disabled") => void;
+  onEdit: (record: KillSwitchRecord) => void;
+  onDelete: (record: KillSwitchRecord) => void;
 }
+
+interface KillSwitchFormState {
+  name: string;
+  type: KillSwitchType;
+  scope: KillSwitchScope;
+  selectedTargets: string[];
+  behavior: KillSwitchBehavior;
+  reason: string;
+}
+
+const KILL_SWITCH_STORAGE_KEY = "kestra-instance-kill-switches";
+
+const DEFAULT_KILL_SWITCH_HISTORY: KillSwitchRecord[] = [
+  {
+    id: "kill-tenant-prod",
+    name: "Tenant kill switch",
+    type: "KILL",
+    scope: "tenant",
+    targets: ["prod"],
+    behavior: "existing",
+    reason: "Immediate shutdown during incident IR-2048",
+    status: "enabled",
+    createdAt: "2025-09-23T09:12:00.000Z",
+    updatedAt: "2025-09-23T09:12:00.000Z",
+    createdBy: "incident-response",
+  },
+  {
+    id: "kill-namespace-analytics",
+    name: "Analytics cooldown",
+    type: "GRACEFULLY_KILL",
+    scope: "namespace",
+    targets: ["company.analytics"],
+    behavior: "existing_and_future",
+    reason: "Graceful shutdown after data retention updates",
+    status: "disabled",
+    createdAt: "2025-08-12T14:00:00.000Z",
+    updatedAt: "2025-08-15T11:24:00.000Z",
+    createdBy: "sre-team",
+  },
+];
 
 const DEFAULT_VISIBLE_FILTERS: string[] = [];
 
@@ -103,6 +148,7 @@ const KILL_SWITCH_COLUMNS: ColumnConfig[] = [
   { id: "created", label: "Created", description: "Creation timestamp", visible: true, order: 7 },
   { id: "updated", label: "Last updated", description: "Last modification timestamp", visible: true, order: 8 },
   { id: "enabled", label: "Enabled", description: "Toggle kill switch", visible: true, order: 9 },
+  { id: "actions", label: "Actions", description: "Edit or delete", visible: true, order: 10 },
 ];
 
 const KILL_SWITCH_TYPE_OPTIONS: MultiSelectOption[] = [
@@ -188,21 +234,6 @@ function getScopeOptions(scope: KillSwitchScope): ScopeOption[] {
   }
 }
 
-function getScopeLabel(scope: KillSwitchScope) {
-  switch (scope) {
-    case "tenant":
-      return "Tenant";
-    case "namespace":
-      return "Namespace";
-    case "flow":
-      return "Flow";
-    case "execution":
-      return "Execution";
-    default:
-      return "Scope";
-  }
-}
-
 function renderTargets(record: KillSwitchRecord) {
   if (record.targets.length === 0) {
     return "—";
@@ -210,7 +241,32 @@ function renderTargets(record: KillSwitchRecord) {
   return record.targets.join(", ");
 }
 
-function KillSwitchTable({ rows, columns, onToggle }: KillSwitchTableProps) {
+function createDefaultForm(scope: KillSwitchScope = "tenant"): KillSwitchFormState {
+  return {
+    name: "",
+    type: "KILL",
+    scope,
+    selectedTargets: [],
+    behavior: "existing",
+    reason: "",
+  };
+}
+
+function normalizeColumns(columns: ColumnConfig[]): ColumnConfig[] {
+  if (columns.some((column) => column.id === "actions")) {
+    return columns;
+  }
+  return [
+    ...columns,
+    { id: "actions", label: "Actions", description: "Edit or delete", visible: true, order: columns.length + 1 },
+  ];
+}
+
+function isSameRecord(a: KillSwitchRecord | null, b: KillSwitchRecord | null): boolean {
+  return Boolean(a && b && a.id === b.id);
+}
+
+function KillSwitchTable({ rows, columns, onToggle, onEdit, onDelete }: KillSwitchTableProps) {
   const visibleColumns = useMemo(
     () => columns.filter((column) => column.visible).sort((a, b) => a.order - b.order),
     [columns],
@@ -241,26 +297,19 @@ function KillSwitchTable({ rows, columns, onToggle }: KillSwitchTableProps) {
 
                   switch (cellId) {
                     case "name":
-                      content = (
-                        <div className="flex flex-col gap-1">
-                          <span className="font-medium text-foreground">{row.name}</span>
-                          <span className="text-xs text-muted-foreground">Created by {row.createdBy}</span>
-                        </div>
-                      );
+                      content = <span className="font-medium text-foreground">{row.name}</span>;
                       break;
                     case "type":
                       content = row.type.replace("_", " ");
                       break;
                     case "scope":
-                      content = getScopeLabel(row.scope);
+                      content = getKillSwitchScopeLabel(row.scope);
                       break;
                     case "targets":
                       content = renderTargets(row);
                       break;
                     case "behavior":
-                      content = row.behavior === "existing"
-                        ? "Existing executions"
-                        : "Existing + future executions";
+                      content = getKillSwitchBehaviorLabel(row.behavior);
                       break;
                     case "reason":
                       content = row.reason ?? "—";
@@ -281,12 +330,51 @@ function KillSwitchTable({ rows, columns, onToggle }: KillSwitchTableProps) {
                         </div>
                       );
                       break;
+                    case "actions":
+                      content = (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                onClick={() => onEdit(row)}
+                                aria-label={`Edit kill switch ${row.name}`}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                onClick={() => onDelete(row)}
+                                aria-label={`Delete kill switch ${row.name}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      );
+                      break;
                     default:
                       content = "—";
                   }
 
+                  const cellClass = cn(
+                    "py-3 px-4 bg-[#262A35] text-sm text-muted-foreground",
+                    cellId === "actions" || cellId === "enabled" ? "text-right align-middle" : "align-top",
+                  );
+
                   return (
-                    <TableCell key={column.id} className="py-3 px-4 align-top bg-[#262A35] text-sm text-muted-foreground">
+                    <TableCell key={column.id} className={cellClass}>
                       {content}
                     </TableCell>
                   );
@@ -301,36 +389,27 @@ function KillSwitchTable({ rows, columns, onToggle }: KillSwitchTableProps) {
 }
 
 export default function InstanceKillSwitchPage() {
-  const [killSwitchHistory, setKillSwitchHistory] = useState<KillSwitchRecord[]>([
-    {
-      id: "kill-tenant-prod",
-      name: "Tenant kill switch",
-      type: "KILL",
-      scope: "tenant",
-      targets: ["prod"],
-      behavior: "existing",
-      reason: "Immediate shutdown during incident IR-2048",
-      status: "enabled",
-      createdAt: "2025-09-23T09:12:00.000Z",
-      updatedAt: "2025-09-23T09:12:00.000Z",
-      createdBy: "incident-response",
-    },
-    {
-      id: "kill-namespace-analytics",
-      name: "Analytics cooldown",
-      type: "GRACEFULLY_KILL",
-      scope: "namespace",
-      targets: ["company.analytics"],
-      behavior: "existing_and_future",
-      reason: "Graceful shutdown after data retention updates",
-      status: "disabled",
-      createdAt: "2025-08-12T14:00:00.000Z",
-      updatedAt: "2025-08-15T11:24:00.000Z",
-      createdBy: "sre-team",
-    },
-  ]);
+  const [killSwitchHistory, setKillSwitchHistory] = useState<KillSwitchRecord[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = window.localStorage.getItem(KILL_SWITCH_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored) as KillSwitchRecord[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load kill switch history", error);
+      }
+    }
+    return [...DEFAULT_KILL_SWITCH_HISTORY];
+  });
 
-  const [columns, setColumns] = useState<ColumnConfig[]>(KILL_SWITCH_COLUMNS.map((column) => ({ ...column })));
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => normalizeColumns(KILL_SWITCH_COLUMNS.map((column) => ({ ...column }))));
   const [visibleFilters, setVisibleFilters] = useState<string[]>(DEFAULT_VISIBLE_FILTERS);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
 
@@ -352,15 +431,10 @@ export default function InstanceKillSwitchPage() {
     record: KillSwitchRecord;
     desiredStatus: "enabled" | "disabled";
   } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<KillSwitchRecord | null>(null);
+  const [editingRecord, setEditingRecord] = useState<KillSwitchRecord | null>(null);
 
-  const [killSwitchForm, setKillSwitchForm] = useState({
-    name: "",
-    type: "KILL" as KillSwitchType,
-    scope: "tenant" as KillSwitchScope,
-    selectedTargets: [] as string[],
-    behavior: "existing" as KillSwitchBehavior,
-    reason: "",
-  });
+  const [killSwitchForm, setKillSwitchForm] = useState<KillSwitchFormState>(createDefaultForm());
 
   const [killSwitchFormError, setKillSwitchFormError] = useState<string | null>(null);
 
@@ -402,11 +476,8 @@ export default function InstanceKillSwitchPage() {
         }
       }
 
-      if (selectedScopes.length > 0) {
-        const includesScope = selectedScopes.includes(entry.scope);
-        if (!includesScope) {
-          return false;
-        }
+      if (selectedScopes.length > 0 && !selectedScopes.includes(entry.scope)) {
+        return false;
       }
 
       if (selectedBehaviors.length > 0) {
@@ -438,7 +509,30 @@ export default function InstanceKillSwitchPage() {
     [killSwitchHistory],
   );
 
-  const scopeLabel = getScopeLabel(killSwitchForm.scope).toLowerCase();
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    try {
+      window.localStorage.setItem(KILL_SWITCH_STORAGE_KEY, JSON.stringify(killSwitchHistory));
+    } catch (error) {
+      console.warn("Failed to persist kill switch history", error);
+    }
+  }, [killSwitchHistory]);
+
+  useEffect(() => {
+    const activeBanners = activeKillSwitches.map((entry) => ({
+      id: entry.id,
+      scope: entry.scope,
+      targets: entry.targets,
+      behavior: entry.behavior,
+      reason: entry.reason,
+    }));
+
+    setKillSwitchBanners(activeBanners);
+  }, [activeKillSwitches]);
+
+  const scopeLabel = getKillSwitchScopeLabel(killSwitchForm.scope).toLowerCase();
 
   const activeFilters = useMemo(() => {
     const filters: { id: string; label: string; value: string; operator?: string }[] = [];
@@ -456,7 +550,7 @@ export default function InstanceKillSwitchPage() {
       filters.push({
         id: "scope",
         label: "Scope",
-        value: selectedScopes.map((scope) => getScopeLabel(scope as KillSwitchScope)).join(", "),
+        value: selectedScopes.map((scope) => getKillSwitchScopeLabel(scope as KillSwitchScope)).join(", "),
         operator: "in",
       });
     }
@@ -466,7 +560,7 @@ export default function InstanceKillSwitchPage() {
         id: "service-type",
         label: "Behavior",
         value: selectedBehaviors
-          .map((behavior) => (behavior === "existing" ? "Existing" : "Existing + future"))
+          .map((behavior) => getKillSwitchBehaviorLabel(behavior as KillSwitchBehavior))
           .join(", "),
         operator: behaviorOperator === "not-in" ? "not in" : "in",
       });
@@ -527,7 +621,7 @@ export default function InstanceKillSwitchPage() {
     setShowChart(false);
     setPeriodicRefresh(true);
     setVisibleFilters(DEFAULT_VISIBLE_FILTERS);
-    setColumns(KILL_SWITCH_COLUMNS.map((column) => ({ ...column })));
+    setColumns(normalizeColumns(KILL_SWITCH_COLUMNS.map((column) => ({ ...column }))));
   };
 
   const handleSaveFilter = (name: string, description: string) => {
@@ -587,8 +681,16 @@ export default function InstanceKillSwitchPage() {
     setBehaviorOperator((state.serviceTypeOperator as "in" | "not-in") || "in");
     setSelectedStatuses(state.selectedInvitationStatuses ?? []);
     setStatusOperator((state.invitationStatusOperator as "in" | "not-in") || "in");
-    setVisibleFilters(state.visibleFilters && state.visibleFilters.length > 0 ? Array.from(new Set(state.visibleFilters)) : DEFAULT_VISIBLE_FILTERS);
-    setColumns(state.columnConfig ? state.columnConfig.map((column) => ({ ...column })) : KILL_SWITCH_COLUMNS.map((column) => ({ ...column })));  
+    const restoredVisibleFilters = state.visibleFilters && state.visibleFilters.length > 0
+      ? Array.from(new Set(state.visibleFilters))
+      : DEFAULT_VISIBLE_FILTERS;
+    setVisibleFilters(restoredVisibleFilters);
+
+    if (state.columnConfig && state.columnConfig.length > 0) {
+      setColumns(normalizeColumns(state.columnConfig.map((column) => ({ ...column }))));
+    } else {
+      setColumns(normalizeColumns(KILL_SWITCH_COLUMNS.map((column) => ({ ...column }))));
+    }
   };
 
   const handleDeleteFilter = (filterId: string) => {
@@ -611,6 +713,11 @@ export default function InstanceKillSwitchPage() {
   };
 
   const handleSubmitKillSwitch = () => {
+    if (!killSwitchForm.name.trim()) {
+      setKillSwitchFormError("Provide a name so you can identify this kill switch later.");
+      return;
+    }
+
     if (killSwitchForm.selectedTargets.length === 0) {
       setKillSwitchFormError(`Select at least one ${scopeLabel} to target.`);
       return;
@@ -618,32 +725,42 @@ export default function InstanceKillSwitchPage() {
 
     const nowIso = new Date().toISOString();
 
-    const record: KillSwitchRecord = {
-      id: `kill-${Date.now()}`,
-      name: killSwitchForm.name.trim() || `${killSwitchForm.type} kill switch`,
-      type: killSwitchForm.type,
-      scope: killSwitchForm.scope,
-      targets: [...killSwitchForm.selectedTargets],
-      behavior: killSwitchForm.behavior,
-      reason: killSwitchForm.reason.trim() || undefined,
-      status: "enabled",
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      createdBy: "you",
-    };
+    if (editingRecord) {
+      setKillSwitchHistory((prev) =>
+        prev.map((entry) =>
+          entry.id === editingRecord.id
+            ? {
+                ...entry,
+                name: killSwitchForm.name.trim() || editingRecord.name,
+                type: killSwitchForm.type,
+                scope: killSwitchForm.scope,
+                targets: [...killSwitchForm.selectedTargets],
+                behavior: killSwitchForm.behavior,
+                reason: killSwitchForm.reason.trim() || undefined,
+                updatedAt: nowIso,
+              }
+            : entry,
+        ),
+      );
+    } else {
+      const record: KillSwitchRecord = {
+        id: `kill-${Date.now()}`,
+        name: killSwitchForm.name.trim() || `${killSwitchForm.type} kill switch`,
+        type: killSwitchForm.type,
+        scope: killSwitchForm.scope,
+        targets: [...killSwitchForm.selectedTargets],
+        behavior: killSwitchForm.behavior,
+        reason: killSwitchForm.reason.trim() || undefined,
+        status: "enabled",
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        createdBy: "you",
+      };
 
-    setKillSwitchHistory((prev) => [record, ...prev]);
-    setKillSwitchDialogOpen(false);
-    setKillSwitchTargetSearch("");
-    setKillSwitchForm({
-      name: "",
-      type: "KILL",
-      scope: killSwitchForm.scope,
-      selectedTargets: [],
-      behavior: "existing",
-      reason: "",
-    });
-    setKillSwitchFormError(null);
+      setKillSwitchHistory((prev) => [record, ...prev]);
+    }
+
+    closeKillSwitchDialog();
   };
 
   const handleKillSwitchToggle = (record: KillSwitchRecord, desiredStatus: "enabled" | "disabled") => {
@@ -689,10 +806,55 @@ export default function InstanceKillSwitchPage() {
     setPendingToggle(null);
   };
 
+  const resetKillSwitchFormState = (scope: KillSwitchScope = "tenant") => {
+    setEditingRecord(null);
+    setKillSwitchForm(createDefaultForm(scope));
+    setKillSwitchTargetSearch("");
+    setKillSwitchFormError(null);
+  };
+
+  const closeKillSwitchDialog = () => {
+    setKillSwitchDialogOpen(false);
+    resetKillSwitchFormState();
+  };
+
+  const openEditKillSwitch = (record: KillSwitchRecord) => {
+    setEditingRecord(record);
+    setKillSwitchForm({
+      name: record.name,
+      type: record.type,
+      scope: record.scope,
+      selectedTargets: [...record.targets],
+      behavior: record.behavior,
+      reason: record.reason ?? "",
+    });
+    setKillSwitchTargetSearch("");
+    setKillSwitchFormError(null);
+    setKillSwitchDialogOpen(true);
+  };
+
+  const openDeleteKillSwitch = (record: KillSwitchRecord) => {
+    setPendingDelete(record);
+  };
+
+  const confirmDeleteKillSwitch = () => {
+    if (!pendingDelete) {
+      return;
+    }
+
+    setKillSwitchHistory((prev) => prev.filter((entry) => entry.id !== pendingDelete.id));
+
+    if (isSameRecord(editingRecord, pendingDelete)) {
+      closeKillSwitchDialog();
+    }
+
+    setPendingDelete(null);
+  };
+
   const filteredCount = filteredKillSwitches.length;
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={100}>
       <div className="min-h-screen bg-background flex flex-col">
         <header className="border-b border-border bg-[#262A35]/80">
           <div className="flex items-center justify-between px-6 py-4 bg-[#2F3341]">
@@ -708,8 +870,8 @@ export default function InstanceKillSwitchPage() {
               <Button
                 className="bg-primary border border-primary-border text-primary-foreground hover:bg-primary/90"
                 onClick={() => {
+                  resetKillSwitchFormState();
                   setKillSwitchDialogOpen(true);
-                  setKillSwitchFormError(null);
                 }}
               >
                 <ShieldAlert className="mr-2 h-4 w-4" />
@@ -733,7 +895,7 @@ export default function InstanceKillSwitchPage() {
             onTogglePeriodicRefresh={setPeriodicRefresh}
             onRefreshData={() => {}}
             columns={columns}
-            onColumnsChange={setColumns}
+            onColumnsChange={(nextColumns) => setColumns(normalizeColumns(nextColumns))}
             selectedStates={[]}
             statesOperator="in"
             onSelectedStatesChange={() => {}}
@@ -836,15 +998,29 @@ export default function InstanceKillSwitchPage() {
                 <p className="text-xs text-muted-foreground">Update your filters or create a new kill switch to get started.</p>
               </div>
             ) : (
-              <KillSwitchTable rows={filteredKillSwitches} columns={columns} onToggle={handleKillSwitchToggle} />
+              <KillSwitchTable
+                rows={filteredKillSwitches}
+                columns={columns}
+                onToggle={handleKillSwitchToggle}
+                onEdit={openEditKillSwitch}
+                onDelete={openDeleteKillSwitch}
+              />
             )}
           </div>
         </main>
 
-        <Dialog open={killSwitchDialogOpen} onOpenChange={setKillSwitchDialogOpen}>
+        <Dialog
+          open={killSwitchDialogOpen}
+          onOpenChange={(open) => {
+            setKillSwitchDialogOpen(open);
+            if (!open) {
+              resetKillSwitchFormState();
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl border border-border bg-[#1F232D]">
             <DialogHeader>
-              <DialogTitle>Configure kill switch</DialogTitle>
+              <DialogTitle>{editingRecord ? "Edit kill switch" : "Configure kill switch"}</DialogTitle>
             </DialogHeader>
             <div className="mt-4 space-y-6">
               <div className="space-y-2">
@@ -858,9 +1034,9 @@ export default function InstanceKillSwitchPage() {
               </div>
 
               <div className="grid gap-4 rounded-md border border-border/70 bg-[#262A35] p-4">
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</span>
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-3 gap-1 rounded-md bg-muted/50 p-1 text-sm font-medium">
                     {(["KILL", "GRACEFULLY_KILL", "IGNORE"] as KillSwitchType[]).map((type) => (
                       <Tooltip key={type}>
                         <TooltipTrigger asChild>
@@ -868,13 +1044,15 @@ export default function InstanceKillSwitchPage() {
                             type="button"
                             onClick={() => setKillSwitchForm((prev) => ({ ...prev, type }))}
                             className={cn(
-                              "flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium transition",
+                              "rounded-md px-3 py-2 transition-colors",
                               killSwitchForm.type === type
-                                ? "border-primary bg-primary/20 text-primary"
-                                : "border-border/60 bg-[#1F232D] text-muted-foreground hover:bg-[#32384A]",
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:bg-muted"
                             )}
                           >
-                            {type.replace("_", " ")}
+                            {type === "KILL" && "Kill"}
+                            {type === "GRACEFULLY_KILL" && "Gracefully kill"}
+                            {type === "IGNORE" && "Ignore"}
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="center">
@@ -889,9 +1067,9 @@ export default function InstanceKillSwitchPage() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Scope</span>
-                  <div className="grid gap-2 sm:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-1 rounded-md bg-muted/50 p-1 text-sm font-medium sm:grid-cols-4">
                     {(["tenant", "namespace", "flow", "execution"] as KillSwitchScope[]).map((scope) => (
                       <button
                         key={scope}
@@ -901,13 +1079,13 @@ export default function InstanceKillSwitchPage() {
                           setKillSwitchTargetSearch("");
                         }}
                         className={cn(
-                          "rounded-md border px-3 py-2 text-sm font-medium transition",
+                          "rounded-md px-3 py-2 transition-colors",
                           killSwitchForm.scope === scope
-                            ? "border-primary bg-primary/20 text-primary"
-                            : "border-border/60 bg-[#1F232D] text-muted-foreground hover:bg-[#32384A]",
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-muted-foreground hover:bg-muted"
                         )}
                       >
-                        {getScopeLabel(scope)}
+                        {getKillSwitchScopeLabel(scope)}
                       </button>
                     ))}
                   </div>
@@ -1005,12 +1183,11 @@ export default function InstanceKillSwitchPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="kill-switch-reason">Reason (optional)</Label>
-                  <Textarea
+                  <Input
                     id="kill-switch-reason"
                     placeholder="Document the incident or change request"
                     value={killSwitchForm.reason}
                     onChange={(event) => setKillSwitchForm((prev) => ({ ...prev, reason: event.target.value }))}
-                    rows={4}
                   />
                 </div>
               </div>
@@ -1020,10 +1197,12 @@ export default function InstanceKillSwitchPage() {
               ) : null}
             </div>
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setKillSwitchDialogOpen(false)}>
+              <Button variant="ghost" onClick={closeKillSwitchDialog}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmitKillSwitch}>Enable kill switch</Button>
+              <Button onClick={handleSubmitKillSwitch}>
+                {editingRecord ? "Save changes" : "Enable kill switch"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1043,6 +1222,35 @@ export default function InstanceKillSwitchPage() {
             <AlertDialogFooter>
               <AlertDialogCancel onClick={cancelPendingToggle}>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmPendingToggle}>Enable</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={Boolean(pendingDelete)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPendingDelete(null);
+            }
+          }}
+        >
+          <AlertDialogContent className="border border-border bg-[#1F232D]">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete kill switch</AlertDialogTitle>
+              <AlertDialogDescription>
+                {pendingDelete
+                  ? `Are you sure you want to delete the kill switch "${pendingDelete.name}"? This action cannot be undone.`
+                  : "Are you sure you want to delete this kill switch?"}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setPendingDelete(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={confirmDeleteKillSwitch}
+              >
+                Delete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
