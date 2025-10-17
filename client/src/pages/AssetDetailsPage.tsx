@@ -400,7 +400,11 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <main
+          className={`flex-1 overflow-y-auto px-6 space-y-6 ${
+            activeTab === "executions" ? "pt-0 pb-6" : "py-6"
+          }`}
+        >
           <TabsContent value="overview" className="space-y-6">
             <Card className="p-6 bg-[#262A35] border-border">
               <div className="text-sm font-semibold mb-4">Asset values</div>
@@ -488,7 +492,7 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="executions">
+          <TabsContent value="executions" className="mt-0">
             <ExecutionsPage assetId={asset.id} embedded heading={`Executions referencing ${assetLabel}`} />
           </TabsContent>
 
