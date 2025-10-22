@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import type { ColumnConfig } from "@/components/ExecutionsTable";
 
@@ -22,7 +23,14 @@ export default function TenantsTable({ rows, columns }: TenantsTableProps) {
   const renderCell = (row: TenantRow, columnId: string) => {
     switch (columnId) {
       case "id":
-        return <span className="text-foreground/90 font-mono text-sm">{row.id}</span>;
+        return (
+          <Link
+            href={`/admin/instance/tenants/${encodeURIComponent(row.id)}`}
+            className="text-foreground/90 font-mono text-sm underline-offset-2 hover:text-primary hover:underline"
+          >
+            {row.id}
+          </Link>
+        );
       case "name":
         return <span className="font-medium text-foreground">{row.name}</span>;
       case "workerGroup":

@@ -14,6 +14,47 @@ export const FLOWS: FlowRow[] = [
     triggers: ['Schedule'],
     revision: '42',
     description: 'Primary data ingestion pipeline',
+    concurrency: {
+      limit: 18,
+      behavior: 'QUEUE',
+      status: 'RUNNING',
+      slots: [
+        { id: 'expedite', label: 'Expedite', limit: 2 },
+        { id: 'realtime', label: 'Realtime', limit: 1 },
+        { id: 'standard_east', label: 'Standard East', limit: 3, default: true },
+        { id: 'standard_west', label: 'Standard West', limit: 2 },
+        { id: 'partners', label: 'Partners', limit: 2 },
+        { id: 'analytics', label: 'Analytics', limit: 2 },
+        { id: 'maintenance', label: 'Maintenance', limit: 1 },
+        { id: 'sandbox', label: 'Sandbox', limit: 1 },
+        { id: 'catchup', label: 'Catchup', limit: 2 },
+        { id: 'ad_hoc', label: 'Ad hoc', limit: 2 },
+      ],
+    },
+  },
+  {
+    id: "concurrency_limited_flow",
+    labels: ["env:production", "team:platform"],
+    namespace: "company.team",
+    lastExecutionDate: "Fri, Sep 12, 2025 6:37 PM",
+    lastExecutionStatus: "SUCCESS",
+    executionStatistics: [
+      { state: "SUCCESS", count: 6, color: "#22c55e" },
+      { state: "FAILED", count: 1, color: "#ef4444" },
+    ],
+    triggers: ["Schedule", "Manual"],
+    revision: "31",
+    description: "Flow protected by concurrency limits for downstream systems",
+    concurrency: {
+      limit: 10,
+      behavior: "QUEUE",
+      status: "RUNNING",
+      slots: [
+        { id: "high", label: "High", limit: 3 },
+        { id: "medium", label: "Medium", limit: 3 },
+        { id: "low", label: "Low", limit: 4, default: true },
+      ],
+    },
   },
   {
     id: 'microservices_and_apis',
@@ -28,6 +69,16 @@ export const FLOWS: FlowRow[] = [
     triggers: ['Webhook'],
     revision: '18',
     description: 'Validates microservices and API interactions',
+    concurrency: {
+      limit: 12,
+      behavior: 'QUEUE',
+      status: 'RUNNING',
+      slots: [
+        { id: 'critical', label: 'Critical', limit: 4, default: true },
+        { id: 'partners', label: 'Partners', limit: 3 },
+        { id: 'backfill', label: 'Backfill', limit: 5 },
+      ],
+    },
   },
   {
     id: 'notification_system',
@@ -41,6 +92,11 @@ export const FLOWS: FlowRow[] = [
     triggers: ['S3'],
     revision: '12',
     description: 'Dispatches customer notifications',
+    concurrency: {
+      limit: 6,
+      behavior: 'CANCEL',
+      status: 'RUNNING',
+    },
   },
   {
     id: 'payment_processing',

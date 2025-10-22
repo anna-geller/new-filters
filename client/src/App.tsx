@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import ExecutionsPage from "@/pages/ExecutionsPage";
 import ExecutionDetailsPage from "@/pages/ExecutionDetailsPage";
 import FlowsPage from "@/pages/FlowsPage";
+import FlowDetailsPage from "@/pages/FlowDetailsPage";
 import AppsPage from "@/pages/AppsPage";
 import AssetsPage from "@/pages/AssetsPage";
 import AssetDetailsPage from "@/pages/AssetDetailsPage";
@@ -23,6 +24,7 @@ import TenantServiceAccountsPage from "@/pages/TenantServiceAccountsPage";
 import InstanceServiceAccountsPage from "@/pages/InstanceServiceAccountsPage";
 import InstanceVersionedPluginsPage from "@/pages/InstanceVersionedPluginsPage";
 import InstanceTenantsPage from "@/pages/InstanceTenantsPage";
+import TenantDetailsPage from "@/pages/TenantDetailsPage";
 import InstanceWorkerGroupsPage from "@/pages/InstanceWorkerGroupsPage";
 import InstanceAnnouncementsPage from "@/pages/InstanceAnnouncementsPage";
 import InstanceServicesPage from "@/pages/InstanceServicesPage";
@@ -54,6 +56,7 @@ function Router() {
       <Route path="/executions/:executionId" component={ExecutionDetailsPage} />
       <Route path="/executions" component={ExecutionsPage} />
       <Route path="/dashboards" component={DashboardsPage} />
+      <Route path="/flows/:namespace/:flowId" component={FlowDetailsPage} />
       <Route path="/flows" component={FlowsPage} />
       <Route path="/assets/:assetId" component={AssetDetailsPage} />
       <Route path="/assets" component={AssetsPage} />
@@ -79,6 +82,7 @@ function Router() {
       <Route path="/admin/instance/iam/users" component={InstanceUsersPage} />
       <Route path="/admin/instance/iam/service-accounts" component={InstanceServiceAccountsPage} />
       <Route path="/admin/instance/versioned-plugins" component={InstanceVersionedPluginsPage} />
+      <Route path="/admin/instance/tenants/:tenantId" component={TenantDetailsPage} />
       <Route path="/admin/instance/tenants" component={InstanceTenantsPage} />
       <Route path="/admin/instance/worker-groups" component={InstanceWorkerGroupsPage} />
       <Route path="/admin/instance/announcements" component={InstanceAnnouncementsPage} />

@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { ColumnConfig } from "./ExecutionsTable";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,19 @@ export interface FlowRow {
   triggers: string[];
   revision: string;
   description: string;
+  concurrency?: {
+    limit: number;
+    behavior: "QUEUE" | "CANCEL" | "FAIL";
+    status?: "RUNNING" | "QUEUED";
+    active?: number;
+    queued?: number;
+    slots?: Array<{
+      id: string;
+      label?: string;
+      limit: number;
+      default?: boolean;
+    }>;
+  };
 }
 
 interface FlowsTableProps {
@@ -33,9 +47,14 @@ export default function FlowsTable({ rows, columns }: FlowsTableProps) {
     switch (columnId) {
       case 'id':
         return (
-          <span className="font-mono text-sm text-foreground truncate" title={row.id}>
-            {row.id}
-          </span>
+          <Link href={`/flows/${encodeURIComponent(row.namespace)}/${encodeURIComponent(row.id)}`}>
+            <span
+              className="font-mono text-sm text-foreground truncate hover:text-primary hover:underline cursor-pointer"
+              title={row.id}
+            >
+              {row.id}
+            </span>
+          </Link>
         );
       case 'labels':
         return (

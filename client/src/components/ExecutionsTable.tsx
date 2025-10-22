@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MoreVertical } from "lucide-react";
 import type { ColumnConfig } from "@/types/savedFilters";
 
 export type { ColumnConfig } from "@/types/savedFilters";
@@ -20,6 +20,7 @@ interface Execution {
   outputs: string[];
   taskId: string;
   state: 'SUCCESS' | 'FAILED' | 'RUNNING' | 'QUEUED' | 'WARNING' | 'PAUSED' | 'CREATED' | 'RESTARTED' | 'CANCELLED';
+  concurrencySlot?: string;
 }
 
 
@@ -34,14 +35,16 @@ export const defaultColumns: ColumnConfig[] = [
   { id: 'start-date', label: 'Start date', description: 'When the execution started', visible: true, order: 2 },
   { id: 'end-date', label: 'End date', description: 'When the execution finished', visible: true, order: 3 },
   { id: 'duration', label: 'Duration', description: 'Total runtime of the execution', visible: true, order: 4 },
-  { id: 'namespace', label: 'Namespace', description: 'Namespace to which the executed flow belongs', visible: true, order: 5 },
-  { id: 'flow', label: 'Flow', description: 'ID of the executed flow', visible: true, order: 6 },
-  { id: 'labels', label: 'Labels', description: 'Execution labels (key:value format)', visible: false, order: 7 },
-  { id: 'state', label: 'State', description: 'Current execution state', visible: true, order: 8 },
-  { id: 'revision', label: 'Revision', description: 'Version of the flow used for this execution', visible: false, order: 9 },
-  { id: 'inputs', label: 'Inputs', description: 'Input values provided to the execution', visible: false, order: 10 },
-  { id: 'outputs', label: 'Outputs', description: 'Outputs emitted by the execution', visible: false, order: 11 },
-  { id: 'task-id', label: 'Task ID', description: 'ID of the last task in the execution', visible: false, order: 12 },
+  { id: 'concurrency-slot', label: 'Concurrency slot', description: 'Slot allocation for this execution', visible: false, order: 5 },
+  { id: 'namespace', label: 'Namespace', description: 'Namespace to which the executed flow belongs', visible: true, order: 6 },
+  { id: 'flow', label: 'Flow', description: 'ID of the executed flow', visible: true, order: 7 },
+  { id: 'labels', label: 'Labels', description: 'Execution labels (key:value format)', visible: false, order: 8 },
+  { id: 'state', label: 'State', description: 'Current execution state', visible: true, order: 9 },
+  { id: 'revision', label: 'Revision', description: 'Version of the flow used for this execution', visible: false, order: 10 },
+  { id: 'inputs', label: 'Inputs', description: 'Input values provided to the execution', visible: false, order: 11 },
+  { id: 'outputs', label: 'Outputs', description: 'Outputs emitted by the execution', visible: false, order: 12 },
+  { id: 'task-id', label: 'Task ID', description: 'ID of the last task in the execution', visible: false, order: 13 },
+  { id: 'actions', label: 'Actions', description: 'Actions available for the execution', visible: false, order: 14 },
 ];
 
 const stateColors = {
@@ -69,6 +72,8 @@ const columnClasses: Record<string, string> = {
   inputs: 'w-56',
   outputs: 'w-56',
   'task-id': 'w-32 max-w-[8rem]',
+  'concurrency-slot': 'w-36 max-w-[9rem]',
+  actions: 'w-16 max-w-[4rem]',
 };
 
 export default function ExecutionsTable({ executions, columns, onLabelClick }: ExecutionsTableProps) {
@@ -112,6 +117,18 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
             {execution.duration}
           </span>
         );
+      case 'concurrency-slot': {
+        const slotLabel = (execution.concurrencySlot ?? 'default').replace(/[-_]/g, ' ');
+        return (
+          <Badge
+            variant="outline"
+            className="text-xs border-border/40 text-foreground/80 uppercase tracking-wide"
+            title={slotLabel}
+          >
+            {slotLabel}
+          </Badge>
+        );
+      }
       case 'namespace':
         return (
           <span className="truncate" title={execution.namespace}>
@@ -207,6 +224,14 @@ export default function ExecutionsTable({ executions, columns, onLabelClick }: E
           <Badge className={`text-xs ${stateColors[execution.state]}`}>
             {execution.state}
           </Badge>
+        );
+      case 'actions':
+        return (
+          <div className="flex items-center justify-end gap-2 w-full">
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </div>
         );
       default:
         return null;
