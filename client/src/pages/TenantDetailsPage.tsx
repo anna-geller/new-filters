@@ -776,7 +776,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
               <div className="rounded-lg border border-border bg-card/40 p-6 shadow-sm">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Tenant metadata</h2>
                 <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-                  <p>ID: <span className="font-mono text-primary/80">{tenantId}</span></p>
+                  <p>ID: <span className="font-mono text-[#ADADED]">{tenantId}</span></p>
                   <p>Status: Active</p>
                   <p>Created: Oct 1, 2024</p>
                 </div>
