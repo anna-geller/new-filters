@@ -1462,7 +1462,7 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
                         {visibleColumns.map((column) => (
                           <th key={column.id} className="px-4 py-3 text-left font-semibold">
                             {column.id === "key" ? (
-                              <span className="inline-flex items-center gap-2 text-sm text-primary/80">
+                              <span className="inline-flex items-center gap-2 text-sm text-[#ADADED]">
                                 {column.label}
                                 <ArrowUpDown className="h-3.5 w-3.5 text-primary" />
                               </span>
