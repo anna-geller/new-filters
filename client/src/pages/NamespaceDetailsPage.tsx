@@ -1212,7 +1212,7 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <Label>Slots</Label>
-                              <Button variant="ghost" size="sm" onClick={handleAddSlotDraft} className="text-primary hover:text-primary">
+                              <Button variant="ghost" size="sm" onClick={handleAddSlotDraft} className="text-[#ADADED] hover:text-primary">
                                 <Plus className="h-4 w-4" />
                                 Add slot
                               </Button>
