@@ -507,7 +507,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="border-b border-border bg-card/60">
-        <div className="px-6 pt-6 pb-4 space-y-4 bg-card/60">
+        <div className="px-6 pt-6 pb-4 space-y-4 bg-[#2F3341]">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -769,7 +769,6 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
           </nav>
         </div>
       </header>
-
       <main className="flex flex-1 flex-col overflow-hidden">
         {activeTab === "Overview" ? (
           <div className="flex-1 overflow-auto px-6 pb-10">
