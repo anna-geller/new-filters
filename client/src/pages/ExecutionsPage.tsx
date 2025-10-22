@@ -28,9 +28,746 @@ export interface ExecutionRecord {
   taskId: string;
   state: 'SUCCESS' | 'FAILED' | 'RUNNING' | 'QUEUED' | 'WARNING' | 'PAUSED' | 'CREATED' | 'RESTARTED' | 'CANCELLED';
   assets?: string[];
+  concurrencySlot?: string;
 }
 
 export const EXECUTION_FIXTURES: ExecutionRecord[] = [
+  {
+    id: '3UuSLFLp',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '0.03s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:queued'],
+    taskId: 'concurrency-slot-01',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'high',
+  },
+  {
+    id: '1SF4Fkm3',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '0.02s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:queued'],
+    taskId: 'concurrency-slot-02',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'low',
+  },
+  {
+    id: '1vdFsFWL',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '6.05s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:manual'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-03',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'high',
+  },
+  {
+    id: '4XMaYCBg',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '16.44s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:manual'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-04',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'high',
+  },
+  {
+    id: '6UKtCDQ0',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '17.96s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:webhook'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-05',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'high',
+  },
+  {
+    id: '5YEGrTHp',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '19.56s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-06',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'medium',
+  },
+  {
+    id: '2ZHDp24m',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '22.57s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-07',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'medium',
+  },
+  {
+    id: '2WTw9kY',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '24.58s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-08',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'medium',
+  },
+  {
+    id: '31ce0gLt',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '26.48s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-09',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'low',
+  },
+  {
+    id: '5mzNFSNM',
+    startDate: 'Tue, Oct 21, 2025 5:36 PM',
+    endDate: '',
+    duration: '1m 43.29s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:manual'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-10',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'low',
+  },
+  {
+    id: '16mTEh6R',
+    startDate: 'Tue, Oct 21, 2025 5:35 PM',
+    endDate: '',
+    duration: '1m 59.83s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:manual'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-11',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'low',
+  },
+  {
+    id: '3Wy28jMo',
+    startDate: 'Tue, Oct 21, 2025 5:35 PM',
+    endDate: '',
+    duration: '2m 1.83s',
+    namespace: 'company.team',
+    flow: 'concurrency_limited_flow',
+    labels: [],
+    revision: '31',
+    inputs: ['trigger:manual'],
+    outputs: ['status:running'],
+    taskId: 'concurrency-slot-12',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'low',
+  },
+  {
+    id: 'dp_run_01',
+    startDate: 'Tue, Oct 21, 2025 5:42 PM',
+    endDate: '',
+    duration: '21.4s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:expedite'],
+    revision: '42',
+    inputs: ['trigger:api'],
+    outputs: ['status:running'],
+    taskId: 'stage-curated',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'expedite',
+  },
+  {
+    id: 'dp_run_02',
+    startDate: 'Tue, Oct 21, 2025 5:41 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:expedite'],
+    revision: '42',
+    inputs: ['trigger:webhook'],
+    outputs: ['status:queued'],
+    taskId: 'stage-curated',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'expedite',
+  },
+  {
+    id: 'dp_run_03',
+    startDate: 'Tue, Oct 21, 2025 5:40 PM',
+    endDate: '',
+    duration: '45.9s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:standard'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'aggregate-daily',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'standard_east',
+  },
+  {
+    id: 'dp_run_04',
+    startDate: 'Tue, Oct 21, 2025 5:39 PM',
+    endDate: '',
+    duration: '33.7s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:standard'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'validate-schemas',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'standard_east',
+  },
+  {
+    id: 'dp_run_05',
+    startDate: 'Tue, Oct 21, 2025 5:38 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:standard'],
+    revision: '42',
+    inputs: ['trigger:api'],
+    outputs: ['status:queued'],
+    taskId: 'aggregate-daily',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'standard_east',
+  },
+  {
+    id: 'dp_run_06',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: '58.2s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:standard'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'publish-warehouse',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'standard_east',
+  },
+  {
+    id: 'dp_run_07',
+    startDate: 'Tue, Oct 21, 2025 5:42 PM',
+    endDate: '',
+    duration: '19.9s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['priority:expedite'],
+    revision: '42',
+    inputs: ['trigger:api'],
+    outputs: ['status:running'],
+    taskId: 'stage-curated',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'expedite',
+  },
+  {
+    id: 'dp_run_08',
+    startDate: 'Tue, Oct 21, 2025 5:40 PM',
+    endDate: '',
+    duration: '37.5s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['region:us-west'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'replicate-west',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'standard_west',
+  },
+  {
+    id: 'dp_run_09',
+    startDate: 'Tue, Oct 21, 2025 5:39 PM',
+    endDate: '',
+    duration: '34.8s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['region:us-west'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'replicate-west',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'standard_west',
+  },
+  {
+    id: 'dp_run_10',
+    startDate: 'Tue, Oct 21, 2025 5:38 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['region:us-west'],
+    revision: '42',
+    inputs: ['trigger:webhook'],
+    outputs: ['status:queued'],
+    taskId: 'replicate-west',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'standard_west',
+  },
+  {
+    id: 'dp_run_11',
+    startDate: 'Tue, Oct 21, 2025 5:41 PM',
+    endDate: '',
+    duration: '12.8s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['stream:payments'],
+    revision: '42',
+    inputs: ['trigger:webhook'],
+    outputs: ['status:running'],
+    taskId: 'stream-ingest',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'realtime',
+  },
+  {
+    id: 'dp_run_12',
+    startDate: 'Tue, Oct 21, 2025 5:40 PM',
+    endDate: '',
+    duration: '18.5s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['partner:crm'],
+    revision: '42',
+    inputs: ['trigger:partner'],
+    outputs: ['status:running'],
+    taskId: 'partner-sync',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'partners',
+  },
+  {
+    id: 'dp_run_13',
+    startDate: 'Tue, Oct 21, 2025 5:39 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['partner:crm'],
+    revision: '42',
+    inputs: ['trigger:partner'],
+    outputs: ['status:queued'],
+    taskId: 'partner-sync',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'partners',
+  },
+  {
+    id: 'dp_run_14',
+    startDate: 'Tue, Oct 21, 2025 5:39 PM',
+    endDate: '',
+    duration: '41.2s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['analysis:model-training'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'feature-build',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'analytics',
+  },
+  {
+    id: 'dp_run_15',
+    startDate: 'Tue, Oct 21, 2025 5:38 PM',
+    endDate: '',
+    duration: '39.6s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['analysis:dashboards'],
+    revision: '42',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'aggregate-business',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'analytics',
+  },
+  {
+    id: 'dp_run_16',
+    startDate: 'Tue, Oct 21, 2025 5:37 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['analysis:nlp'],
+    revision: '42',
+    inputs: ['trigger:api'],
+    outputs: ['status:queued'],
+    taskId: 'feature-build',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'analytics',
+  },
+  {
+    id: 'dp_run_17',
+    startDate: 'Tue, Oct 21, 2025 5:36 PM',
+    endDate: '',
+    duration: '14.2s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['maintenance'],
+    revision: '42',
+    inputs: ['trigger:cli'],
+    outputs: ['status:running'],
+    taskId: 'vacuum-tables',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'maintenance',
+  },
+  {
+    id: 'dp_run_18',
+    startDate: 'Tue, Oct 21, 2025 5:36 PM',
+    endDate: '',
+    duration: '9.1s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['sandbox:experiment'],
+    revision: '42',
+    inputs: ['trigger:ui'],
+    outputs: ['status:running'],
+    taskId: 'sandbox-run',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'sandbox',
+  },
+  {
+    id: 'dp_run_19',
+    startDate: 'Tue, Oct 21, 2025 5:35 PM',
+    endDate: '',
+    duration: '52.4s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['catchup:region-eu'],
+    revision: '42',
+    inputs: ['trigger:cli'],
+    outputs: ['status:running'],
+    taskId: 'catchup-batch',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'catchup',
+  },
+  {
+    id: 'dp_run_20',
+    startDate: 'Tue, Oct 21, 2025 5:34 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['catchup:region-apac'],
+    revision: '42',
+    inputs: ['trigger:cli'],
+    outputs: ['status:queued'],
+    taskId: 'catchup-batch',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'catchup',
+  },
+  {
+    id: 'dp_run_21',
+    startDate: 'Tue, Oct 21, 2025 5:33 PM',
+    endDate: '',
+    duration: '24.6s',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['ad-hoc:qa'],
+    revision: '42',
+    inputs: ['trigger:ui'],
+    outputs: ['status:running'],
+    taskId: 'adhoc-run',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'ad_hoc',
+  },
+  {
+    id: 'dp_run_22',
+    startDate: 'Tue, Oct 21, 2025 5:32 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company',
+    flow: 'data_pipeline',
+    labels: ['ad-hoc:ops'],
+    revision: '42',
+    inputs: ['trigger:ui'],
+    outputs: ['status:queued'],
+    taskId: 'adhoc-run',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'ad_hoc',
+  },
+  {
+    id: 'msa_run_01',
+    startDate: 'Tue, Oct 21, 2025 5:43 PM',
+    endDate: '',
+    duration: '12.1s',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['priority:critical'],
+    revision: '18',
+    inputs: ['trigger:webhook'],
+    outputs: ['status:running'],
+    taskId: 'smoke-services',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'critical',
+  },
+  {
+    id: 'msa_run_02',
+    startDate: 'Tue, Oct 21, 2025 5:42 PM',
+    endDate: '',
+    duration: '11.2s',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['partner:billing'],
+    revision: '18',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'contract-tests',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'partners',
+  },
+  {
+    id: 'msa_run_03',
+    startDate: 'Tue, Oct 21, 2025 5:42 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['partner:billing'],
+    revision: '18',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:queued'],
+    taskId: 'contract-tests',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'partners',
+  },
+  {
+    id: 'msa_run_04',
+    startDate: 'Tue, Oct 21, 2025 5:41 PM',
+    endDate: '',
+    duration: '27.6s',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['priority:critical'],
+    revision: '18',
+    inputs: ['trigger:flow'],
+    outputs: ['status:running'],
+    taskId: 'synthetic-load',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'critical',
+  },
+  {
+    id: 'msa_run_05',
+    startDate: 'Tue, Oct 21, 2025 5:41 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['priority:critical'],
+    revision: '18',
+    inputs: ['trigger:api'],
+    outputs: ['status:queued'],
+    taskId: 'synthetic-load',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'critical',
+  },
+  {
+    id: 'msa_run_06',
+    startDate: 'Tue, Oct 21, 2025 5:40 PM',
+    endDate: '',
+    duration: '1m 02.3s',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['run:backfill'],
+    revision: '18',
+    inputs: ['trigger:cli'],
+    outputs: ['status:running'],
+    taskId: 'historical-validation',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'backfill',
+  },
+  {
+    id: 'msa_run_07',
+    startDate: 'Tue, Oct 21, 2025 5:39 PM',
+    endDate: '',
+    duration: 'pending',
+    namespace: 'company.team',
+    flow: 'microservices_and_apis',
+    labels: ['run:backfill'],
+    revision: '18',
+    inputs: ['trigger:cli'],
+    outputs: ['status:queued'],
+    taskId: 'historical-validation',
+    state: 'QUEUED',
+    assets: [],
+    concurrencySlot: 'backfill',
+  },
+  {
+    id: 'ns_run_01',
+    startDate: 'Tue, Oct 21, 2025 5:44 PM',
+    endDate: '',
+    duration: '8.6s',
+    namespace: 'company.team.backend',
+    flow: 'notification_system',
+    labels: ['channel:email'],
+    revision: '12',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'dispatch-email',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'default',
+  },
+  {
+    id: 'ns_run_02',
+    startDate: 'Tue, Oct 21, 2025 5:43 PM',
+    endDate: '',
+    duration: '7.2s',
+    namespace: 'company.team.backend',
+    flow: 'notification_system',
+    labels: ['channel:sms'],
+    revision: '12',
+    inputs: ['trigger:api'],
+    outputs: ['status:running'],
+    taskId: 'dispatch-sms',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'default',
+  },
+  {
+    id: 'ns_run_03',
+    startDate: 'Tue, Oct 21, 2025 5:42 PM',
+    endDate: '',
+    duration: 'cancelled',
+    namespace: 'company.team.backend',
+    flow: 'notification_system',
+    labels: ['channel:push'],
+    revision: '12',
+    inputs: ['trigger:api'],
+    outputs: ['status:cancelled'],
+    taskId: 'dispatch-push',
+    state: 'CANCELLED',
+    assets: [],
+    concurrencySlot: 'default',
+  },
+  {
+    id: 'ns_run_04',
+    startDate: 'Tue, Oct 21, 2025 5:41 PM',
+    endDate: '',
+    duration: '9.8s',
+    namespace: 'company.team.backend',
+    flow: 'notification_system',
+    labels: ['channel:email'],
+    revision: '12',
+    inputs: ['trigger:schedule'],
+    outputs: ['status:running'],
+    taskId: 'dispatch-email',
+    state: 'RUNNING',
+    assets: [],
+    concurrencySlot: 'default',
+  },
+  {
+    id: 'ns_run_05',
+    startDate: 'Tue, Oct 21, 2025 5:40 PM',
+    endDate: '',
+    duration: 'cancelled',
+    namespace: 'company.team.backend',
+    flow: 'notification_system',
+    labels: ['channel:sms'],
+    revision: '12',
+    inputs: ['trigger:api'],
+    outputs: ['status:cancelled'],
+    taskId: 'dispatch-sms',
+    state: 'CANCELLED',
+    assets: [],
+    concurrencySlot: 'default',
+  },
   {
     id: 'exec_90231',
     startDate: 'Sun, Jun 2, 2024 6:42 PM',
@@ -323,16 +1060,44 @@ interface ExecutionsPageProps {
   embedded?: boolean;
   heading?: string;
   params?: Record<string, string | undefined> | { [param: number]: string | undefined };
+  flowId?: string;
+  flowNamespace?: string;
+  datasetOverride?: ExecutionRecord[];
+  initialColumns?: ColumnConfig[];
+  hideHeader?: boolean;
+  layout?: "page" | "section";
 }
 
 
-export default function ExecutionsPage({ assetId, embedded = false, heading = 'Executions' }: ExecutionsPageProps = {}) {
+export default function ExecutionsPage({
+  assetId,
+  embedded = false,
+  heading = 'Executions',
+  flowId,
+  flowNamespace,
+  datasetOverride,
+  initialColumns,
+  hideHeader = false,
+  layout = 'page',
+}: ExecutionsPageProps = {}) {
   const executionDataset = useMemo(() => {
-    if (!assetId) {
-      return EXECUTION_FIXTURES;
+    let dataset = datasetOverride ?? EXECUTION_FIXTURES;
+    if (assetId) {
+      dataset = dataset.filter((execution) => execution.assets?.includes(assetId));
     }
-    return EXECUTION_FIXTURES.filter((execution) => execution.assets?.includes(assetId));
-  }, [assetId]);
+    if (flowId) {
+      dataset = dataset.filter((execution) => {
+        if (execution.flow !== flowId) {
+          return false;
+        }
+        if (flowNamespace) {
+          return execution.namespace === flowNamespace;
+        }
+        return true;
+      });
+    }
+    return dataset;
+  }, [assetId, flowId, flowNamespace, datasetOverride]);
 
   const flowOptions = useMemo(() => {
     const uniqueFlows = Array.from(new Set(executionDataset.map((exec) => exec.flow)));
@@ -378,7 +1143,16 @@ export default function ExecutionsPage({ assetId, embedded = false, heading = 'E
   const [selectedInitialExecution, setSelectedInitialExecution] = useState<string>('');
   const [showChart, setShowChart] = useState(false);
   const [periodicRefresh, setPeriodicRefresh] = useState(true);
-  const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
+  const computedInitialColumns = useMemo(
+    () => (initialColumns ?? defaultColumns).map((column) => ({ ...column })),
+    [initialColumns],
+  );
+
+  const [columns, setColumns] = useState<ColumnConfig[]>(computedInitialColumns);
+  
+  useEffect(() => {
+    setColumns(computedInitialColumns);
+  }, [computedInitialColumns]);
   
   // Saved filters state
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
@@ -1077,7 +1851,11 @@ export default function ExecutionsPage({ assetId, embedded = false, heading = 'E
     setSelectedInitialExecution(state.selectedInitialExecution);
     
     // Restore column configuration if available (fallback to default columns for backwards compatibility)
-    setColumns(state.columnConfig && state.columnConfig.length > 0 ? state.columnConfig : defaultColumns);
+    setColumns(
+      state.columnConfig && state.columnConfig.length > 0
+        ? state.columnConfig.map((column) => ({ ...column }))
+        : computedInitialColumns,
+    );
     
     console.log('Filter loaded:', filter.name);
   };
@@ -1132,16 +1910,28 @@ export default function ExecutionsPage({ assetId, embedded = false, heading = 'E
     console.log('Label clicked:', clickedLabel, '-> transformed to:', transformedLabel, '- added to Labels filter with has-all-of operator');
   };
 
-  const containerClass = embedded ? 'bg-transparent space-y-4' : 'min-h-screen bg-[#1F232D]';
+  const layoutMode = layout ?? 'page';
+  const isPageLayout = layoutMode === 'page';
+  const containerClass = embedded
+    ? 'bg-transparent space-y-4'
+    : isPageLayout
+      ? 'min-h-screen bg-[#1F232D]'
+      : 'space-y-4';
   const headerWrapperClass = 'border-b border-border bg-card/50';
   const headerInnerClass = 'flex items-center justify-between px-6 py-4 bg-[#2F3341]';
-  const contentPaddingClass = embedded ? 'p-0' : 'p-4';
-  const showExecuteButton = !embedded;
+  const tableWrapperClass = useMemo(() => {
+    if (layoutMode === 'section') {
+      return 'max-h-[460px] overflow-auto';
+    }
+    return embedded ? 'p-0' : 'p-4';
+  }, [embedded, layoutMode]);
+  const showHeader = !embedded && !hideHeader;
+  const showExecuteButton = showHeader;
   const headingText = heading;
 
   return (
     <div className={containerClass}>
-      {!embedded && (
+      {showHeader && (
         <header className={headerWrapperClass}>
           <div className={headerInnerClass}>
             <div className="flex items-center gap-4">
@@ -1163,7 +1953,7 @@ export default function ExecutionsPage({ assetId, embedded = false, heading = 'E
           </div>
         </header>
       )}
-      <main className={embedded ? 'space-y-4' : 'flex-1'}>
+      <main className={embedded || !isPageLayout ? 'space-y-4' : 'flex-1'}>
         {/* Filter Interface */}
         <FilterInterface
           searchValue={searchValue}
@@ -1242,7 +2032,7 @@ export default function ExecutionsPage({ assetId, embedded = false, heading = 'E
         )}
 
         {/* Table */}
-        <div className={contentPaddingClass}>
+        <div className={tableWrapperClass}>
           <ExecutionsTable 
             executions={filteredExecutions} 
             columns={columns}
