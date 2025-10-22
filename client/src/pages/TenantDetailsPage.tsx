@@ -634,7 +634,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-foreground">Slots</span>
-                            <Button variant="ghost" size="sm" onClick={handleAddSlotDraft} className="text-primary hover:text-primary">
+                            <Button variant="ghost" size="sm" onClick={handleAddSlotDraft} className="text-[#ADADED] hover:text-primary">
                               <Plus className="h-4 w-4" />
                               Add slot
                             </Button>
