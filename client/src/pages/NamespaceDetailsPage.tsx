@@ -871,7 +871,7 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card/60">
-        <div className="px-6 py-5 space-y-4 bg-card/60">
+        <div className="px-6 py-5 space-y-4 bg-[#2F3341]">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -1358,7 +1358,6 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
           </nav>
         </div>
       </header>
-
       <main className="flex flex-1 flex-col overflow-hidden">
         {isSecretsTab ? (
           <>
@@ -1719,7 +1718,6 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
           </div>
         )}
       </main>
-
       <Dialog open={isOauthDialogOpen} onOpenChange={setIsOauthDialogOpen}>
         <DialogContent>
           <DialogHeader>
