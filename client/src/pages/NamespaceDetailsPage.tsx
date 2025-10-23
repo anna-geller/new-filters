@@ -90,6 +90,8 @@ interface LimitEntry {
   type: LimitType;
   behavior: LimitBehavior;
   totalLimit: number;
+  includeChildNamespaces?: boolean;
+  forceConcurrencyLimit?: boolean;
   interval?: {
     preset: "hour" | "day" | "week" | "month" | "year" | "custom";
     label: string;
@@ -169,7 +171,7 @@ const LIMIT_COLUMNS: ColumnConfig[] = [
   { id: "type", label: "Type", description: "Concurrency or quota limit", visible: true, order: 1 },
   { id: "behavior", label: "Behavior", description: "What happens when the limit is reached", visible: true, order: 2 },
   { id: "total-limit", label: "Total limit", description: "Maximum executions allowed", visible: true, order: 3 },
-  { id: "interval", label: "Interval", description: "Quota interval (if applicable)", visible: true, order: 4 },
+  { id: "interval", label: "Duration", description: "Quota duration (if applicable)", visible: true, order: 4 },
   { id: "slots", label: "Slots", description: "Slot allocations for concurrency", visible: true, order: 5 },
 ];
 
@@ -199,9 +201,6 @@ const QUOTA_BEHAVIOR_EXPLANATIONS: Record<LimitBehavior, string> = {
 const QUOTA_INTERVAL_OPTIONS = [
   { value: 'hour', label: 'Per hour' },
   { value: 'day', label: 'Per day' },
-  { value: 'week', label: 'Per week' },
-  { value: 'month', label: 'Per month' },
-  { value: 'year', label: 'Per year' },
   { value: 'custom', label: 'Custom (ISO 8601 duration)' },
 ] as const;
 
@@ -211,6 +210,8 @@ const INITIAL_LIMITS: LimitEntry[] = [
     type: 'Concurrency',
     behavior: 'QUEUE',
     totalLimit: 50,
+    includeChildNamespaces: false,
+    forceConcurrencyLimit: false,
     slots: [
       { name: 'Standard East', limit: 10, default: true },
       { name: 'Standard West', limit: 10 },
@@ -226,6 +227,7 @@ const INITIAL_LIMITS: LimitEntry[] = [
     type: 'Quota',
     behavior: 'FAIL',
     totalLimit: 750,
+    includeChildNamespaces: false,
     interval: {
       preset: 'day',
       label: 'Per day',
@@ -237,9 +239,11 @@ const INITIAL_LIMITS: LimitEntry[] = [
     type: 'Quota',
     behavior: 'QUEUE',
     totalLimit: 1500,
+    includeChildNamespaces: false,
     interval: {
-      preset: 'month',
-      label: 'Per month',
+      preset: 'custom',
+      label: 'Custom (P1M)',
+      value: 'P1M',
     },
     createdAt: '2025-10-01T08:30:00Z',
   },
@@ -278,6 +282,8 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
   const [limitDrawerOpen, setLimitDrawerOpen] = useState(false);
   const [newLimitType, setNewLimitType] = useState<LimitType>("Concurrency");
   const [newLimitBehavior, setNewLimitBehavior] = useState<LimitBehavior>("QUEUE");
+  const [newLimitIncludeChildNamespaces, setNewLimitIncludeChildNamespaces] = useState(false);
+  const [newLimitForceConcurrencyLimit, setNewLimitForceConcurrencyLimit] = useState(false);
   const [newLimitTotal, setNewLimitTotal] = useState<number>(1);
   const [slotDrafts, setSlotDrafts] = useState<LimitSlotDraft[]>([]);
   const [slotLimitError, setSlotLimitError] = useState<string>("");
@@ -350,6 +356,8 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
         entry.type,
         entry.behavior,
         String(entry.totalLimit),
+        entry.includeChildNamespaces ? "include child namespaces" : "",
+        entry.forceConcurrencyLimit ? "force concurrency limit" : "",
         intervalSummary,
         slotSummary,
       ]
@@ -375,6 +383,8 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
   const resetLimitForm = () => {
     setNewLimitType("Concurrency");
     setNewLimitBehavior("QUEUE");
+    setNewLimitIncludeChildNamespaces(false);
+    setNewLimitForceConcurrencyLimit(false);
     setNewLimitTotal(1);
     setSlotDrafts([]);
     setSlotLimitError("");
@@ -434,6 +444,8 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
     setNewLimitBehavior("QUEUE");
     if (type === "Concurrency") {
       setSlotDrafts([]);
+    } else {
+      setNewLimitForceConcurrencyLimit(false);
     }
     setLimitFormError("");
   };
@@ -475,6 +487,8 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
     setNewLimitType(entry.type);
     setNewLimitBehavior(entry.behavior);
     setNewLimitTotal(entry.totalLimit);
+    setNewLimitIncludeChildNamespaces(!!entry.includeChildNamespaces);
+    setNewLimitForceConcurrencyLimit(entry.type === "Concurrency" ? !!entry.forceConcurrencyLimit : false);
     setLimitFormError("");
     setSlotLimitError("");
 
@@ -487,16 +501,22 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
       setSlotDrafts(drafts);
       setQuotaIntervalPreset("day");
       setQuotaCustomInterval("P1D");
+  } else {
+    setSlotDrafts([]);
+    const rawPreset = entry.interval?.preset;
+    const resolvedPreset: typeof QUOTA_INTERVAL_OPTIONS[number]["value"] =
+      rawPreset === "hour" || rawPreset === "day"
+        ? rawPreset
+        : entry.interval?.value
+          ? "custom"
+          : "day";
+    setQuotaIntervalPreset(resolvedPreset);
+    if (resolvedPreset === "custom") {
+      setQuotaCustomInterval(entry.interval?.value ?? "P1D");
     } else {
-      setSlotDrafts([]);
-      const preset = entry.interval?.preset ?? (entry.interval?.value ? "custom" : "day");
-      setQuotaIntervalPreset(preset);
-      if (preset === "custom") {
-        setQuotaCustomInterval(entry.interval?.value ?? "P1D");
-      } else {
-        setQuotaCustomInterval(entry.interval?.value ?? "P1D");
-      }
+      setQuotaCustomInterval("P1D");
     }
+  }
 
     setLimitDrawerOpen(true);
   };
@@ -566,6 +586,7 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
     if (newLimitType === "Quota") {
       if (quotaIntervalPreset === "custom") {
         if (!quotaCustomInterval.trim()) {
+          setLimitFormError("Provide a valid ISO 8601 value for the custom duration.");
           return;
         }
         intervalConfig = {
@@ -589,6 +610,8 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
       type: newLimitType,
       behavior: newLimitBehavior,
       totalLimit: Math.max(1, Math.floor(newLimitTotal)),
+      includeChildNamespaces: newLimitIncludeChildNamespaces,
+      forceConcurrencyLimit: newLimitType === "Concurrency" ? newLimitForceConcurrencyLimit : false,
       interval: newLimitType === "Quota" ? intervalConfig : undefined,
       slots: newLimitType === "Concurrency" ? slotsToPersist : undefined,
       createdAt: existingEntry?.createdAt ?? new Date().toISOString(),
@@ -683,9 +706,31 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
         );
       case "behavior":
         return (
-          <span className="text-sm font-medium text-foreground">
-            {entry.behavior}
-          </span>
+          <div className="space-y-1">
+            <span className="text-sm font-medium text-foreground">
+              {entry.behavior}
+            </span>
+            {(entry.includeChildNamespaces || entry.forceConcurrencyLimit) ? (
+              <div className="flex flex-wrap gap-2">
+                {entry.includeChildNamespaces ? (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase tracking-wide border-border/40 text-muted-foreground"
+                  >
+                    Includes child namespaces
+                  </Badge>
+                ) : null}
+                {entry.forceConcurrencyLimit ? (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase tracking-wide border-border/40 text-muted-foreground"
+                  >
+                    Forced concurrency
+                  </Badge>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         );
       case "total-limit":
         return <span className="text-sm text-foreground font-semibold">{entry.totalLimit}</span>;
@@ -1197,6 +1242,40 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
                           </div>
                         </div>
 
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-3 rounded-md border border-border/60 bg-muted/30 p-3">
+                            <div className="space-y-1 pr-4">
+                              <span className="text-sm font-medium text-foreground">Include Child Namespaces</span>
+                              <p className="text-xs text-muted-foreground">
+                                Count executions from child namespaces toward this limit
+                              </p>
+                            </div>
+                            <Switch
+                              checked={newLimitIncludeChildNamespaces}
+                              onCheckedChange={setNewLimitIncludeChildNamespaces}
+                              aria-label="Include executions from child namespaces"
+                            />
+                          </div>
+                          <div
+                            className={`flex items-start justify-between gap-3 rounded-md border border-border/60 bg-muted/30 p-3 ${
+                              newLimitType !== "Concurrency" ? "opacity-60" : ""
+                            }`}
+                          >
+                            <div className="space-y-1 pr-4">
+                              <span className="text-sm font-medium text-foreground">Force Concurrency Limit</span>
+                              <p className="text-xs text-muted-foreground">
+                                When enabled, this concurrency limit overrides any higher limits set by child namespaces or flows.
+                              </p>
+                            </div>
+                            <Switch
+                              checked={newLimitForceConcurrencyLimit}
+                              onCheckedChange={setNewLimitForceConcurrencyLimit}
+                              disabled={newLimitType !== "Concurrency"}
+                              aria-label="Force concurrency limit for this namespace"
+                            />
+                          </div>
+                        </div>
+
                         <div className="space-y-2">
                           <Label htmlFor="limit-total">Total limit *</Label>
                           <Input
@@ -1279,13 +1358,13 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
                         {newLimitType === "Quota" ? (
                           <div className="space-y-3">
                             <div className="space-y-2">
-                              <Label>Interval *</Label>
+                              <Label>Duration *</Label>
                               <Select
                                 value={quotaIntervalPreset}
                                 onValueChange={(value) => setQuotaIntervalPreset(value as typeof QUOTA_INTERVAL_OPTIONS[number]["value"])}
                               >
                                 <SelectTrigger className="bg-background">
-                                  <SelectValue placeholder="Select interval" />
+                                  <SelectValue placeholder="Select duration" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-popover text-popover-foreground">
                                   {QUOTA_INTERVAL_OPTIONS.map((option) => (
@@ -1298,7 +1377,7 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
                             </div>
                             {quotaIntervalPreset === "custom" ? (
                               <div className="space-y-1">
-                                <Label htmlFor="quota-custom-interval">Custom interval (ISO 8601 duration)</Label>
+                                <Label htmlFor="quota-custom-interval">Custom duration (ISO 8601)</Label>
                                 <Input
                                   id="quota-custom-interval"
                                   value={quotaCustomInterval}
@@ -1556,100 +1635,100 @@ export default function NamespaceDetailsPage({ params }: NamespaceDetailsPagePro
           </>
         ) : isLimitsTab ? (
           <>
-            <FilterInterface
-              searchValue={limitSearchValue}
-              onSearchChange={setLimitSearchValue}
-              activeFilters={limitActiveFilters}
-              onClearFilter={handleLimitClearFilter}
-              onEditFilter={() => {}}
-              onResetFilters={handleResetLimitFilters}
-              showChart={false}
-              onToggleShowChart={() => {}}
-              periodicRefresh={limitPeriodicRefresh}
-              onTogglePeriodicRefresh={setLimitPeriodicRefresh}
-              onRefreshData={handleRefreshLimits}
-              columns={limitColumns}
-              onColumnsChange={setLimitColumns}
-              selectedStates={[]}
-              statesOperator="in"
-              onSelectedStatesChange={() => {}}
-              onStatesOperatorChange={() => {}}
-              selectedInterval="all-time"
-              intervalStartDate={undefined}
-              intervalEndDate={undefined}
-              onIntervalChange={() => {}}
-              selectedLabels={[]}
-              labelsOperator="has-any-of"
-              labelsCustomValue=""
-              onLabelsSelectionChange={() => {}}
-              onLabelsOperatorChange={() => {}}
-              onLabelsCustomValueChange={() => {}}
-              tagOptions={[]}
-              selectedInputs={[]}
-              inputsOperator="has-any-of"
-              inputsCustomValue=""
-              onInputsSelectionChange={() => {}}
-              onInputsOperatorChange={() => {}}
-              onInputsCustomValueChange={() => {}}
-              selectedOutputs={[]}
-              outputsOperator="has-any-of"
-              outputsCustomValue=""
-              onOutputsSelectionChange={() => {}}
-              onOutputsOperatorChange={() => {}}
-              onOutputsCustomValueChange={() => {}}
-              selectedNamespaces={[]}
-              namespaceOperator="in"
-              namespaceCustomValue=""
-              onNamespacesSelectionChange={() => {}}
-              onNamespaceOperatorChange={() => {}}
-              onNamespaceCustomValueChange={() => {}}
-              namespaceOptions={[]}
-              selectedFlows={[]}
-              onFlowsSelectionChange={() => {}}
-              selectedScopes={[]}
-              onScopesSelectionChange={() => {}}
-              selectedKinds={[]}
-              onKindsSelectionChange={() => {}}
-              selectedHierarchy="all"
-              onHierarchySelectionChange={() => {}}
-              selectedInitialExecution=""
-              onInitialExecutionSelectionChange={() => {}}
-              actorValue=""
-              onActorChange={() => {}}
-              selectedActions={[]}
-              actionsOperator="in"
-              onActionsSelectionChange={() => {}}
-              onActionsOperatorChange={() => {}}
-              selectedResources={[]}
-              resourcesOperator="in"
-              onResourcesSelectionChange={() => {}}
-              onResourcesOperatorChange={() => {}}
-              userValue=""
-              onUserChange={() => {}}
-              selectedSuperadminStatuses={[]}
-              superadminOperator="in"
-              onSuperadminSelectionChange={() => {}}
-              onSuperadminOperatorChange={() => {}}
-              selectedInvitationStatuses={[]}
-              invitationStatusOperator="in"
-              onInvitationStatusesChange={() => {}}
-              onInvitationStatusOperatorChange={() => {}}
-              invitationStatusOptions={[]}
-              savedFilters={limitSavedFilters}
-              onSaveFilter={handleSaveLimitFilter}
-              onLoadFilter={handleLoadLimitFilter}
-              onDeleteFilter={handleDeleteLimitFilter}
-              onUpdateFilter={handleUpdateLimitFilter}
-              visibleFilters={limitVisibleFilters}
-              onVisibleFiltersChange={setLimitVisibleFilters}
-              onResetFilter={handleResetLimitFilterById}
-              filterOptions={FILTER_OPTIONS}
-              searchPlaceholder="Search limits"
-              showChartToggleControl={false}
-            />
+            <div className="space-y-6">
+              <FilterInterface
+                searchValue={limitSearchValue}
+                onSearchChange={setLimitSearchValue}
+                activeFilters={limitActiveFilters}
+                onClearFilter={handleLimitClearFilter}
+                onEditFilter={() => {}}
+                onResetFilters={handleResetLimitFilters}
+                showChart={false}
+                onToggleShowChart={() => {}}
+                periodicRefresh={limitPeriodicRefresh}
+                onTogglePeriodicRefresh={setLimitPeriodicRefresh}
+                onRefreshData={handleRefreshLimits}
+                columns={limitColumns}
+                onColumnsChange={setLimitColumns}
+                selectedStates={[]}
+                statesOperator="in"
+                onSelectedStatesChange={() => {}}
+                onStatesOperatorChange={() => {}}
+                selectedInterval="all-time"
+                intervalStartDate={undefined}
+                intervalEndDate={undefined}
+                onIntervalChange={() => {}}
+                selectedLabels={[]}
+                labelsOperator="has-any-of"
+                labelsCustomValue=""
+                onLabelsSelectionChange={() => {}}
+                onLabelsOperatorChange={() => {}}
+                onLabelsCustomValueChange={() => {}}
+                tagOptions={[]}
+                selectedInputs={[]}
+                inputsOperator="has-any-of"
+                inputsCustomValue=""
+                onInputsSelectionChange={() => {}}
+                onInputsOperatorChange={() => {}}
+                onInputsCustomValueChange={() => {}}
+                selectedOutputs={[]}
+                outputsOperator="has-any-of"
+                outputsCustomValue=""
+                onOutputsSelectionChange={() => {}}
+                onOutputsOperatorChange={() => {}}
+                onOutputsCustomValueChange={() => {}}
+                selectedNamespaces={[]}
+                namespaceOperator="in"
+                namespaceCustomValue=""
+                onNamespacesSelectionChange={() => {}}
+                onNamespaceOperatorChange={() => {}}
+                onNamespaceCustomValueChange={() => {}}
+                namespaceOptions={[]}
+                selectedFlows={[]}
+                onFlowsSelectionChange={() => {}}
+                selectedScopes={[]}
+                onScopesSelectionChange={() => {}}
+                selectedKinds={[]}
+                onKindsSelectionChange={() => {}}
+                selectedHierarchy="all"
+                onHierarchySelectionChange={() => {}}
+                selectedInitialExecution=""
+                onInitialExecutionSelectionChange={() => {}}
+                actorValue=""
+                onActorChange={() => {}}
+                selectedActions={[]}
+                actionsOperator="in"
+                onActionsSelectionChange={() => {}}
+                onActionsOperatorChange={() => {}}
+                selectedResources={[]}
+                resourcesOperator="in"
+                onResourcesSelectionChange={() => {}}
+                onResourcesOperatorChange={() => {}}
+                userValue=""
+                onUserChange={() => {}}
+                selectedSuperadminStatuses={[]}
+                superadminOperator="in"
+                onSuperadminSelectionChange={() => {}}
+                onSuperadminOperatorChange={() => {}}
+                selectedInvitationStatuses={[]}
+                invitationStatusOperator="in"
+                onInvitationStatusesChange={() => {}}
+                onInvitationStatusOperatorChange={() => {}}
+                invitationStatusOptions={[]}
+                savedFilters={limitSavedFilters}
+                onSaveFilter={handleSaveLimitFilter}
+                onLoadFilter={handleLoadLimitFilter}
+                onDeleteFilter={handleDeleteLimitFilter}
+                onUpdateFilter={handleUpdateLimitFilter}
+                visibleFilters={limitVisibleFilters}
+                onVisibleFiltersChange={setLimitVisibleFilters}
+                onResetFilter={handleResetLimitFilterById}
+                filterOptions={FILTER_OPTIONS}
+                searchPlaceholder="Search limits"
+                showChartToggleControl={false}
+              />
 
-            <div className="flex-1 overflow-auto px-6 pb-8">
-              <div className="mt-4 rounded-lg border border-border/60 bg-card/40 shadow-sm">
+              <div className="rounded-lg border border-border/60 bg-card/40 shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="min-w-full table-fixed text-sm">
                     <thead>

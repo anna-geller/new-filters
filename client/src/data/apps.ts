@@ -32,6 +32,30 @@ export const APPS: AppRecord[] = [
     namespace: "company.sales",
     flow: "kestra_mcp_docker",
   },
+  {
+    id: "customer_insights_dashboard",
+    name: "Customer Insights Dashboard",
+    type: "Analytics",
+    tags: ["Customer", "BI"],
+    namespace: "company.analytics",
+    flow: "customer_360_build",
+  },
+  {
+    id: "customer_success_portal",
+    name: "Customer Success Portal",
+    type: "Internal",
+    tags: ["Support", "Customer"],
+    namespace: "company.support",
+    flow: "customer_support_case_enrich",
+  },
+  {
+    id: "feature_flag_console",
+    name: "Feature Flag Console",
+    type: "Operations",
+    tags: ["Platform", "Feature Flags"],
+    namespace: "company.platform",
+    flow: "feature_flag_rollout",
+  },
 ];
 
 export const appsById = APPS.reduce<Record<string, AppRecord>>((acc, app) => {

@@ -390,13 +390,6 @@ export default function FlowDetailsPage({ params }: FlowDetailsPageProps) {
             )}
           </TabsContent>
 
-          <TabsContent value="audit-logs">
-            {renderPlaceholderCard(
-              "Audit Logs",
-              "This tab will display audit events and security-relevant activity for the flow.",
-            )}
-          </TabsContent>
-
           <TabsContent value="concurrency" className="space-y-6">
             <Card className="bg-[#262A35] border-border p-6 space-y-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -467,6 +460,13 @@ export default function FlowDetailsPage({ params }: FlowDetailsPageProps) {
               hideHeader
               layout="section"
             />
+          </TabsContent>
+
+          <TabsContent value="audit-logs">
+            {renderPlaceholderCard(
+              "Audit Logs",
+              "This tab will display audit events and security-relevant activity for the flow.",
+            )}
           </TabsContent>
         </main>
       </div>

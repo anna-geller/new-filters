@@ -205,6 +205,11 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
     [asset.relatedFlows],
   );
 
+  const hasRelatedDependencies =
+    (asset.relatedAssets?.length ?? 0) > 0 ||
+    (asset.relatedApps?.length ?? 0) > 0 ||
+    (asset.relatedFlows?.length ?? 0) > 0;
+
   const dependencyRows = useMemo<DependencyDisplayItem[]>(
     () => [
       {
@@ -497,148 +502,163 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
           </TabsContent>
 
           <TabsContent value="dependencies">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-              <Card className="p-6 bg-[#262A35] border-border space-y-6">
-                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                  {legendItems.map((item) => (
-                    <span key={item.label} className="flex items-center gap-2">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      {item.label}
-                    </span>
-                  ))}
-                </div>
-                <div className="relative">
-                  <svg
-                    viewBox={`0 0 ${graphNodes.size.width} ${graphNodes.size.height}`}
-                    className="w-full"
-                    style={{ height: graphNodes.size.height }}
-                  >
-                    {graphNodes.nodes
-                      .filter((node) => node.id !== asset.id)
-                      .map((node) => (
-                        <line
-                          key={`edge-${node.id}`}
-                          x1={graphNodes.center.x}
-                          y1={graphNodes.center.y}
-                          x2={node.x}
-                          y2={node.y}
-                          stroke="#373B4A"
-                          strokeWidth={1.2}
-                          strokeLinecap="round"
-                        />
-                      ))}
-
-                    {graphNodes.nodes.map((node) => {
-                      const styleKey = node.type === "primary" ? "primary" : node.type;
-                      const color = CHIP_COLORS[styleKey].fill;
-                      const isSelected = node.id === selectedNodeId;
-                      const radius = node.type === "primary" ? 22 : 16;
-                      const haloRadius = radius + (isSelected ? 6 : 3);
-
-                      return (
-                        <g
-                          key={node.id}
-                          className="cursor-pointer"
-                          onClick={() => handleNodeSelect(node.id)}
-                        >
-                          <circle
-                            cx={node.x}
-                            cy={node.y}
-                            r={haloRadius}
-                            fill="#11141F"
-                            opacity={0.85}
-                          />
-                          <circle
-                            cx={node.x}
-                            cy={node.y}
-                            r={radius}
-                            fill={color}
-                            stroke={isSelected ? "#C4B5FD" : "#1F232D"}
-                            strokeWidth={isSelected ? 3 : 2}
-                          />
-                          <text
-                            x={node.x}
-                            y={node.y + radius + 12}
-                            textAnchor="middle"
-                            className="fill-muted-foreground text-xs font-mono"
-                          >
-                            {node.id}
-                          </text>
-                        </g>
-                      );
-                    })}
-                  </svg>
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-[#262A35] border-border space-y-4">
-                <div>
-                  <div className="text-sm font-semibold">Dependency catalog</div>
+            {!hasRelatedDependencies ? (
+              <Card className="p-8 bg-[#262A35] border-border space-y-4 text-center">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-foreground">No dependencies yet</h3>
                   <p className="text-sm text-muted-foreground">
-                    Search linked assets, apps, and flows. Selecting an entry highlights it in the graph.
+                    {assetLabel} doesn&apos;t reference any related assets, apps, or flows. Add relationships in the asset
+                    catalog to visualize them here.
                   </p>
                 </div>
-                <Input
-                  value={dependencySearch}
-                  onChange={(event) => setDependencySearch(event.target.value)}
-                  placeholder="Search dependencies..."
-                  className="bg-[#1F232D] border-border/70"
-                />
-                <div className="space-y-2">
-                  {filteredDependencies.length === 0 ? (
-                    <div className="rounded-md border border-border/50 px-3 py-4 text-center text-xs text-muted-foreground">
-                      No dependencies match your search.
-                    </div>
-                  ) : (
-                    filteredDependencies.map((item) => {
-                      const kind = item.category === 'Flow' ? 'flow' : item.category === 'App' ? 'app' : 'asset';
-                      const isPrimary = item.id === asset.id;
-                      const badgeKey = (isPrimary ? 'primary' : kind) as keyof typeof CHIP_COLORS;
-                      const isActive = item.id === selectedNodeId;
-                      return (
-                        <div
-                          key={`${item.category}-${item.id}`}
-                          className={`flex items-center gap-3 rounded-md border px-3 py-2 transition ${
-                            isActive ? 'border-primary/50 bg-white/10' : 'border-border/50 bg-[#1F232D] hover:bg-white/5'
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => handleNodeSelect(item.id)}
-                            className="flex flex-1 flex-col items-start gap-1 text-left"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${CHIP_COLORS[badgeKey].badge}`}>
-                                {item.category}
-                              </span>
-                              <span className="font-mono text-sm text-foreground">{item.id}</span>
-                            </div>
-                            {item.category === 'Flow' && item.namespace ? (
-                              <div className="font-mono text-xs text-muted-foreground">{item.namespace}</div>
-                            ) : null}
-                          </button>
-                          {item.href ? (
-                            <Link
-                              href={item.href}
-                              className="text-muted-foreground transition-colors hover:text-foreground"
-                              onClick={(event) => event.stopPropagation()}
-                              aria-label={`Open ${item.category.toLowerCase()} ${item.id}`}
-                            >
-                              <Link2 className="h-4 w-4" />
-                            </Link>
-                          ) : (
-                            <Link2 className="h-4 w-4 text-muted-foreground/30" />
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Once dependencies are registered, you&apos;ll see them plotted on the graph and listed for quick navigation.
+                </p>
               </Card>
-            </div>
+            ) : (
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+                <Card className="p-6 bg-[#262A35] border-border space-y-6">
+                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    {legendItems.map((item) => (
+                      <span key={item.label} className="flex items-center gap-2">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="relative">
+                    <svg
+                      viewBox={`0 0 ${graphNodes.size.width} ${graphNodes.size.height}`}
+                      className="w-full"
+                      style={{ height: graphNodes.size.height }}
+                    >
+                      {graphNodes.nodes
+                        .filter((node) => node.id !== asset.id)
+                        .map((node) => (
+                          <line
+                            key={`edge-${node.id}`}
+                            x1={graphNodes.center.x}
+                            y1={graphNodes.center.y}
+                            x2={node.x}
+                            y2={node.y}
+                            stroke="#373B4A"
+                            strokeWidth={1.2}
+                            strokeLinecap="round"
+                          />
+                        ))}
+
+                      {graphNodes.nodes.map((node) => {
+                        const styleKey = node.type === "primary" ? "primary" : node.type;
+                        const color = CHIP_COLORS[styleKey].fill;
+                        const isSelected = node.id === selectedNodeId;
+                        const radius = node.type === "primary" ? 22 : 16;
+                        const haloRadius = radius + (isSelected ? 6 : 3);
+
+                        return (
+                          <g
+                            key={node.id}
+                            className="cursor-pointer"
+                            onClick={() => handleNodeSelect(node.id)}
+                          >
+                            <circle
+                              cx={node.x}
+                              cy={node.y}
+                              r={haloRadius}
+                              fill="#11141F"
+                              opacity={0.85}
+                            />
+                            <circle
+                              cx={node.x}
+                              cy={node.y}
+                              r={radius}
+                              fill={color}
+                              stroke={isSelected ? "#C4B5FD" : "#1F232D"}
+                              strokeWidth={isSelected ? 3 : 2}
+                            />
+                            <text
+                              x={node.x}
+                              y={node.y + radius + 12}
+                              textAnchor="middle"
+                              className="fill-muted-foreground text-xs font-mono"
+                            >
+                              {node.id}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                </Card>
+
+                <Card className="p-6 bg-[#262A35] border-border space-y-4">
+                  <div>
+                    <div className="text-sm font-semibold">Dependency catalog</div>
+                    <p className="text-sm text-muted-foreground">
+                      Search linked assets, apps, and flows. Selecting an entry highlights it in the graph.
+                    </p>
+                  </div>
+                  <Input
+                    value={dependencySearch}
+                    onChange={(event) => setDependencySearch(event.target.value)}
+                    placeholder="Search dependencies..."
+                    className="bg-[#1F232D] border-border/70"
+                  />
+                  <div className="space-y-2">
+                    {filteredDependencies.length === 0 ? (
+                      <div className="rounded-md border border-border/50 px-3 py-4 text-center text-xs text-muted-foreground">
+                        No dependencies match your search.
+                      </div>
+                    ) : (
+                      filteredDependencies.map((item) => {
+                        const kind = item.category === 'Flow' ? 'flow' : item.category === 'App' ? 'app' : 'asset';
+                        const isPrimary = item.id === asset.id;
+                        const badgeKey = (isPrimary ? 'primary' : kind) as keyof typeof CHIP_COLORS;
+                        const isActive = item.id === selectedNodeId;
+                        return (
+                          <div
+                            key={`${item.category}-${item.id}`}
+                            className={`flex items-center gap-3 rounded-md border px-3 py-2 transition ${
+                              isActive ? 'border-primary/50 bg-white/10' : 'border-border/50 bg-[#1F232D] hover:bg-white/5'
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleNodeSelect(item.id)}
+                              className="flex flex-1 flex-col items-start gap-1 text-left"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${CHIP_COLORS[badgeKey].badge}`}>
+                                  {item.category}
+                                </span>
+                                <span className="font-mono text-sm text-foreground">{item.id}</span>
+                              </div>
+                              {item.category === 'Flow' && item.namespace ? (
+                                <div className="font-mono text-xs text-muted-foreground">{item.namespace}</div>
+                              ) : null}
+                            </button>
+                            {item.href ? (
+                              <Link
+                                href={item.href}
+                                className="text-muted-foreground transition-colors hover:text-foreground"
+                                onClick={(event) => event.stopPropagation()}
+                                aria-label={`Open ${item.category.toLowerCase()} ${item.id}`}
+                              >
+                                <Link2 className="h-4 w-4" />
+                              </Link>
+                            ) : (
+                              <Link2 className="h-4 w-4 text-muted-foreground/30" />
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
           </TabsContent>
         </main>
       </div>
