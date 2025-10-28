@@ -12,6 +12,7 @@ import FlowDetailsPage from "@/pages/FlowDetailsPage";
 import AppsPage from "@/pages/AppsPage";
 import AssetsPage from "@/pages/AssetsPage";
 import AssetDetailsPage from "@/pages/AssetDetailsPage";
+import AssetsOssPage from "@/pages/AssetsOssPage";
 import TestsPage from "@/pages/TestsPage";
 import LogsPage from "@/pages/LogsPage";
 import TriggersPage from "@/pages/TriggersPage";
@@ -58,8 +59,10 @@ function Router() {
       <Route path="/dashboards" component={DashboardsPage} />
       <Route path="/flows/:namespace/:flowId" component={FlowDetailsPage} />
       <Route path="/flows" component={FlowsPage} />
+      <Route path="/assets/:namespace/:assetId" component={AssetDetailsPage} />
       <Route path="/assets/:assetId" component={AssetDetailsPage} />
       <Route path="/assets" component={AssetsPage} />
+      <Route path="/assets-oss" component={AssetsOssPage} />
       <Route path="/apps" component={AppsPage} />
       <Route path="/logs" component={LogsPage} />
       <Route path="/plugins" component={PluginsPage} />

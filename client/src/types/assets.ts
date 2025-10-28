@@ -6,7 +6,9 @@ export interface AssetFlowLink {
 export interface AssetRecord {
   id: string;
   type: string;
+  namespace: string;
   displayName?: string;
+  description?: string;
   values?: Record<string, unknown>;
   relatedAssets?: string[];
   relatedApps?: string[];

@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { composeAssetKey } from "@/utils/assetKeys";
 
 interface ActiveFilter {
   id: string;
@@ -48,12 +50,38 @@ const ASSET_FILTER_OPTIONS: FilterOption[] = [
 
 const ASSET_COLUMNS: ColumnConfig[] = [
   { id: "id", label: "ID", description: "Unique identifier of the asset", visible: true, order: 1 },
-  { id: "displayName", label: "Display name", description: "Human friendly name of the asset", visible: true, order: 2 },
-  { id: "type", label: "Type", description: "Classification of the asset", visible: true, order: 3 },
-  { id: "relatedAssets", label: "Related Assets", description: "Assets that reference or depend on this asset", visible: true, order: 4 },
-  { id: "relatedApps", label: "Related Apps", description: "Apps that interact with this asset", visible: true, order: 5 },
-  { id: "relatedFlows", label: "Related Flows", description: "Flows that reference this asset", visible: true, order: 6 },
-  { id: "lastExecution", label: "Last execution", description: "Most recent execution touching this asset", visible: true, order: 7 },
+  { id: "namespace", label: "Namespace", description: "Namespace that owns the asset", visible: true, order: 2 },
+  {
+    id: "displayName",
+    label: "Display name",
+    description: "Human friendly name of the asset",
+    visible: true,
+    order: 3,
+  },
+  { id: "type", label: "Type", description: "Classification of the asset", visible: true, order: 4 },
+  {
+    id: "description",
+    label: "Description",
+    description: "Optional Markdown description for the asset",
+    visible: false,
+    order: 5,
+  },
+  {
+    id: "relatedAssets",
+    label: "Related Assets",
+    description: "Assets that reference or depend on this asset",
+    visible: false,
+    order: 6,
+  },
+  {
+    id: "relatedApps",
+    label: "Related Apps",
+    description: "Apps that interact with this asset",
+    visible: false,
+    order: 7,
+  },
+  { id: "relatedFlows", label: "Related Flows", description: "Flows that reference this asset", visible: true, order: 8 },
+  { id: "lastExecution", label: "Last execution", description: "Most recent execution touching this asset", visible: true, order: 9 },
 ];
 
 const DEFAULT_VISIBLE_FILTERS: string[] = [];
@@ -69,7 +97,9 @@ const operatorDisplay: Record<string, string> = {
 interface AssetFormState {
   id: string;
   type: string;
+  namespace: string;
   displayName: string;
+  description: string;
   emitEvents: boolean;
   relatedAssets: string[];
   relatedApps: string[];
@@ -79,7 +109,9 @@ interface AssetFormState {
 const EMPTY_FORM_STATE: AssetFormState = {
   id: "",
   type: "",
+  namespace: "",
   displayName: "",
+  description: "",
   emitEvents: false,
   relatedAssets: [],
   relatedApps: [],
@@ -134,11 +166,13 @@ export default function AssetsPage() {
 
     return assetRecords.filter((asset) => {
       const relatedFlows = asset.relatedFlows ?? [];
-      const namespaces = relatedFlows
+      const flowNamespaces = relatedFlows
         .map((flow) => flow.namespace?.toLowerCase() ?? "")
         .filter((value) => value.length > 0);
       const flowsLower = relatedFlows.map((flow) => flow.flow.toLowerCase());
       const flowIdentifiers = relatedFlows.map((flow) => flow.flow);
+      const assetNamespace = asset.namespace.trim();
+      const assetNamespaceLower = assetNamespace.toLowerCase();
 
       if (term) {
         const valueStrings = Object.values(asset.values ?? {}).map((value) =>
@@ -150,11 +184,13 @@ export default function AssetsPage() {
           asset.id,
           asset.displayName ?? "",
           asset.type,
+          assetNamespace,
+          asset.description ?? "",
           ...valueStrings,
           ...associatedAssets,
           ...associatedApps,
           ...flowIdentifiers,
-          ...namespaces,
+          ...flowNamespaces,
         ]
           .join(" ")
           .toLowerCase();
@@ -165,28 +201,24 @@ export default function AssetsPage() {
 
       if (selectedNamespaces.length > 0 || namespaceNeedle) {
         if (namespaceOperator === "in" && selectedNamespaces.length > 0) {
-          const match = relatedFlows.some((flow) => flow.namespace && selectedNamespaces.includes(flow.namespace));
+          const match = selectedNamespaces.includes(assetNamespace);
           if (!match) return false;
         }
 
         if (namespaceOperator === "not-in" && selectedNamespaces.length > 0) {
-          const hasDisallowed = relatedFlows.some((flow) => flow.namespace && selectedNamespaces.includes(flow.namespace));
-          if (hasDisallowed) return false;
+          if (selectedNamespaces.includes(assetNamespace)) return false;
         }
 
         if (namespaceOperator === "contains" && namespaceNeedle) {
-          const contains = namespaces.some((namespace) => namespace.includes(namespaceNeedle));
-          if (!contains) return false;
+          if (!assetNamespaceLower.includes(namespaceNeedle)) return false;
         }
 
         if (namespaceOperator === "starts-with" && namespaceNeedle) {
-          const starts = namespaces.some((namespace) => namespace.startsWith(namespaceNeedle));
-          if (!starts) return false;
+          if (!assetNamespaceLower.startsWith(namespaceNeedle)) return false;
         }
 
         if (namespaceOperator === "ends-with" && namespaceNeedle) {
-          const ends = namespaces.some((namespace) => namespace.endsWith(namespaceNeedle));
-          if (!ends) return false;
+          if (!assetNamespaceLower.endsWith(namespaceNeedle)) return false;
         }
       }
 
@@ -365,21 +397,25 @@ export default function AssetsPage() {
 
     const trimmedId = formState.id.trim();
     const trimmedType = formState.type.trim();
+    const trimmedNamespace = formState.namespace.trim();
+    const trimmedDescription = formState.description.trim();
 
-    if (!trimmedId || !trimmedType) {
+    if (!trimmedId || !trimmedType || !trimmedNamespace) {
       toast({
         title: "Missing information",
-        description: "ID and type are required to create an asset.",
+        description: "ID, type, and namespace are required to create an asset.",
         variant: "destructive",
       });
       return;
     }
 
-    const exists = assetRecords.some((asset) => asset.id === trimmedId);
+    const exists = assetRecords.some(
+      (asset) => asset.id === trimmedId && asset.namespace === trimmedNamespace,
+    );
     if (exists) {
       toast({
         title: "Asset already exists",
-        description: `An asset with id "${trimmedId}" is already registered. Use a unique id.`,
+        description: `An asset with id "${trimmedId}" already exists in namespace "${trimmedNamespace}". Use a unique identifier for that namespace.`,
         variant: "destructive",
       });
       return;
@@ -387,6 +423,8 @@ export default function AssetsPage() {
 
     const valuesObject = buildValuesObject();
     const hasValues = Object.keys(valuesObject).length > 0;
+    const normalizedRelatedAssets = formState.relatedAssets.map((value) => value.trim()).filter(Boolean);
+    const normalizedRelatedApps = formState.relatedApps.map((value) => value.trim()).filter(Boolean);
 
     const selectedFlows: AssetFlowLink[] = formState.relatedFlows
       .map((flowId) => {
@@ -404,10 +442,12 @@ export default function AssetsPage() {
     const newAsset: AssetRecord = {
       id: trimmedId,
       type: trimmedType,
+      namespace: trimmedNamespace,
       displayName: formState.displayName.trim() || undefined,
+      description: trimmedDescription || undefined,
       emitEvents: formState.emitEvents,
-      relatedAssets: formState.relatedAssets,
-      relatedApps: formState.relatedApps,
+      relatedAssets: normalizedRelatedAssets,
+      relatedApps: normalizedRelatedApps,
       relatedFlows: selectedFlows,
       values: hasValues ? valuesObject : undefined,
     };
@@ -416,7 +456,7 @@ export default function AssetsPage() {
     setAssetRecords(getAllAssets());
     toast({
       title: "Asset created",
-      description: `${trimmedId} is now available in the catalog.`,
+      description: `${trimmedNamespace}/${trimmedId} is now available in the catalog.`,
     });
     setCreateDialogOpen(false);
     resetForm();
@@ -426,7 +466,9 @@ export default function AssetsPage() {
     () =>
       filteredAssets.map((asset) => ({
         id: asset.id,
+        namespace: asset.namespace,
         displayName: asset.displayName,
+        description: asset.description,
         type: asset.type,
         relatedAssets: asset.relatedAssets ?? [],
         relatedApps: asset.relatedApps ?? [],
@@ -451,15 +493,11 @@ export default function AssetsPage() {
 
   const namespaceOptions = useMemo(() => {
     const namespaces = Array.from(
-      new Set(
-        allRelatedFlows
-          .map((flow) => flow.namespace)
-          .filter((namespace): namespace is string => Boolean(namespace)),
-      ),
+      new Set(assetRecords.map((asset) => asset.namespace).filter((namespace) => namespace.trim().length > 0)),
     );
     namespaces.sort((a, b) => a.localeCompare(b));
     return namespaces;
-  }, [allRelatedFlows]);
+  }, [assetRecords]);
 
   const assetTypeOptions = useMemo(
     () =>
@@ -472,8 +510,8 @@ export default function AssetsPage() {
   const assetOptions = useMemo(
     () =>
       assetRecords.map((asset) => ({
-        id: asset.id,
-        label: asset.displayName ?? asset.id,
+        id: composeAssetKey(asset.namespace, asset.id),
+        label: asset.displayName ? `${asset.displayName} (${asset.namespace})` : composeAssetKey(asset.namespace, asset.id),
       })),
     [assetRecords],
   );
@@ -855,7 +893,7 @@ export default function AssetsPage() {
           </DialogHeader>
 
           <form onSubmit={handleCreateAsset} className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="asset-id">ID *</Label>
                 <Input
@@ -863,6 +901,16 @@ export default function AssetsPage() {
                   value={formState.id}
                   onChange={(event) => updateFormField("id", event.target.value)}
                   placeholder="unique_asset_id"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="asset-namespace">Namespace *</Label>
+                <Input
+                  id="asset-namespace"
+                  value={formState.namespace}
+                  onChange={(event) => updateFormField("namespace", event.target.value)}
+                  placeholder="company.team"
                   required
                 />
               </div>
@@ -922,6 +970,17 @@ export default function AssetsPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="asset-description">Description</Label>
+              <Textarea
+                id="asset-description"
+                value={formState.description}
+                onChange={(event) => updateFormField("description", event.target.value)}
+                placeholder="Add context or links. Markdown renders on the overview tab."
+                rows={4}
+              />
             </div>
 
             <div className="space-y-3">

@@ -781,7 +781,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success', 'instance_id:i-0acme1234'],
     taskId: 'launch_ec2',
     state: 'SUCCESS',
-    assets: ['my_ec2'],
+    assets: ['company.team/my_ec2'],
   },
   {
     id: 'exec_88741',
@@ -796,7 +796,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:running'],
     taskId: 'apply_patches',
     state: 'RUNNING',
-    assets: ['my_ec2'],
+    assets: ['company.team/my_ec2'],
   },
   {
     id: 'exec_86103',
@@ -811,7 +811,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:failed', 'message:critical-asset'],
     taskId: 'stop_instance',
     state: 'FAILED',
-    assets: ['my_ec2'],
+    assets: ['company.team/my_ec2'],
   },
   {
     id: 'exec_90511',
@@ -826,7 +826,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success', 'records_processed:14210'],
     taskId: 'load_to_s3',
     state: 'SUCCESS',
-    assets: ['products_csv_s3', 'products_csv_source'],
+    assets: ['company.team/products_csv_s3', 'company.analytics/products_csv_source'],
   },
   {
     id: 'exec_89942',
@@ -841,7 +841,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success', 'quality_gate:passed'],
     taskId: 'quality_gate',
     state: 'SUCCESS',
-    assets: ['products_csv_s3'],
+    assets: ['company.team/products_csv_s3'],
   },
   {
     id: 'exec_90510',
@@ -856,7 +856,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success', 'bytes_downloaded:20480'],
     taskId: 'products',
     state: 'SUCCESS',
-    assets: ['products_csv_source'],
+    assets: ['company.analytics/products_csv_source'],
   },
   {
     id: 'exec_81234',
@@ -871,7 +871,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:running', 'nodes_pending:4'],
     taskId: 'add_nodes',
     state: 'RUNNING',
-    assets: ['cluster_1', 'region_us_east_1'],
+    assets: ['company.platform/cluster_1', 'company.platform/region_us_east_1'],
   },
   {
     id: 'exec_80555',
@@ -886,7 +886,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success'],
     taskId: 'init_cluster',
     state: 'SUCCESS',
-    assets: ['cluster_1', 'region_us_east_1'],
+    assets: ['company.platform/cluster_1', 'company.platform/region_us_east_1'],
   },
   {
     id: 'exec_79012',
@@ -901,7 +901,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success'],
     taskId: 'register_region',
     state: 'SUCCESS',
-    assets: ['region_us_east_1'],
+    assets: ['company.platform/region_us_east_1'],
   },
   {
     id: 'exec_88021',
@@ -916,7 +916,7 @@ export const EXECUTION_FIXTURES: ExecutionRecord[] = [
     outputs: ['status:success', 'issues_found:0'],
     taskId: 'audit_status',
     state: 'SUCCESS',
-    assets: ['region_us_east_1'],
+    assets: ['company.platform/region_us_east_1'],
   },
   {
     id: 'a1b2c3d4',

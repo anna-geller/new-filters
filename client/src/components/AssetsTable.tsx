@@ -5,6 +5,7 @@ import type { ColumnConfig } from "@/types/savedFilters";
 import type { AssetExecutionSummary } from "@/types/assets";
 import { Link, useLocation } from "wouter";
 import { ExternalLink } from "lucide-react";
+import { composeAssetKey, parseAssetKey } from "@/utils/assetKeys";
 
 export interface AssetTableFlowLink {
   namespace?: string;
@@ -13,7 +14,9 @@ export interface AssetTableFlowLink {
 
 export interface AssetTableRow {
   id: string;
+  namespace: string;
   displayName?: string;
+  description?: string;
   type: string;
   relatedAssets?: string[];
   relatedApps?: string[];
@@ -27,13 +30,15 @@ interface AssetsTableProps {
 }
 
 const columnWidths: Record<string, string> = {
-  id: "w-48 max-w-[12rem]",
-  displayName: "w-64 max-w-[16rem]",
-  type: "w-36 max-w-[9rem]",
-  relatedAssets: "w-80",
-  relatedApps: "w-80",
-  relatedFlows: "w-96",
-  lastExecution: "w-32 max-w-[8rem]",
+  id: "min-w-[7rem] max-w-[10rem] lg:max-w-[12rem]",
+  namespace: "min-w-[7rem] max-w-[12rem]",
+  displayName: "min-w-[8rem] max-w-[14rem]",
+  type: "min-w-[6rem] max-w-[8rem]",
+  description: "min-w-[8rem] max-w-[18rem]",
+  relatedAssets: "min-w-[9rem] max-w-[18rem]",
+  relatedApps: "min-w-[9rem] max-w-[18rem]",
+  relatedFlows: "min-w-[11rem] max-w-[20rem]",
+  lastExecution: "min-w-[6rem] max-w-[8rem]",
 };
 
 const executionStateStyles: Record<string, string> = {
@@ -60,8 +65,9 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
     .filter((column) => column.visible)
     .sort((a, b) => a.order - b.order);
 
-  const handleRowClick = (assetId: string) => {
-    setLocation(`/assets/${assetId}`);
+  const handleRowClick = (namespace: string, assetId: string) => {
+    const safeNamespace = namespace.trim();
+    setLocation(safeNamespace ? `/assets/${safeNamespace}/${assetId}` : `/assets/${assetId}`);
   };
 
   const handleTagClick = (event: MouseEvent) => {
@@ -69,15 +75,16 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
   };
 
   const renderIdCell = (row: AssetTableRow) => (
-    <div className="flex items-center gap-2">
+    <div className="flex min-w-0 items-center gap-2">
       <Link
-        href={`/assets/${row.id}`}
-        className="font-mono text-sm text-[#A3A4DF] hover:text-[#C2C3FF] truncate"
+        href={row.namespace ? `/assets/${row.namespace}/${row.id}` : `/assets/${row.id}`}
+        className="min-w-0 flex-1 truncate font-mono text-sm text-[#A3A4DF] hover:text-[#C2C3FF]"
         onClick={handleTagClick}
+        title={row.id}
       >
         {row.id}
       </Link>
-      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+      <ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
     </div>
   );
 
@@ -88,19 +95,37 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
     }
 
     return (
-      <div className="flex flex-wrap gap-1.5">
-        {related.map((assetId) => (
-          <Link
-            key={assetId}
-            href={`/assets/${assetId}`}
-            onClick={handleTagClick}
-            className="no-underline"
-          >
-            <Badge variant="outline" className={assetBadgeClass}>
-              {assetId}
+      <div className="flex min-w-0 flex-wrap gap-1.5">
+        {related.map((assetKey) => {
+          const { namespace, id } = parseAssetKey(assetKey);
+          const displayLabel = namespace ? `${namespace}/${id}` : id || assetKey;
+          const href =
+            namespace && id ? `/assets/${namespace}/${id}` : undefined;
+          const badge = (
+            <Badge variant="outline" className={assetBadgeClass} title={displayLabel}>
+              {displayLabel}
             </Badge>
-          </Link>
-        ))}
+          );
+
+          if (!href) {
+            return (
+              <span key={assetKey} className="no-underline">
+                {badge}
+              </span>
+            );
+          }
+
+          return (
+            <Link
+              key={assetKey}
+              href={href}
+              onClick={handleTagClick}
+              className="no-underline"
+            >
+              {badge}
+            </Link>
+          );
+        })}
       </div>
     );
   };
@@ -112,7 +137,7 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
     }
 
     return (
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex min-w-0 flex-wrap gap-1.5">
         {related.map((appId) => (
           <Link
             key={appId}
@@ -120,7 +145,7 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
             onClick={handleTagClick}
             className="no-underline"
           >
-            <Badge variant="outline" className={appBadgeClass}>
+            <Badge variant="outline" className={appBadgeClass} title={appId}>
               {appId}
             </Badge>
           </Link>
@@ -136,7 +161,7 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
     }
 
     return (
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-w-0 flex-col gap-1.5">
         {related.map((flow) => {
           const namespace = flow.namespace ?? "";
           const label = namespace ? `${namespace}/${flow.flow}` : flow.flow;
@@ -150,7 +175,7 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
               onClick={handleTagClick}
               className="no-underline inline-flex"
             >
-              <Badge variant="outline" className={flowBadgeClass}>
+              <Badge variant="outline" className={flowBadgeClass} title={label}>
                 {label}
               </Badge>
             </Link>
@@ -187,11 +212,25 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
     switch (columnId) {
       case "id":
         return renderIdCell(row);
+      case "namespace":
+        return (
+          <span className="block truncate font-mono text-xs text-muted-foreground" title={row.namespace}>
+            {row.namespace}
+          </span>
+        );
       case "displayName":
         return (
           <span className="text-sm font-medium text-foreground truncate" title={row.displayName ?? row.id}>
             {row.displayName ?? "—"}
           </span>
+        );
+      case "description":
+        return row.description ? (
+          <span className="text-sm text-muted-foreground line-clamp-2" title={row.description}>
+            {row.description}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
         );
       case "type":
         return (
@@ -214,14 +253,14 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed border-separate border-spacing-0 text-sm">
+      <div className="overflow-x-auto md:overflow-visible">
+        <table className="w-full border-separate border-spacing-0 text-sm">
           <thead>
             <tr className="border-b border-border bg-card/60">
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className={`px-4 py-3 text-left font-medium text-muted-foreground align-top bg-[#2F3341] ${columnWidths[column.id] ?? "w-60"}`}
+                  className={`px-3 py-3 text-left font-medium text-muted-foreground align-top bg-[#2F3341] ${columnWidths[column.id] ?? "min-w-[8rem] max-w-[14rem]"}`}
                 >
                   <span className="truncate block" title={column.label}>
                     {column.label}
@@ -233,16 +272,16 @@ export default function AssetsTable({ rows, columns }: AssetsTableProps) {
           <tbody>
             {rows.map((row) => (
               <tr
-                key={row.id}
+                key={composeAssetKey(row.namespace, row.id)}
                 className="border-b border-border last:border-b-0 hover:bg-card/40 cursor-pointer"
-                onClick={() => handleRowClick(row.id)}
+                onClick={() => handleRowClick(row.namespace, row.id)}
               >
                 {visibleColumns.map((column) => (
                   <td
                     key={column.id}
-                    className={`px-4 py-3 align-top text-foreground bg-[#262A35] ${columnWidths[column.id] ?? "w-60"}`}
+                    className={`px-3 py-3 align-top text-foreground bg-[#262A35] ${columnWidths[column.id] ?? "min-w-[8rem] max-w-[14rem]"}`}
                   >
-                    <div className="min-h-[32px] flex items-start">
+                    <div className="flex min-h-[32px] min-w-0 items-start overflow-hidden">
                       {renderCell(row, column.id)}
                     </div>
                   </td>
