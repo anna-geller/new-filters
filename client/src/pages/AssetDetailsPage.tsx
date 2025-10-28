@@ -1099,8 +1099,10 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
     activeTab === "executions"
       ? "pt-0 pb-6"
       : activeTab === "dependencies"
-        ? "pt-2 pb-6"
+        ? "pt-1 pb-6"
         : "py-6";
+
+  const mainSpacingClass = activeTab === "dependencies" ? "space-y-4" : "space-y-6";
 
   return (
     <Tabs
@@ -1185,7 +1187,7 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
           </div>
         </header>
 
-        <main className={`flex-1 overflow-y-auto px-6 space-y-6 ${mainPaddingClass}`}>
+        <main className={`flex-1 overflow-y-auto px-6 ${mainSpacingClass} ${mainPaddingClass}`}>
           <TabsContent value="overview" className="space-y-6">
             {asset.description ? (
               <Card className="p-6 bg-[#262A35] border-border">
@@ -1299,7 +1301,7 @@ export default function AssetDetailsPage({ params }: AssetDetailsPageProps) {
                 </p>
               </Card>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <FilterInterface
                   searchValue={dependencySearch}
                   onSearchChange={setDependencySearch}
