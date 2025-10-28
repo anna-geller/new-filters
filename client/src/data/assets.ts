@@ -1,10 +1,14 @@
 import type { AssetRecord } from "@/types/assets";
+import { composeAssetKey } from "@/utils/assetKeys";
 
 export const ASSETS: AssetRecord[] = [
   {
     id: "my_ec2",
     type: "VM",
+    namespace: "company.team",
     displayName: "My VM",
+    description:
+      "## Production compute node\n\nRuns the payment ingestion path and is patched nightly via the `hardenVM` flow.\n- Anchored to cluster capacity window\n- Emits health metrics to Grafana",
     values: {
       namespace: "company.team",
       primaryFlow: "provisionVM",
@@ -15,7 +19,7 @@ export const ASSETS: AssetRecord[] = [
       createdAt: "2024-02-14T11:32:00Z",
       ip: "192.0.2.10",
     },
-    relatedAssets: ["cluster_1", "region_us_east_1"],
+    relatedAssets: ["company.platform/cluster_1", "company.platform/region_us_east_1"],
     relatedApps: ["request_data_form"],
     relatedFlows: [
       { namespace: "company.team", flow: "provisionVM" },
@@ -55,7 +59,10 @@ export const ASSETS: AssetRecord[] = [
   {
     id: "products_csv_s3",
     type: "Dataset",
+    namespace: "company.team",
     displayName: "Products CSV on S3",
+    description:
+      "Daily export of the merchandising catalog prepared for analytics teams.\n\n- Source: `products_csv_source`\n- Refresh cadence: every weekday at 12:45 UTC\n- Retained for 30 days in the bucket lifecycle policy",
     values: {
       namespace: "company.team",
       primaryFlow: "csv_to_s3_lineage",
@@ -65,7 +72,7 @@ export const ASSETS: AssetRecord[] = [
       status: "ON",
       lastShipped: "2024-05-27T12:45:00Z",
     },
-    relatedAssets: ["products_csv_source"],
+    relatedAssets: ["company.analytics/products_csv_source"],
     relatedApps: ["data_quality_dashboard"],
     relatedFlows: [
       { namespace: "company.team", flow: "csv_to_s3_lineage" },
@@ -95,7 +102,10 @@ export const ASSETS: AssetRecord[] = [
   {
     id: "cluster_1",
     type: "Cluster",
+    namespace: "company.platform",
     displayName: "Production Compute Cluster",
+    description:
+      "Primary compute backbone for frontend and integration workloads.\n\n- Scaled automatically by the `scaleOutCluster` flow\n- Provides reserved capacity for incident response runbooks",
     values: {
       namespace: "company.platform",
       primaryFlow: "scaleOutCluster",
@@ -105,7 +115,7 @@ export const ASSETS: AssetRecord[] = [
       nodes: "24",
       lastAudit: "2024-05-30T05:30:00Z",
     },
-    relatedAssets: ["region_us_east_1", "my_ec2"],
+    relatedAssets: ["company.platform/region_us_east_1", "company.team/my_ec2"],
     relatedApps: ["capacity_alerts"],
     relatedFlows: [
       { namespace: "company.platform", flow: "bootstrapCluster" },
@@ -135,6 +145,7 @@ export const ASSETS: AssetRecord[] = [
   {
     id: "products_csv_source",
     type: "Dataset",
+    namespace: "company.analytics",
     displayName: "Products CSV Source",
     values: {
       namespace: "company.analytics",
@@ -143,7 +154,7 @@ export const ASSETS: AssetRecord[] = [
       refreshCadence: "24h",
       format: "CSV",
     },
-    relatedAssets: ["products_csv_s3"],
+    relatedAssets: ["company.team/products_csv_s3"],
     relatedApps: ["lineage_observer"],
     relatedFlows: [
       { namespace: "company.analytics", flow: "downloadProducts" },
@@ -153,6 +164,7 @@ export const ASSETS: AssetRecord[] = [
   {
     id: "region_us_east_1",
     type: "Region",
+    namespace: "company.platform",
     displayName: "Region us-east-1",
     values: {
       namespace: "company.platform",
@@ -162,16 +174,171 @@ export const ASSETS: AssetRecord[] = [
       compliance: "SOC 2 Type II",
       regionsLinked: "3",
     },
-    relatedAssets: ["cluster_1", "my_ec2"],
+    relatedAssets: ["company.platform/cluster_1", "company.team/my_ec2"],
     relatedApps: ["cost_monitoring"],
     relatedFlows: [
       { namespace: "company.platform", flow: "registerRegion" },
       { namespace: "company.platform", flow: "scaleOutCluster" },
     ],
   },
+  {
+    id: "customer_events_stream",
+    type: "Stream",
+    namespace: "company.platform",
+    displayName: "Customer Events Stream",
+    description:
+      "High-volume Kafka topic carrying customer interactions from web and mobile channels.\n\n- Multi-region producers with 24 partitions\n- Enriched downstream by the `customer_360_build` flow\n- Retention tuned for 72 hours to balance freshness and cost",
+    values: {
+      namespace: "company.platform",
+      primaryFlow: "customer_events_stream_ingest",
+      status: "ON",
+      partitions: 24,
+      retentionHours: 72,
+      transport: "Kafka",
+    },
+    relatedAssets: [
+      "company.analytics/customer_profile_db",
+      "company.analytics/customer_360_warehouse",
+      "company.platform/region_us_east_1",
+    ],
+    relatedApps: ["customer_insights_dashboard"],
+    relatedFlows: [
+      { namespace: "company.platform", flow: "customer_events_stream_ingest" },
+      { namespace: "company.analytics", flow: "customer_360_build" },
+    ],
+    executions: [
+      {
+        id: "exec_93012",
+        namespace: "company.platform",
+        flow: "customer_events_stream_ingest",
+        taskId: "consume_batch",
+        status: "SUCCESS",
+        timestamp: "2024-06-03T06:04:00Z",
+        note: "Batch of 1.2M events processed",
+      },
+      {
+        id: "exec_92881",
+        namespace: "company.analytics",
+        flow: "customer_360_build",
+        taskId: "merge_stream_stage",
+        status: "RUNNING",
+        timestamp: "2024-06-02T23:50:00Z",
+        note: "Joining with daily aggregates",
+      },
+    ],
+  },
+  {
+    id: "customer_profile_db",
+    type: "Database",
+    namespace: "company.analytics",
+    displayName: "Customer Profile Database",
+    values: {
+      namespace: "company.analytics",
+      primaryFlow: "customer_support_case_enrich",
+      engine: "PostgreSQL",
+      status: "ON",
+      storageTier: "gold",
+      sizeGb: 820,
+    },
+    relatedAssets: [
+      "company.platform/customer_events_stream",
+      "company.analytics/customer_360_warehouse",
+    ],
+    relatedApps: ["customer_success_portal"],
+    relatedFlows: [
+      { namespace: "company.support", flow: "customer_support_case_enrich" },
+      { namespace: "company.analytics", flow: "customer_360_build" },
+    ],
+    executions: [
+      {
+        id: "exec_92210",
+        namespace: "company.support",
+        flow: "customer_support_case_enrich",
+        taskId: "enrich_records",
+        status: "SUCCESS",
+        timestamp: "2024-06-01T14:18:00Z",
+        note: "Updated 4.2k support cases",
+      },
+    ],
+  },
+  {
+    id: "customer_360_warehouse",
+    type: "Dataset",
+    namespace: "company.analytics",
+    displayName: "Customer 360 Warehouse",
+    values: {
+      namespace: "company.analytics",
+      primaryFlow: "customer_360_build",
+      layer: "gold",
+      status: "ON",
+      refreshedAt: "2024-06-03T05:30:00Z",
+      tables: 18,
+    },
+    relatedAssets: [
+      "company.platform/customer_events_stream",
+      "company.analytics/customer_profile_db",
+      "company.team/products_csv_s3",
+    ],
+    relatedApps: ["customer_insights_dashboard", "customer_success_portal"],
+    relatedFlows: [
+      { namespace: "company.analytics", flow: "customer_360_build" },
+      { namespace: "company.analytics", flow: "refreshProductInventory" },
+      { namespace: "company.support", flow: "customer_support_case_enrich" },
+    ],
+    executions: [
+      {
+        id: "exec_94001",
+        namespace: "company.analytics",
+        flow: "customer_360_build",
+        taskId: "publish_gold",
+        status: "SUCCESS",
+        timestamp: "2024-06-03T05:30:00Z",
+        note: "Warehouse snapshot published for BI consumers",
+      },
+      {
+        id: "exec_93655",
+        namespace: "company.analytics",
+        flow: "refreshProductInventory",
+        taskId: "join_inventory",
+        status: "SUCCESS",
+        timestamp: "2024-06-02T22:11:00Z",
+        note: "Aligned product inventory metrics to customer view",
+      },
+    ],
+  },
+  {
+    id: "feature_flag_archive",
+    type: "Config",
+    namespace: "company.platform",
+    displayName: "Feature Flag Archive",
+    values: {
+      namespace: "company.platform",
+      status: "READY",
+      storage: "S3",
+      retentionDays: 30,
+    },
+    relatedAssets: [],
+    relatedApps: [],
+    relatedFlows: [],
+  },
+  {
+    id: "orphan_backup_snapshot",
+    type: "Snapshot",
+    namespace: "company.platform",
+    displayName: "Orphaned Backup Snapshot",
+    values: {
+      namespace: "company.platform",
+      createdAt: "2024-05-20T02:42:00Z",
+      sizeGb: 56,
+      status: "ARCHIVED",
+    },
+    relatedAssets: [],
+    relatedApps: [],
+    relatedFlows: [],
+  },
 ];
 
 export const assetsById = ASSETS.reduce<Record<string, AssetRecord>>((acc, asset) => {
-  acc[asset.id] = asset;
+  acc[composeAssetKey(asset.namespace, asset.id)] = asset;
   return acc;
 }, {});

@@ -69,6 +69,7 @@ interface LimitEntry {
   type: LimitType;
   behavior: LimitBehavior;
   totalLimit: number;
+  forceConcurrencyLimit?: boolean;
   interval?: {
     preset: "hour" | "day" | "week" | "month" | "year" | "custom";
     label: string;
@@ -84,7 +85,7 @@ const LIMIT_COLUMNS: ColumnConfig[] = [
   { id: "type", label: "Type", description: "Concurrency or quota limit", visible: true, order: 1 },
   { id: "behavior", label: "Behavior", description: "What happens when the limit is reached", visible: true, order: 2 },
   { id: "total-limit", label: "Total limit", description: "Maximum executions allowed", visible: true, order: 3 },
-  { id: "interval", label: "Interval", description: "Quota interval (if applicable)", visible: true, order: 4 },
+  { id: "interval", label: "Duration", description: "Quota duration (if applicable)", visible: true, order: 4 },
   { id: "slots", label: "Slots", description: "Slot allocations for concurrency", visible: true, order: 5 },
 ];
 
@@ -108,9 +109,6 @@ const QUOTA_BEHAVIOR_EXPLANATIONS: Record<LimitBehavior, string> = {
 const QUOTA_INTERVAL_OPTIONS = [
   { value: "hour", label: "Per hour" },
   { value: "day", label: "Per day" },
-  { value: "week", label: "Per week" },
-  { value: "month", label: "Per month" },
-  { value: "year", label: "Per year" },
   { value: "custom", label: "Custom (ISO 8601 duration)" },
 ] as const;
 
@@ -120,6 +118,7 @@ const INITIAL_LIMITS: LimitEntry[] = [
     type: "Concurrency",
     behavior: "QUEUE",
     totalLimit: 100,
+    forceConcurrencyLimit: false,
     slots: [
       { name: "High Priority", limit: 30 },
       { name: "Standard", limit: 60, default: true },
@@ -133,8 +132,9 @@ const INITIAL_LIMITS: LimitEntry[] = [
     behavior: "FAIL",
     totalLimit: 400,
     interval: {
-      preset: "week",
-      label: "Per week",
+      preset: "custom",
+      label: "Custom (P1W)",
+      value: "P1W",
     },
     createdAt: "2025-05-01T09:30:00Z",
   },
@@ -158,6 +158,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
   const [limitDrawerOpen, setLimitDrawerOpen] = useState(false);
   const [newLimitType, setNewLimitType] = useState<LimitType>("Concurrency");
   const [newLimitBehavior, setNewLimitBehavior] = useState<LimitBehavior>("QUEUE");
+  const [newLimitForceConcurrencyLimit, setNewLimitForceConcurrencyLimit] = useState(false);
   const [newLimitTotal, setNewLimitTotal] = useState<number>(1);
   const [slotDrafts, setSlotDrafts] = useState<LimitSlotDraft[]>([]);
   const [slotLimitError, setSlotLimitError] = useState<string>("");
@@ -196,6 +197,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
         entry.type,
         entry.behavior,
         String(entry.totalLimit),
+        entry.forceConcurrencyLimit ? "force concurrency limit" : "",
         intervalSummary,
         slotSummary,
       ]
@@ -210,6 +212,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
   const resetLimitForm = () => {
     setNewLimitType("Concurrency");
     setNewLimitBehavior("QUEUE");
+    setNewLimitForceConcurrencyLimit(false);
     setNewLimitTotal(1);
     setSlotDrafts([]);
     setSlotLimitError("");
@@ -231,6 +234,8 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
     setNewLimitBehavior("QUEUE");
     if (type === "Concurrency") {
       setSlotDrafts([]);
+    } else {
+      setNewLimitForceConcurrencyLimit(false);
     }
     setLimitFormError("");
   };
@@ -306,7 +311,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
     if (newLimitType === "Quota") {
       if (quotaIntervalPreset === "custom") {
         if (!quotaCustomInterval.trim()) {
-          setLimitFormError("Provide a valid ISO 8601 duration for the custom interval.");
+          setLimitFormError("Provide a valid ISO 8601 value for the custom duration.");
           return;
         }
         intervalConfig = {
@@ -330,6 +335,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
       type: newLimitType,
       behavior: newLimitBehavior,
       totalLimit: Math.max(1, Math.floor(newLimitTotal)),
+      forceConcurrencyLimit: newLimitType === "Concurrency" ? newLimitForceConcurrencyLimit : false,
       interval: newLimitType === "Quota" ? intervalConfig : undefined,
       slots: newLimitType === "Concurrency" ? slotsToPersist : undefined,
       createdAt: existingEntry?.createdAt ?? new Date().toISOString(),
@@ -349,6 +355,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
     setNewLimitType(entry.type);
     setNewLimitBehavior(entry.behavior);
     setNewLimitTotal(entry.totalLimit);
+    setNewLimitForceConcurrencyLimit(entry.type === "Concurrency" ? !!entry.forceConcurrencyLimit : false);
     setLimitFormError("");
     setSlotLimitError("");
 
@@ -361,16 +368,22 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
       setSlotDrafts(drafts);
       setQuotaIntervalPreset("day");
       setQuotaCustomInterval("P1D");
+  } else {
+    setSlotDrafts([]);
+    const rawPreset = entry.interval?.preset;
+    const resolvedPreset: typeof QUOTA_INTERVAL_OPTIONS[number]["value"] =
+      rawPreset === "hour" || rawPreset === "day"
+        ? rawPreset
+        : entry.interval?.value
+          ? "custom"
+          : "day";
+    setQuotaIntervalPreset(resolvedPreset);
+    if (resolvedPreset === "custom") {
+      setQuotaCustomInterval(entry.interval?.value ?? "P1D");
     } else {
-      setSlotDrafts([]);
-      const preset = entry.interval?.preset ?? (entry.interval?.value ? "custom" : "day");
-      setQuotaIntervalPreset(preset);
-      if (preset === "custom") {
-        setQuotaCustomInterval(entry.interval?.value ?? "P1D");
-      } else {
-        setQuotaCustomInterval(entry.interval?.value ?? "P1D");
-      }
+      setQuotaCustomInterval("P1D");
     }
+  }
 
     setLimitDrawerOpen(true);
   };
@@ -466,7 +479,19 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
           </Badge>
         );
       case "behavior":
-        return <span className="text-sm font-medium text-foreground">{entry.behavior}</span>;
+        return (
+          <div className="space-y-1">
+            <span className="text-sm font-medium text-foreground">{entry.behavior}</span>
+            {entry.forceConcurrencyLimit ? (
+              <Badge
+                variant="outline"
+                className="inline-flex text-[10px] uppercase tracking-wide border-border/40 text-muted-foreground"
+              >
+                Forced concurrency
+              </Badge>
+            ) : null}
+          </div>
+        );
       case "total-limit":
         return <span className="text-sm font-semibold text-foreground">{entry.totalLimit}</span>;
       case "interval":
@@ -620,6 +645,25 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                         </div>
                       </div>
 
+                      <div
+                        className={`flex items-start justify-between gap-3 rounded-md border border-border/60 bg-muted/30 p-3 ${
+                          newLimitType !== "Concurrency" ? "opacity-60" : ""
+                        }`}
+                      >
+                        <div className="space-y-1 pr-4">
+                          <span className="text-sm font-medium text-foreground">Force Concurrency Limit</span>
+                          <p className="text-xs text-muted-foreground">
+                            When enabled, this concurrency limit overrides any higher limits set by any namespaces or flows.
+                          </p>
+                        </div>
+                        <Switch
+                          checked={newLimitForceConcurrencyLimit}
+                          onCheckedChange={setNewLimitForceConcurrencyLimit}
+                          disabled={newLimitType !== "Concurrency"}
+                          aria-label="Force concurrency limit for this tenant"
+                        />
+                      </div>
+
                       <div className="space-y-2">
                         <span className="text-sm font-medium text-foreground">Total limit *</span>
                         <Input
@@ -695,13 +739,13 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                       {newLimitType === "Quota" ? (
                         <div className="space-y-3">
                           <div className="space-y-2">
-                            <span className="text-sm font-medium text-foreground">Interval *</span>
+                            <span className="text-sm font-medium text-foreground">Duration *</span>
                             <Select
                               value={quotaIntervalPreset}
                               onValueChange={(value) => setQuotaIntervalPreset(value as typeof QUOTA_INTERVAL_OPTIONS[number]["value"])}
                             >
                               <SelectTrigger className="bg-background">
-                                <SelectValue placeholder="Select interval" />
+                                <SelectValue placeholder="Select duration" />
                               </SelectTrigger>
                               <SelectContent className="bg-popover text-popover-foreground">
                                 {QUOTA_INTERVAL_OPTIONS.map((option) => (
@@ -714,7 +758,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                           </div>
                           {quotaIntervalPreset === "custom" ? (
                             <div className="space-y-1">
-                              <span className="text-xs font-medium uppercase text-muted-foreground">Custom interval (ISO 8601 duration)</span>
+                              <span className="text-xs font-medium uppercase text-muted-foreground">Custom duration (ISO 8601)</span>
                               <Input
                                 value={quotaCustomInterval}
                                 onChange={(event) => setQuotaCustomInterval(event.target.value)}
@@ -792,7 +836,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
             </div>
           </div>
         ) : activeTab === "Limits" ? (
-          <>
+          <div className="space-y-6">
             <FilterInterface
               searchValue={limitSearchValue}
               onSearchChange={setLimitSearchValue}
@@ -885,70 +929,68 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
               showChartToggleControl={false}
             />
 
-            <div className="flex-1 overflow-auto px-6 pb-8">
-              <div className="mt-4 rounded-lg border border-border/60 bg-card/40 shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full table-fixed text-sm">
-                    <thead>
-                      <tr className="bg-muted/60 text-muted-foreground">
-                        {visibleLimitColumns.map((column) => (
-                          <th key={column.id} className="px-4 py-3 text-left font-semibold">
-                            {column.label}
-                          </th>
-                        ))}
-                        <th className="w-[120px] px-4 py-3 text-right font-semibold">
-                          <span className="sr-only">Actions</span>
+            <div className="rounded-lg border border-border/60 bg-card/40 shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-fixed text-sm">
+                  <thead>
+                    <tr className="bg-muted/60 text-muted-foreground">
+                      {visibleLimitColumns.map((column) => (
+                        <th key={column.id} className="px-4 py-3 text-left font-semibold">
+                          {column.label}
                         </th>
+                      ))}
+                      <th className="w-[120px] px-4 py-3 text-right font-semibold">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredLimits.length === 0 ? (
+                      <tr>
+                        <td colSpan={visibleLimitColumns.length + 1} className="px-6 py-10 text-center text-sm text-muted-foreground">
+                          No limits defined yet.
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {filteredLimits.length === 0 ? (
-                        <tr>
-                          <td colSpan={visibleLimitColumns.length + 1} className="px-6 py-10 text-center text-sm text-muted-foreground">
-                            No limits defined yet.
+                    ) : (
+                      filteredLimits.map((entry) => (
+                        <tr key={entry.id} className="border-t border-border/50 bg-card/60">
+                          {visibleLimitColumns.map((column) => (
+                            <td key={column.id} className="px-4 py-3 align-top">
+                              {renderLimitCell(entry, column.id as LimitColumnId)}
+                            </td>
+                          ))}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="border border-border/70 bg-muted/60 text-muted-foreground hover:bg-muted"
+                                aria-label="Edit limit"
+                                onClick={() => handleEditLimit(entry)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="border border-border/70 bg-muted/60 text-muted-foreground hover:bg-destructive/20"
+                                aria-label="Delete limit"
+                                onClick={() => handleDeleteLimit(entry.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
-                      ) : (
-                        filteredLimits.map((entry) => (
-                          <tr key={entry.id} className="border-t border-border/50 bg-card/60">
-                            {visibleLimitColumns.map((column) => (
-                              <td key={column.id} className="px-4 py-3 align-top">
-                                {renderLimitCell(entry, column.id as LimitColumnId)}
-                              </td>
-                            ))}
-                            <td className="px-4 py-3">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  type="button"
-                                  size="icon"
-                                  variant="ghost"
-                                  className="border border-border/70 bg-muted/60 text-muted-foreground hover:bg-muted"
-                                  aria-label="Edit limit"
-                                  onClick={() => handleEditLimit(entry)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  size="icon"
-                                  variant="ghost"
-                                  className="border border-border/70 bg-muted/60 text-muted-foreground hover:bg-destructive/20"
-                                  aria-label="Delete limit"
-                                  onClick={() => handleDeleteLimit(entry.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex flex-1 items-center justify-center px-6 py-10 text-sm text-muted-foreground">
             Content for this section will be available soon.

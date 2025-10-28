@@ -74,6 +74,9 @@ export interface SavedFilter {
     selectedBindingTypes?: string[];
     // Column configuration for table display
     columnConfig?: ColumnConfig[];
+    dependencyAssetFilters?: DetailFilter[];
+    dependencyFlowFilters?: DetailFilter[];
+    dependencyAppFilters?: DetailFilter[];
   };
 }
 

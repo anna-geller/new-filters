@@ -146,6 +146,10 @@ interface FilterInterfaceProps {
   onResourcesOperatorChange?: (operator: 'in' | 'not-in') => void;
   detailsFilters?: DetailFilter[];
   onDetailsChange?: (details: DetailFilter[]) => void;
+  dependencyAssetFilters?: DetailFilter[];
+  onDependencyAssetFiltersChange?: (details: DetailFilter[]) => void;
+  dependencyAppFilters?: DetailFilter[];
+  onDependencyAppFiltersChange?: (details: DetailFilter[]) => void;
   userValue?: string;
   onUserChange?: (value: string) => void;
   selectedSuperadminStatus?: string | null;
@@ -308,6 +312,10 @@ export default function FilterInterface({
   onResourcesOperatorChange,
   detailsFilters = [],
   onDetailsChange,
+  dependencyAssetFilters = [],
+  onDependencyAssetFiltersChange,
+  dependencyAppFilters = [],
+  onDependencyAppFiltersChange,
   userValue = '',
   onUserChange,
   selectedSuperadminStatus = null,
@@ -490,6 +498,8 @@ export default function FilterInterface({
   const [actionFilterOpen, setActionFilterOpen] = useState(false);
   const [resourceFilterOpen, setResourceFilterOpen] = useState(false);
   const [detailsFilterOpen, setDetailsFilterOpen] = useState(false);
+  const [dependencyAssetFilterOpen, setDependencyAssetFilterOpen] = useState(false);
+  const [dependencyAppFilterOpen, setDependencyAppFilterOpen] = useState(false);
   const [userFilterOpen, setUserFilterOpen] = useState(false);
   const [superadminFilterOpen, setSuperadminFilterOpen] = useState(false);
   const [statusFilterOpen, setStatusFilterOpen] = useState(false);
@@ -730,6 +740,18 @@ export default function FilterInterface({
         onServiceTypesSelectionChange?.([]);
         onServiceTypeOperatorChange?.('in');
       }
+    } else if (filterId === 'dependency-assets') {
+      if (!currentlyVisible) {
+        setDependencyAssetFilterOpen(true);
+      } else {
+        onDependencyAssetFiltersChange?.([]);
+      }
+    } else if (filterId === 'dependency-apps') {
+      if (!currentlyVisible) {
+        setDependencyAppFilterOpen(true);
+      } else {
+        onDependencyAppFiltersChange?.([]);
+      }
     }
   };
 
@@ -789,6 +811,10 @@ export default function FilterInterface({
       setResourceFilterOpen(true);
     } else if (filterId === 'details') {
       setDetailsFilterOpen(true);
+    } else if (filterId === 'dependency-assets') {
+      setDependencyAssetFilterOpen(true);
+    } else if (filterId === 'dependency-apps') {
+      setDependencyAppFilterOpen(true);
     } else if (filterId === 'user') {
       setUserFilterOpen(true);
     } else if (filterId === 'superadmin') {
@@ -999,6 +1025,14 @@ export default function FilterInterface({
     onDetailsChange?.(nextDetails);
   };
 
+  const handleDependencyAssetFiltersChangeInternal = (nextDetails: DetailFilter[]) => {
+    onDependencyAssetFiltersChange?.(nextDetails);
+  };
+
+  const handleDependencyAppFiltersChangeInternal = (nextDetails: DetailFilter[]) => {
+    onDependencyAppFiltersChange?.(nextDetails);
+  };
+
   const handleUserValueChangeInternal = (value: string) => {
     onUserChange?.(value);
   };
@@ -1132,6 +1166,14 @@ export default function FilterInterface({
 
   const handleCloseDetailsFilter = () => {
     setDetailsFilterOpen(false);
+  };
+
+  const handleCloseDependencyAssetFilter = () => {
+    setDependencyAssetFilterOpen(false);
+  };
+
+  const handleCloseDependencyAppFilter = () => {
+    setDependencyAppFilterOpen(false);
   };
 
   const handleCloseUserFilter = () => {
@@ -1692,6 +1734,56 @@ export default function FilterInterface({
               onChange={handleDetailsChangeInternal}
               onClose={handleCloseDetailsFilter}
               onReset={() => onResetFilter('details')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'dependency-assets') {
+      return (
+        <Popover key={filter.id} open={dependencyAssetFilterOpen} onOpenChange={setDependencyAssetFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'matches'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-[26rem] p-0">
+            <DetailsFilterEditor
+              details={dependencyAssetFilters}
+              onChange={handleDependencyAssetFiltersChangeInternal}
+              onClose={handleCloseDependencyAssetFilter}
+              onReset={() => onResetFilter('dependency-assets')}
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+    else if (filter.id === 'dependency-apps') {
+      return (
+        <Popover key={filter.id} open={dependencyAppFilterOpen} onOpenChange={setDependencyAppFilterOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex-shrink-0">
+              <FilterBadge
+                label={filter.label}
+                value={filter.value}
+                operator={filter.operator || 'matches'}
+                onClear={() => onClearFilter(filter.id)}
+                onEdit={() => handleEditFilter(filter.id)}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-[26rem] p-0">
+            <DetailsFilterEditor
+              details={dependencyAppFilters}
+              onChange={handleDependencyAppFiltersChangeInternal}
+              onClose={handleCloseDependencyAppFilter}
+              onReset={() => onResetFilter('dependency-apps')}
             />
           </PopoverContent>
         </Popover>

@@ -159,30 +159,15 @@ export default function DetailsFilterEditor({ details, onChange, onClose, onRese
               <TooltipContent>Reset details filters</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (hasPendingInput) {
-                  resetInputs();
-                }
-                onClose();
-              }}
-              data-testid="button-details-cancel"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleApply}
-              disabled={isApplyDisabled}
-              className="min-w-[5rem]"
-              data-testid="button-details-apply"
-            >
-              Apply
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            onClick={handleApply}
+            disabled={isApplyDisabled}
+            className="min-w-[5rem]"
+            data-testid="button-details-apply"
+          >
+            Apply
+          </Button>
         </div>
       </div>
       <div className="p-4 border-t border-border bg-[#2F3341] text-xs text-muted-foreground">

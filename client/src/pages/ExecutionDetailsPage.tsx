@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EXECUTION_FIXTURES, type ExecutionRecord } from "@/pages/ExecutionsPage";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { parseAssetKey } from "@/utils/assetKeys";
 
 interface ExecutionDetailsPageProps {
   params?: {
@@ -129,13 +130,28 @@ export default function ExecutionDetailsPage({ params }: ExecutionDetailsPagePro
             <h3 className="text-sm font-semibold">Related assets</h3>
             {execution.assets && execution.assets.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {execution.assets.map((assetId) => (
-                  <Link key={assetId} href={`/assets/${assetId}`} className="no-underline">
-                    <Badge variant="outline" className="text-xs border-border/50 hover:border-primary/60">
-                      {assetId}
+                {execution.assets.map((assetRef) => {
+                  const { namespace, id } = parseAssetKey(assetRef);
+                  const display = namespace && id ? `${namespace}/${id}` : assetRef;
+                  const href = namespace && id ? `/assets/${namespace}/${id}` : undefined;
+                  const badge = (
+                    <Badge variant="outline" className="text-xs border-border/50 hover:border-primary/60" title={display}>
+                      {display}
                     </Badge>
-                  </Link>
-                ))}
+                  );
+                  if (!href) {
+                    return (
+                      <span key={assetRef} className="no-underline">
+                        {badge}
+                      </span>
+                    );
+                  }
+                  return (
+                    <Link key={assetRef} href={href} className="no-underline">
+                      {badge}
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
               <span className="text-xs text-muted-foreground">No asset references.</span>

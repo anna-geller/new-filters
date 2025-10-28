@@ -1,5 +1,6 @@
 import type { AssetRecord } from "@/types/assets";
 import { ASSETS } from "@/data/assets";
+import { buildAssetKeyFromRecord, composeAssetKey, normalizeAssetNamespace } from "@/utils/assetKeys";
 
 const CUSTOM_ASSETS_STORAGE_KEY = "app.customAssets";
 const ASSETS_UPDATED_EVENT = "assets-updated";
@@ -18,7 +19,11 @@ function safeParseAssets(value: string | null): AssetRecord[] {
   try {
     const parsed = JSON.parse(value);
     if (Array.isArray(parsed)) {
-      return parsed as AssetRecord[];
+      return (parsed as AssetRecord[]).map((asset) => ({
+        ...asset,
+        id: asset.id.trim(),
+        namespace: normalizeAssetNamespace(asset.namespace),
+      }));
     }
   } catch (error) {
     console.warn("Failed to parse stored custom assets", error);
@@ -41,7 +46,13 @@ export function saveCustomAssets(assets: AssetRecord[]): void {
     return;
   }
 
-  window.localStorage.setItem(CUSTOM_ASSETS_STORAGE_KEY, JSON.stringify(assets));
+  const normalized = assets.map((asset) => ({
+    ...asset,
+    id: asset.id.trim(),
+    namespace: normalizeAssetNamespace(asset.namespace),
+  }));
+
+  window.localStorage.setItem(CUSTOM_ASSETS_STORAGE_KEY, JSON.stringify(normalized));
   emitAssetsUpdated();
 }
 
@@ -50,19 +61,32 @@ export function upsertCustomAsset(asset: AssetRecord): void {
     return;
   }
 
-  const current = loadCustomAssets();
-  const filtered = current.filter((item) => item.id !== asset.id);
-  filtered.push(asset);
+  const candidate: AssetRecord = {
+    ...asset,
+    id: asset.id.trim(),
+    namespace: normalizeAssetNamespace(asset.namespace),
+  };
+  const candidateKey = buildAssetKeyFromRecord(candidate);
+
+  const current = loadCustomAssets().map((existing) => ({
+    ...existing,
+    id: existing.id.trim(),
+    namespace: normalizeAssetNamespace(existing.namespace),
+  }));
+
+  const filtered = current.filter((item) => buildAssetKeyFromRecord(item) !== candidateKey);
+  filtered.push(candidate);
   saveCustomAssets(filtered);
 }
 
-export function deleteCustomAsset(assetId: string): void {
+export function deleteCustomAsset(namespace: string, assetId: string): void {
   if (typeof window === "undefined") {
     return;
   }
 
+  const targetKey = composeAssetKey(namespace, assetId);
   const current = loadCustomAssets();
-  const filtered = current.filter((asset) => asset.id !== assetId);
+  const filtered = current.filter((asset) => buildAssetKeyFromRecord(asset) !== targetKey);
   if (filtered.length !== current.length) {
     saveCustomAssets(filtered);
   }
@@ -70,26 +94,39 @@ export function deleteCustomAsset(assetId: string): void {
 
 export function getAllAssets(): AssetRecord[] {
   const baseMap = new Map<string, AssetRecord>();
+
   for (const asset of ASSETS) {
-    baseMap.set(asset.id, asset);
+    const normalized: AssetRecord = {
+      ...asset,
+      id: asset.id.trim(),
+      namespace: normalizeAssetNamespace(asset.namespace),
+    };
+    baseMap.set(buildAssetKeyFromRecord(normalized), normalized);
   }
 
   const customAssets = loadCustomAssets();
   for (const asset of customAssets) {
-    baseMap.set(asset.id, asset);
+    baseMap.set(buildAssetKeyFromRecord(asset), asset);
   }
 
   return Array.from(baseMap.values());
 }
 
-export function getAssetById(assetId: string): AssetRecord | undefined {
+export function getAssetByKey(namespace: string, assetId: string): AssetRecord | undefined {
   const allAssets = getAllAssets();
-  return allAssets.find((asset) => asset.id === assetId);
+  const targetKey = composeAssetKey(namespace, assetId);
+  return allAssets.find((asset) => buildAssetKeyFromRecord(asset) === targetKey);
 }
 
-export function isCustomAsset(assetId: string): boolean {
+export function getAssetByCompositeKey(assetKey: string): AssetRecord | undefined {
+  const allAssets = getAllAssets();
+  return allAssets.find((asset) => buildAssetKeyFromRecord(asset) === assetKey);
+}
+
+export function isCustomAsset(namespace: string, assetId: string): boolean {
   const customAssets = loadCustomAssets();
-  return customAssets.some((asset) => asset.id === assetId);
+  const targetKey = composeAssetKey(namespace, assetId);
+  return customAssets.some((asset) => buildAssetKeyFromRecord(asset) === targetKey);
 }
 
 export function subscribeToAssetChanges(listener: () => void) {
