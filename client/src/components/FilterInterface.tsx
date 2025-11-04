@@ -12,7 +12,7 @@ import FilterCustomizationPanel from './FilterCustomizationPanel';
 import SearchBar from './SearchBar';
 import TimeRangeSelector from './TimeRangeSelector';
 import TablePropertiesPanel from './TablePropertiesPanel';
-import StateFilterEditor, { type StateOption } from './StateFilterEditor';
+import StateFilterEditor, { type StateOption, type StateFilterOperatorOption } from './StateFilterEditor';
 import LabelsFilterEditor from './LabelsFilterEditor';
 import InputsFilterEditor from './InputsFilterEditor';
 import OutputsFilterEditor from './OutputsFilterEditor';
@@ -200,6 +200,8 @@ interface FilterInterfaceProps {
   missingSourceOptions?: EnabledOption[];
   namespaceOptions?: string[];
   levelsFilterOptions?: StateOption[];
+  levelsOperatorOptions?: StateFilterOperatorOption[];
+  levelsSingleSelectionOperators?: string[];
   triggerIdValue?: string;
   triggerIdOperator?: string;
   onTriggerIdValueChange?: (value: string) => void;
@@ -361,6 +363,8 @@ export default function FilterInterface({
   missingSourceOptions,
   namespaceOptions,
   levelsFilterOptions,
+  levelsOperatorOptions,
+  levelsSingleSelectionOperators,
   triggerIdValue = '',
   triggerIdOperator = 'equals',
   onTriggerIdValueChange,
@@ -1310,6 +1314,8 @@ export default function FilterInterface({
               onClose={handleCloseLevelsFilter}
               onReset={() => onResetFilter('levels')}
               stateOptions={levelsOptionsList}
+              operatorOptions={levelsOperatorOptions}
+              singleSelectionOperators={levelsSingleSelectionOperators}
             />
           </PopoverContent>
         </Popover>

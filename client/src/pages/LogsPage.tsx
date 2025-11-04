@@ -7,7 +7,7 @@ import type { SavedFilter } from "@/types/savedFilters";
 import { logsSavedFiltersStorage } from "@/utils/logsSavedFiltersStorage";
 import type { FlowOption } from "@/components/FlowFilterEditor";
 import type { ScopeOption } from "@/components/ScopeFilterEditor";
-import type { StateOption } from "@/components/StateFilterEditor";
+import type { StateOption, StateFilterOperatorOption } from "@/components/StateFilterEditor";
 
 interface ActiveFilter {
   id: string;
@@ -18,7 +18,7 @@ interface ActiveFilter {
 
 const LOG_ROWS: LogRow[] = [
   {
-    date: "2025-09-19 14:24:41",
+    date: "2025-11-03 14:24:41",
     level: "INFO",
     namespace: "company",
     flow: "data_pipeline",
@@ -29,7 +29,7 @@ const LOG_ROWS: LogRow[] = [
     message: "/luigi.txt",
   },
   {
-    date: "2025-09-19 14:24:41",
+    date: "2025-11-03 14:24:41",
     level: "INFO",
     namespace: "company",
     flow: "data_pipeline",
@@ -41,7 +41,7 @@ const LOG_ROWS: LogRow[] = [
       "Dry run is disabled, performing following actions (+ for deletions, - for update or no modification)",
   },
   {
-    date: "2025-09-19 14:24:20",
+    date: "2025-11-03 14:24:20",
     level: "INFO",
     namespace: "company.team",
     flow: "data_pipeline",
@@ -52,7 +52,7 @@ const LOG_ROWS: LogRow[] = [
     message: "Hello from Kestra",
   },
   {
-    date: "2025-09-19 14:24:44",
+    date: "2025-11-03 14:24:44",
     level: "INFO",
     namespace: "company",
     flow: "data_pipeline",
@@ -63,7 +63,7 @@ const LOG_ROWS: LogRow[] = [
     message: "Start cloning from `https://github.com/Bent/qa-git-task`",
   },
   {
-    date: "2025-09-19 14:24:44",
+    date: "2025-11-03 14:24:44",
     level: "DEBUG",
     namespace: "company",
     flow: "data_pipeline",
@@ -74,7 +74,7 @@ const LOG_ROWS: LogRow[] = [
     message: "SSLContext already configured with key: JVM",
   },
   {
-    date: "2025-09-19 14:24:40",
+    date: "2025-11-03 14:24:40",
     level: "TRACE",
     namespace: "tutorial",
     flow: "microservices_and_apis",
@@ -85,7 +85,7 @@ const LOG_ROWS: LogRow[] = [
     message: "IllegalVariableEvaluationException: Unable to find 'inputs' used in expression 'col1,col2'",
   },
   {
-    date: "2025-09-19 14:24:40",
+    date: "2025-11-03 14:24:40",
     level: "ERROR",
     namespace: "tutorial",
     flow: "microservices_and_apis",
@@ -94,6 +94,182 @@ const LOG_ROWS: LogRow[] = [
     executionId: "4hv0bDG3cSHhCTuot9EcsJ",
     triggerId: "microservices-check",
     message: "Unable to find 'inputs' used in expression 'col1,col2' at line 2",
+  },
+  {
+    date: "2025-11-03 13:58:12",
+    level: "WARN",
+    namespace: "billing",
+    flow: "invoice_dispatch",
+    taskId: "pdf-render",
+    scope: "system",
+    executionId: "E1wbB3YkLjf6wR8Yq0Nv",
+    triggerId: "monthly-batch",
+    message: "Render timeout approaching threshold for invoice #INV-2048",
+  },
+  {
+    date: "2025-11-03 13:57:01",
+    level: "INFO",
+    namespace: "billing",
+    flow: "invoice_dispatch",
+    taskId: "notify",
+    scope: "user",
+    executionId: "E1wbB3YkLjf6wR8Yq0Nv",
+    triggerId: "monthly-batch",
+    message: "Sent invoice email to finance@acme.co (batch 19/09)",
+  },
+  {
+    date: "2025-11-03 13:42:27",
+    level: "DEBUG",
+    namespace: "company.analytics",
+    flow: "etl_job",
+    taskId: "transform",
+    scope: "system",
+    executionId: "a2J9n0KwP3F5m8ZrQ4Ht",
+    triggerId: "nightly-etl",
+    message: "Normalized 12,403 rows, 3 columns flagged for null coalescing",
+  },
+  {
+    date: "2025-11-03 13:42:22",
+    level: "TRACE",
+    namespace: "company.analytics",
+    flow: "etl_job",
+    taskId: "extract",
+    scope: "system",
+    executionId: "a2J9n0KwP3F5m8ZrQ4Ht",
+    triggerId: "nightly-etl",
+    message: "Fetching chunk 4 from S3://analytics/raw/2025/09/19/",
+  },
+  {
+    date: "2025-11-03 13:15:55",
+    level: "ERROR",
+    namespace: "alerts.core",
+    flow: "pager_duty_sync",
+    taskId: "sync",
+    scope: "system",
+    executionId: "pZt6gQv12Mx9Na3Lc4Hd",
+    triggerId: "alerts-sync",
+    message: "Failed to sync incident INC-4832: 502 Bad Gateway",
+  },
+  {
+    date: "2025-11-03 13:15:22",
+    level: "WARN",
+    namespace: "alerts.core",
+    flow: "pager_duty_sync",
+    taskId: "sync",
+    scope: "system",
+    executionId: "pZt6gQv12Mx9Na3Lc4Hd",
+    triggerId: "alerts-sync",
+    message: "Retry scheduled in 120 seconds for incident INC-4832",
+  },
+  {
+    date: "2025-11-03 12:59:11",
+    level: "INFO",
+    namespace: "apps.web",
+    flow: "user_signup",
+    taskId: "welcome-email",
+    scope: "user",
+    executionId: "uSg5QvP1nK2rL7dXf9Hb",
+    triggerId: "signup-form",
+    message: "Queued welcome email for new user anna.geller@example.com",
+  },
+  {
+    date: "2025-11-03 12:59:07",
+    level: "DEBUG",
+    namespace: "apps.web",
+    flow: "user_signup",
+    taskId: "validate",
+    scope: "system",
+    executionId: "uSg5QvP1nK2rL7dXf9Hb",
+    triggerId: "signup-form",
+    message: "Validation completed in 132ms for tenant 'newco'",
+  },
+  {
+    date: "2025-11-03 12:40:44",
+    level: "TRACE",
+    namespace: "maintenance",
+    flow: "cleanup_task",
+    taskId: "scan",
+    scope: "system",
+    executionId: "cLm4DvQ8Rt5Ya1Xs2Fe9",
+    triggerId: "hourly-cleanup",
+    message: "Inspecting directory /tmp/workers/ for stale artifacts",
+  },
+  {
+    date: "2025-11-03 12:40:49",
+    level: "INFO",
+    namespace: "maintenance",
+    flow: "cleanup_task",
+    taskId: "purge",
+    scope: "system",
+    executionId: "cLm4DvQ8Rt5Ya1Xs2Fe9",
+    triggerId: "hourly-cleanup",
+    message: "Removed 8 temporary files older than 48 hours",
+  },
+  {
+    date: "2025-11-03 12:20:03",
+    level: "ERROR",
+    namespace: "reporting",
+    flow: "daily_summary",
+    taskId: "render",
+    scope: "system",
+    executionId: "rEp4OrT7Ui8Pl0QwXz6K",
+    triggerId: "morning-summary",
+    message: "Template rendering failed: missing variable revenueForecast",
+  },
+  {
+    date: "2025-11-03 12:19:48",
+    level: "INFO",
+    namespace: "reporting",
+    flow: "daily_summary",
+    taskId: "aggregate",
+    scope: "system",
+    executionId: "rEp4OrT7Ui8Pl0QwXz6K",
+    triggerId: "morning-summary",
+    message: "Aggregated 6,342 events into reporting metrics",
+  },
+  {
+    date: "2025-11-03 12:01:20",
+    level: "WARN",
+    namespace: "platform.core",
+    flow: "feature_flags",
+    taskId: "sync",
+    scope: "system",
+    executionId: "fLg8HnR2Cv5Mx1Qz9Kt0",
+    triggerId: "feature-sync",
+    message: "Flag rollout delayed: missing approval for experiment 'checkout-redesign'",
+  },
+  {
+    date: "2025-11-03 11:45:33",
+    level: "TRACE",
+    namespace: "platform.core",
+    flow: "feature_flags",
+    taskId: "fetch",
+    scope: "system",
+    executionId: "fLg8HnR2Cv5Mx1Qz9Kt0",
+    triggerId: "feature-sync",
+    message: "Polling config service at https://flags.internal/v1/features?offset=200",
+  },
+  {
+    date: "2025-11-03 11:30:05",
+    level: "DEBUG",
+    namespace: "platform.messaging",
+    flow: "webhook_delivery",
+    taskId: "dispatch",
+    scope: "system",
+    executionId: "wBh3UnL9Cp7Ks2Fx0Gd4",
+    triggerId: "webhook-retry",
+    message: "Retry #2 for webhook 98fe2b68-26b4-4029, delay=45s",
+  },
+  {
+    date: "2025-11-03 11:30:16",
+    level: "INFO",
+    namespace: "platform.messaging",
+    flow: "webhook_delivery",
+    taskId: "dispatch",
+    scope: "system",
+    executionId: "wBh3UnL9Cp7Ks2Fx0Gd4",
+    triggerId: "webhook-retry",
+    message: "Webhook 98fe2b68-26b4-4029 delivered successfully (HTTP 200)",
   },
 ];
 
@@ -130,6 +306,41 @@ const LOG_LEVEL_OPTIONS: StateOption[] = [
   },
 ];
 
+const LEVEL_ORDER = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"] as const;
+type LogLevel = (typeof LEVEL_ORDER)[number];
+
+const LEVEL_OPERATOR_OPTIONS: StateFilterOperatorOption[] = [
+  {
+    id: "in",
+    label: "in",
+    description: "Include only the selected levels.",
+  },
+  {
+    id: "not-in",
+    label: "not in",
+    description: "Exclude the selected levels.",
+  },
+  {
+    id: "lte",
+    label: "at or below",
+    description: "Include this level and all higher severities.",
+  },
+];
+
+const LEVEL_SINGLE_SELECTION_OPERATORS = ["lte"];
+
+const LEVEL_SEVERITY: Record<LogLevel, number> = {
+  TRACE: 0,
+  DEBUG: 1,
+  INFO: 2,
+  WARN: 3,
+  ERROR: 4,
+};
+
+const LEVEL_ORDER_SET = new Set<string>(LEVEL_ORDER);
+
+const isLogLevel = (value: string): value is LogLevel => LEVEL_ORDER_SET.has(value);
+
 const LOG_FILTER_OPTIONS: FilterOption[] = [
   { id: "interval", label: "Interval", description: "Filter by log timestamp", enabled: true, order: 1 },
   { id: "levels", label: "Levels", description: "Filter by log severity", enabled: true, order: 2 },
@@ -139,7 +350,7 @@ const LOG_FILTER_OPTIONS: FilterOption[] = [
   { id: "trigger-id", label: "Trigger ID", description: "Filter by trigger identifier", enabled: true, order: 6 },
 ];
 
-const LEVEL_CHART_META: Record<string, { icon: typeof Radio; gradientFrom: string; gradientTo: string; border: string }> = {
+const LEVEL_CHART_META: Record<LogLevel, { icon: typeof Radio; gradientFrom: string; gradientTo: string; border: string }> = {
   TRACE: { icon: Radio, gradientFrom: "from-indigo-500/70", gradientTo: "to-indigo-300/60", border: "border-indigo-400/60" },
   DEBUG: { icon: Bug, gradientFrom: "from-sky-500/70", gradientTo: "to-sky-300/60", border: "border-sky-400/60" },
   INFO: { icon: Info, gradientFrom: "from-emerald-500/70", gradientTo: "to-emerald-300/60", border: "border-emerald-400/60" },
@@ -173,9 +384,12 @@ const LOG_SCOPE_OPTIONS: ScopeOption[] = [
   },
 ];
 
+const DEFAULT_SCOPE_SELECTION = LOG_SCOPE_OPTIONS.map((option) => option.id);
+
 const operatorDisplay: Record<string, string> = {
   in: "in",
   "not-in": "not in",
+  lte: "at or below",
   contains: "contains",
   "starts-with": "starts with",
   "ends-with": "ends with",
@@ -194,7 +408,7 @@ export default function LogsPage() {
   const [selectedFlows, setSelectedFlows] = useState<string[]>([]);
   const [flowOperator, setFlowOperator] = useState('in');
   const [flowCustomValue, setFlowCustomValue] = useState('');
-  const [selectedScopes, setSelectedScopes] = useState<string[]>(['user']);
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([...DEFAULT_SCOPE_SELECTION]);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [levelsOperator, setLevelsOperator] = useState("in");
   const [triggerIdValue, setTriggerIdValue] = useState("");
@@ -223,6 +437,29 @@ export default function LogsPage() {
     const storedFilters = logsSavedFiltersStorage.getAll();
     setSavedFilters(storedFilters);
   }, []);
+
+  useEffect(() => {
+    if (levelsOperator !== "lte") {
+      return;
+    }
+
+    const validLevels = selectedLevels.filter(isLogLevel);
+
+    if (validLevels.length === 0) {
+      if (selectedLevels.length > 0) {
+        setSelectedLevels([]);
+      }
+      return;
+    }
+
+    const mostSevere = validLevels.reduce((currentMax, level) =>
+      LEVEL_SEVERITY[level] > LEVEL_SEVERITY[currentMax] ? level : currentMax
+    );
+
+    if (selectedLevels.length !== 1 || selectedLevels[0] !== mostSevere) {
+      setSelectedLevels([mostSevere]);
+    }
+  }, [levelsOperator, selectedLevels]);
 
   const namespaceOptions = useMemo(
     () => Array.from(new Set(LOG_ROWS.map((row) => row.namespace))).sort(),
@@ -255,6 +492,16 @@ export default function LogsPage() {
         }
         if (levelsOperator === "not-in" && selectedLevels.includes(row.level)) {
           return false;
+        }
+        if (levelsOperator === "lte") {
+          const thresholdLevel = selectedLevels.find(isLogLevel);
+          if (!thresholdLevel) {
+            return false;
+          }
+          const entrySeverity = LEVEL_SEVERITY[row.level];
+          if (entrySeverity < LEVEL_SEVERITY[thresholdLevel]) {
+            return false;
+          }
         }
       }
 
@@ -331,8 +578,7 @@ export default function LogsPage() {
   ]);
 
   const levelSummary = useMemo(() => {
-    const levelsOrder = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"] as const;
-    const counts = levelsOrder.map((level) => ({
+    const counts = LEVEL_ORDER.map((level) => ({
       level,
       count: filteredLogs.filter((log) => log.level === level).length,
     }));
@@ -363,9 +609,15 @@ export default function LogsPage() {
 
   const levelsFilterValue = useMemo(() => {
     if (selectedLevels.length === 0) return "Any";
+    if (levelsOperator === "lte") {
+      const thresholdLevel = selectedLevels.find(isLogLevel);
+      if (thresholdLevel) {
+        return `${thresholdLevel} and above`;
+      }
+    }
     if (selectedLevels.length === 1) return selectedLevels[0];
     return `${selectedLevels.length} selected`;
-  }, [selectedLevels]);
+  }, [selectedLevels, levelsOperator]);
 
   const namespaceFilterValue = useMemo(() => {
     if (["in", "not-in"].includes(namespaceOperator)) {
@@ -492,7 +744,7 @@ export default function LogsPage() {
     } else if (filterId === "flow") {
       setSelectedFlows([]);
     } else if (filterId === "scope") {
-      setSelectedScopes(['user']);
+      setSelectedScopes([...DEFAULT_SCOPE_SELECTION]);
     } else if (filterId === "trigger-id") {
       setTriggerIdValue("");
       setTriggerIdOperator("equals");
@@ -520,7 +772,7 @@ export default function LogsPage() {
     setNamespaceOperator("in");
     setNamespaceCustomValue("");
     setSelectedFlows([]);
-    setSelectedScopes(['user']);
+    setSelectedScopes([...DEFAULT_SCOPE_SELECTION]);
     setTriggerIdValue("");
     setTriggerIdOperator("equals");
     setVisibleFilters(DEFAULT_VISIBLE_FILTERS);
@@ -541,7 +793,7 @@ export default function LogsPage() {
     } else if (filterId === "flow") {
       setSelectedFlows([]);
     } else if (filterId === "scope") {
-      setSelectedScopes(['user']);
+      setSelectedScopes([...DEFAULT_SCOPE_SELECTION]);
     } else if (filterId === "trigger-id") {
       setTriggerIdValue("");
       setTriggerIdOperator("equals");
@@ -611,7 +863,7 @@ export default function LogsPage() {
     setNamespaceOperator(state.namespaceOperator ?? "in");
     setNamespaceCustomValue(state.namespaceCustomValue ?? "");
     setSelectedFlows(state.selectedFlows ?? []);
-    setSelectedScopes(state.selectedScopes ?? ['user']);
+    setSelectedScopes(state.selectedScopes ?? [...DEFAULT_SCOPE_SELECTION]);
     setTriggerIdValue(state.triggerIdValue ?? "");
     setTriggerIdOperator(state.triggerIdOperator ?? "equals");
 
@@ -742,6 +994,8 @@ export default function LogsPage() {
           flowOptions={flowOptions}
           scopeOptions={LOG_SCOPE_OPTIONS}
           levelsFilterOptions={LOG_LEVEL_OPTIONS}
+          levelsOperatorOptions={LEVEL_OPERATOR_OPTIONS}
+          levelsSingleSelectionOperators={LEVEL_SINGLE_SELECTION_OPERATORS}
           triggerIdValue={triggerIdValue}
           triggerIdOperator={triggerIdOperator}
           onTriggerIdValueChange={setTriggerIdValue}
