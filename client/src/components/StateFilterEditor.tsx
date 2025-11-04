@@ -7,7 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckSquare, Square, Info, RotateCcw, CheckCircle, Play, XCircle, X, AlertTriangle, Pause, Ban, SkipForward, Clock, RefreshCw, Circle } from "lucide-react";
 
-const operatorOptions = [
+export interface StateFilterOperatorOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+const defaultOperatorOptions: StateFilterOperatorOption[] = [
   { id: 'in', label: 'in', description: 'Execution state is one of the selected states' },
   { id: 'not-in', label: 'not in', description: 'Execution state is not one of the selected states' },
 ];
@@ -120,6 +126,8 @@ interface StateFilterEditorProps {
   onClose: () => void;
   onReset?: () => void;
   stateOptions?: StateOption[];
+  operatorOptions?: StateFilterOperatorOption[];
+  singleSelectionOperators?: string[];
 }
 
 export default function StateFilterEditor({ 
@@ -129,13 +137,16 @@ export default function StateFilterEditor({
   onOperatorChange,
   onClose,
   onReset,
-  stateOptions
+  stateOptions,
+  operatorOptions,
+  singleSelectionOperators,
 }: StateFilterEditorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentStates, setCurrentStates] = useState(selectedStates);
   const [currentOperator, setCurrentOperator] = useState(statesOperator);
 
   const availableStates = stateOptions ?? defaultStateOptions;
+  const operatorChoices = operatorOptions ?? defaultOperatorOptions;
 
   // Sync local state with props when they change (important for reset functionality)
   useEffect(() => {
@@ -150,8 +161,32 @@ export default function StateFilterEditor({
     state.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const singleSelectionActive = singleSelectionOperators?.includes(currentOperator) ?? false;
+
+  useEffect(() => {
+    if (!singleSelectionActive) {
+      return;
+    }
+
+    setCurrentStates((prev) => {
+      if (prev.length <= 1) {
+        return prev;
+      }
+      return [prev[0]];
+    });
+  }, [singleSelectionActive]);
+
   const handleToggleState = (stateId: string) => {
     const isSelected = currentStates.includes(stateId);
+    if (singleSelectionActive) {
+      if (isSelected) {
+        setCurrentStates([]);
+      } else {
+        setCurrentStates([stateId]);
+      }
+      return;
+    }
+
     if (isSelected) {
       setCurrentStates(currentStates.filter(id => id !== stateId));
     } else {
@@ -175,6 +210,9 @@ export default function StateFilterEditor({
   };
 
   const handleSelectAll = () => {
+    if (singleSelectionActive) {
+      return;
+    }
     const allVisibleStates = filteredStates.map(state => state.id);
     const combinedStates = [...currentStates, ...allVisibleStates];
     const newSelection = Array.from(new Set(combinedStates));
@@ -190,7 +228,7 @@ export default function StateFilterEditor({
   const allVisible = filteredStates.every(state => currentStates.includes(state.id));
   const noneVisible = filteredStates.every(state => !currentStates.includes(state.id));
 
-  const selectedOperatorObj = operatorOptions.find(op => op.id === currentOperator);
+  const selectedOperatorObj = operatorChoices.find(op => op.id === currentOperator);
 
   return (
     <Card className="w-96 p-0 bg-popover border border-popover-border shadow-lg">
@@ -206,7 +244,7 @@ export default function StateFilterEditor({
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-[#2F3341]">
-              {operatorOptions.map((option) => (
+              {operatorChoices.map((option) => (
                 <SelectItem key={option.id} value={option.id} data-testid={`states-operator-${option.id}`}>
                   <div className="flex flex-col">
                     <span className="font-medium">{option.label}</span>
@@ -232,7 +270,7 @@ export default function StateFilterEditor({
             variant="outline"
             size="sm"
             onClick={handleSelectAll}
-            disabled={allVisible}
+            disabled={allVisible || singleSelectionActive}
             className="flex-1"
             data-testid="button-select-all"
           >
