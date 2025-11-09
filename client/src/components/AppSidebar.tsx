@@ -3,36 +3,42 @@ import { useLocation, Link } from "wouter";
 import kestraLogo from "@/assets/Kestra.full.logo.light.png";
 import type { LucideIcon } from "lucide-react";
 import {
-  Box,
-  Building,
-  Building2,
   ChevronDown,
   ChevronRight,
-  Database,
-  FileText,
-  FlaskConical,
-  Folder,
-  Grid2x2,
-  LayoutDashboard,
-  LayoutGrid,
-  Megaphone,
-  Monitor,
-  MonitorCog,
-  MonitorDot,
-  Play,
-  Puzzle,
-  Server,
-  ServerCog,
-  Waves,
-  Shapes,
-  Shield,
-  ShieldAlert,
-  TrendingUp,
-  Workflow,
-  Wrench,
-  Zap,
-  Lock,
 } from "lucide-react";
+import { SvgIcon } from "@/components/SvgIcon";
+
+// Import custom SVG icons
+import appsIcon from "@/assets/menu-icons/apps.svg";
+import assetsIcon from "@/assets/menu-icons/assets.svg";
+import blueprintsIcon from "@/assets/menu-icons/blueprints.svg";
+import blueprintsAppsIcon from "@/assets/menu-icons/blueprints.apps.svg";
+import blueprintsCustomIcon from "@/assets/menu-icons/blueprints.custom.svg";
+import blueprintsDashboardsIcon from "@/assets/menu-icons/blueprints.dashboards.svg";
+import blueprintsFlowsIcon from "@/assets/menu-icons/blueprints.flows.svg";
+import dashboardsIcon from "@/assets/menu-icons/dashboards.svg";
+import executionsIcon from "@/assets/menu-icons/executions.svg";
+import flowsIcon from "@/assets/menu-icons/flows.svg";
+import instanceIcon from "@/assets/menu-icons/instance.svg";
+import instanceAnnoucementsIcon from "@/assets/menu-icons/instance.annoucements.svg";
+import instanceAuditlogsIcon from "@/assets/menu-icons/instance.auditlogs.svg";
+import instanceIamIcon from "@/assets/menu-icons/instance.iam.svg";
+import instanceServicesIcon from "@/assets/menu-icons/instance.services.svg";
+import instanceSystemOverviewIcon from "@/assets/menu-icons/instance.systemOverview.svg";
+import instanceTenantsIcon from "@/assets/menu-icons/instance.tenants.svg";
+import instanceVersionedPluginsIcon from "@/assets/menu-icons/instance.versionedPlugins.svg";
+import instanceWorkerGroupsIcon from "@/assets/menu-icons/instance.workerGroups.svg";
+import logsIcon from "@/assets/menu-icons/logs.svg";
+import namespacesIcon from "@/assets/menu-icons/namespaces.svg";
+import pluginsIcon from "@/assets/menu-icons/plugins.svg";
+import testsIcon from "@/assets/menu-icons/tests.svg";
+import tenantIcon from "@/assets/menu-icons/tenant.svg";
+import tenantAuditLogsIcon from "@/assets/menu-icons/tenant.auditLogs.svg";
+import tenantIamIcon from "@/assets/menu-icons/tenant.iam.svg";
+import tenantKvStoreIcon from "@/assets/menu-icons/tenant.kvStore.svg";
+import tenantSecretsIcon from "@/assets/menu-icons/tenant.secrets.svg";
+import tenantSystemOverviewIcon from "@/assets/menu-icons/tenant.systemOverview.svg";
+import tenantTriggersIcon from "@/assets/menu-icons/tenant.triggers.svg";
 
 import {
   Sidebar,
@@ -52,7 +58,7 @@ import {
 type NavItem = {
   title: string;
   url?: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon | string;
   children?: NavItem[];
 };
 
@@ -61,106 +67,106 @@ const navigationItems: NavItem[] = [
   {
     title: "Dashboards",
     url: "/dashboards",
-    icon: TrendingUp,
+    icon: dashboardsIcon,
   },
   {
     title: "Flows",
     url: "/flows",
-    icon: Grid2x2,
+    icon: flowsIcon,
   },
   {
     title: "Apps",
     url: "/apps",
-    icon: LayoutGrid,
+    icon: appsIcon,
   },
   {
     title: "Executions",
     url: "/executions",
-    icon: Play,
+    icon: executionsIcon,
   },
   {
     title: "Logs",
     url: "/logs",
-    icon: FileText,
+    icon: logsIcon,
   },
   {
     title: "Tests",
     url: "/tests",
-    icon: FlaskConical,
+    icon: testsIcon,
   },
   {
     title: "Assets",
     url: "/assets",
-    icon: Box,
+    icon: assetsIcon,
   },
   {
     title: "Namespaces",
     url: "/namespaces",
-    icon: Folder,
+    icon: namespacesIcon,
   },
   {
     title: "Plugins",
     url: "/plugins",
-    icon: Puzzle,
+    icon: pluginsIcon,
   },
   {
     title: "Blueprints",
-    icon: LayoutDashboard,
+    icon: blueprintsIcon,
     children: [
       {
         title: "Custom Blueprints",
         url: "/blueprints/custom",
-        icon: Wrench,
+        icon: blueprintsCustomIcon,
       },
       {
         title: "Flow Blueprints",
         url: "/blueprints/flow",
-        icon: Grid2x2,
+        icon: blueprintsFlowsIcon,
       },
       {
         title: "App Blueprints",
         url: "/blueprints/app",
-        icon: LayoutGrid,
+        icon: blueprintsAppsIcon,
       },
       {
         title: "Dashboard Blueprints",
         url: "/blueprints/dashboard",
-        icon: TrendingUp,
+        icon: blueprintsDashboardsIcon,
       },
     ],
   },
   {
     title: "Tenant Administration",
-    icon: Building,
+    icon: tenantIcon,
     children: [
       {
         title: "System Overview",
         url: "/admin/tenant/system-overview",
-        icon: MonitorDot,
+        icon: tenantSystemOverviewIcon,
       },
       {
         title: "KV Store",
         url: "/admin/tenant/kv-store",
-        icon: Database,
+        icon: tenantKvStoreIcon,
       },
       {
         title: "Secrets",
         url: "/admin/tenant/secrets",
-        icon: Lock,
+        icon: tenantSecretsIcon,
       },
       {
         title: "Triggers",
         url: "/admin/tenant/triggers",
-        icon: Zap,
+        icon: tenantTriggersIcon,
       },
       {
         title: "Audit Logs",
         url: "/admin/tenant/audit-logs",
-        icon: FileText,
+        icon: tenantAuditLogsIcon,
       },
       {
         title: "IAM",
-        icon: Shield,
+        icon: tenantIamIcon,
         children: [
           {
             title: "Users",
@@ -196,26 +202,26 @@ const navigationItems: NavItem[] = [
   },
   {
     title: "Instance Administration",
-    icon: MonitorCog,
+    icon: instanceIcon,
     children: [
       {
         title: "System Overview",
         url: "/admin/instance/system-overview",
-        icon: Monitor,
+        icon: instanceSystemOverviewIcon,
       },
       {
         title: "Services",
         url: "/admin/instance/services",
-        icon: Waves,
+        icon: instanceServicesIcon,
       },
       {
         title: "Audit Logs",
         url: "/admin/instance/audit-logs",
-        icon: FileText,
+        icon: instanceAuditlogsIcon,
       },
       {
         title: "IAM",
-        icon: Shield,
+        icon: instanceIamIcon,
         children: [
           {
             title: "Users",
@@ -230,27 +236,27 @@ const navigationItems: NavItem[] = [
       {
         title: "Versioned Plugins",
         url: "/admin/instance/versioned-plugins",
-        icon: Puzzle,
+        icon: instanceVersionedPluginsIcon,
       },
       {
         title: "Tenants",
         url: "/admin/instance/tenants",
-        icon: Building2,
+        icon: instanceTenantsIcon,
       },
       {
         title: "Worker Groups",
         url: "/admin/instance/worker-groups",
-        icon: ServerCog,
+        icon: instanceWorkerGroupsIcon,
       },
       {
         title: "Kill Switch",
         url: "/admin/instance/kill-switch",
-        icon: ShieldAlert,
+        icon: instanceIcon,
       },
       {
         title: "Announcements",
         url: "/admin/instance/announcements",
-        icon: Megaphone,
+        icon: instanceAnnoucementsIcon,
       },
     ],
   },
@@ -358,14 +364,26 @@ const toggleExpanded = (nodeKey: string) => {
     const nodeKey = generateNodeKey(item, parentKey);
     const hasChildren = Array.isArray(item.children) && item.children.length > 0;
     const children = hasChildren ? item.children! : [];
-    const Icon = item.icon;
+    const icon = item.icon;
     const isExpanded = expandedItems.has(nodeKey);
     const isActive = isItemActive(item);
     const testId = `nav-${nodeKey.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
+    // Render icon - check if it's a string (SVG path) or a component (LucideIcon)
+    const renderIcon = (iconProp?: LucideIcon | string, className?: string) => {
+      if (!iconProp) return null;
+      
+      if (typeof iconProp === "string") {
+        return <SvgIcon src={iconProp} className={className} />;
+      } else {
+        const IconComponent = iconProp;
+        return <IconComponent className={className} />;
+      }
+    };
+
     if (level === 0) {
       // Top-level items
-      if (!Icon) {
+      if (!icon) {
         return null;
       }
 
@@ -378,7 +396,7 @@ const toggleExpanded = (nodeKey: string) => {
                 isActive={isActive}
                 data-testid={testId}
               >
-                <Icon />
+                {renderIcon(icon)}
                 <span>{item.title}</span>
                 {isExpanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
               </SidebarMenuButton>
@@ -396,7 +414,7 @@ const toggleExpanded = (nodeKey: string) => {
                 data-testid={testId}
               >
                 <Link href={item.url}>
-                  <Icon />
+                  {renderIcon(icon)}
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>
@@ -415,7 +433,7 @@ const toggleExpanded = (nodeKey: string) => {
                 isActive={isActive}
                 data-testid={testId}
               >
-                {Icon && <Icon className="h-4 w-4" />}
+                {renderIcon(icon, "h-4 w-4")}
                 <span>{item.title}</span>
                 {isExpanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}
               </SidebarMenuSubButton>
@@ -433,7 +451,7 @@ const toggleExpanded = (nodeKey: string) => {
                 data-testid={testId}
               >
                 <Link href={item.url}>
-                  {Icon && <Icon className="h-4 w-4" />}
+                  {renderIcon(icon, "h-4 w-4")}
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuSubButton>
