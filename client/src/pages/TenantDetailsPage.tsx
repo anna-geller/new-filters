@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FilterInterface from "@/components/FilterInterface";
 import type { ColumnConfig } from "@/components/ExecutionsTable";
 import { SavedFilter } from "@/types/savedFilters";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -22,6 +24,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -45,6 +55,19 @@ import {
   Plus,
   Trash2,
   Star,
+  Info,
+  RotateCcw,
+  CheckCircle,
+  Play,
+  XCircle,
+  X,
+  AlertTriangle,
+  Pause,
+  Ban,
+  SkipForward,
+  Clock,
+  RefreshCw,
+  Circle,
 } from "lucide-react";
 
 interface TenantDetailsPageProps {
@@ -79,7 +102,23 @@ interface LimitEntry {
   createdAt: string;
 }
 
-const NAVIGATION_ITEMS = ["Overview", "Limits", "Audit Logs"] as const;
+interface ExecutionStateSynonym {
+  id: string;
+  tenantId: string;
+  defaultState: string;
+  synonym: string;
+  createdAt: Date | string;
+}
+
+interface ExecutionStateConfig {
+  id: string;
+  label: string;
+  icon: typeof Info;
+  description: string;
+  color: string;
+}
+
+const NAVIGATION_ITEMS = ["Overview", "Limits", "Execution states", "Audit Logs"] as const;
 
 const LIMIT_COLUMNS: ColumnConfig[] = [
   { id: "type", label: "Type", description: "Concurrency or quota limit", visible: true, order: 1 },
@@ -142,6 +181,24 @@ const INITIAL_LIMITS: LimitEntry[] = [
 
 const DEFAULT_VISIBLE_FILTERS: string[] = [];
 
+const EXECUTION_STATE_CONFIGS: ExecutionStateConfig[] = [
+  { id: "CREATED", label: "CREATED", icon: Info, description: "Execution has been created", color: "bg-purple-900/30 text-purple-300 border-purple-700" },
+  { id: "RESTARTED", label: "RESTARTED", icon: RotateCcw, description: "Execution has been restarted", color: "bg-teal-900/30 text-teal-300 border-teal-600" },
+  { id: "SUCCESS", label: "SUCCESS", icon: CheckCircle, description: "Execution completed successfully", color: "bg-green-900/30 text-green-300 border-green-700" },
+  { id: "RUNNING", label: "RUNNING", icon: Play, description: "Execution is currently running", color: "bg-blue-900/30 text-blue-300 border-blue-700" },
+  { id: "KILLING", label: "KILLING", icon: XCircle, description: "Execution is being killed", color: "bg-red-900/30 text-red-300 border-red-700" },
+  { id: "KILLED", label: "KILLED", icon: X, description: "Execution has been killed", color: "bg-red-900/30 text-red-300 border-red-700" },
+  { id: "WARNING", label: "WARNING", icon: AlertTriangle, description: "Execution completed with warnings", color: "bg-yellow-900/30 text-yellow-300 border-yellow-700" },
+  { id: "FAILED", label: "FAILED", icon: XCircle, description: "Execution has failed", color: "bg-red-900/30 text-red-300 border-red-700" },
+  { id: "PAUSED", label: "PAUSED", icon: Pause, description: "Execution has been paused", color: "bg-orange-900/30 text-orange-300 border-orange-700" },
+  { id: "CANCELLED", label: "CANCELLED", icon: Ban, description: "Execution has been cancelled", color: "bg-gray-900/30 text-gray-300 border-gray-700" },
+  { id: "SKIPPED", label: "SKIPPED", icon: SkipForward, description: "Execution has been skipped", color: "bg-gray-900/30 text-gray-300 border-gray-700" },
+  { id: "QUEUED", label: "QUEUED", icon: Clock, description: "Execution is queued for processing", color: "bg-indigo-900/30 text-indigo-300 border-indigo-700" },
+  { id: "RETRYING", label: "RETRYING", icon: RefreshCw, description: "Execution is being retried", color: "bg-cyan-900/30 text-cyan-300 border-cyan-700" },
+  { id: "RETRIED", label: "RETRIED", icon: RotateCcw, description: "Execution has been retried", color: "bg-cyan-900/30 text-cyan-300 border-cyan-700" },
+  { id: "BREAKPOINT", label: "BREAKPOINT", icon: Circle, description: "Execution stopped at breakpoint", color: "bg-pink-900/30 text-pink-300 border-pink-700" },
+];
+
 export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
   const tenantParam = params?.tenantId ?? "demo";
   const tenantId = decodeURIComponent(tenantParam);
@@ -166,6 +223,111 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
   const [quotaIntervalPreset, setQuotaIntervalPreset] = useState<typeof QUOTA_INTERVAL_OPTIONS[number]["value"]>("day");
   const [quotaCustomInterval, setQuotaCustomInterval] = useState("P1D");
   const [editingLimitId, setEditingLimitId] = useState<string | null>(null);
+
+  // Execution States state management
+  const [synonymDialogOpen, setSynonymDialogOpen] = useState(false);
+  const [selectedStateForSynonym, setSelectedStateForSynonym] = useState<string>("");
+  const [newSynonymValue, setNewSynonymValue] = useState("");
+  const [synonymError, setSynonymError] = useState("");
+  const queryClient = useQueryClient();
+
+  // Fetch execution state synonyms
+  const { data: executionStateSynonyms = [], isLoading: isLoadingSynonyms } = useQuery<ExecutionStateSynonym[]>({
+    queryKey: ["executionStateSynonyms", tenantId],
+    queryFn: async () => {
+      const response = await fetch(`/api/tenants/${tenantId}/execution-states`);
+      if (!response.ok) throw new Error("Failed to fetch execution state synonyms");
+      return response.json();
+    },
+  });
+
+  // Create synonym mutation
+  const createSynonymMutation = useMutation({
+    mutationFn: async ({ defaultState, synonym }: { defaultState: string; synonym: string }) => {
+      const response = await fetch(`/api/tenants/${tenantId}/execution-states`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ defaultState, synonym }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create synonym");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["executionStateSynonyms", tenantId] });
+      setSynonymDialogOpen(false);
+      setNewSynonymValue("");
+      setSynonymError("");
+      toast({ title: "Synonym added", description: "The custom execution state has been created." });
+    },
+    onError: (error: Error) => {
+      setSynonymError(error.message);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete synonym mutation
+  const deleteSynonymMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/tenants/${tenantId}/execution-states/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete synonym");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["executionStateSynonyms", tenantId] });
+      toast({ title: "Synonym removed", description: "The custom execution state has been deleted." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Group synonyms by default state
+  const synonymsByState = useMemo(() => {
+    const grouped: Record<string, ExecutionStateSynonym[]> = {};
+    executionStateSynonyms.forEach((synonym) => {
+      if (!grouped[synonym.defaultState]) {
+        grouped[synonym.defaultState] = [];
+      }
+      grouped[synonym.defaultState].push(synonym);
+    });
+    return grouped;
+  }, [executionStateSynonyms]);
+
+  const handleOpenSynonymDialog = (stateId: string) => {
+    setSelectedStateForSynonym(stateId);
+    setNewSynonymValue("");
+    setSynonymError("");
+    setSynonymDialogOpen(true);
+  };
+
+  const handleSaveSynonym = () => {
+    if (!selectedStateForSynonym) {
+      setSynonymError("Please select a default state");
+      return;
+    }
+    if (!newSynonymValue.trim()) {
+      setSynonymError("Synonym cannot be empty");
+      return;
+    }
+    // Convert to uppercase with underscores (e.g., "Application Submitted" -> "APPLICATION_SUBMITTED")
+    const formattedSynonym = newSynonymValue
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "_");
+    
+    createSynonymMutation.mutate({
+      defaultState: selectedStateForSynonym,
+      synonym: formattedSynonym,
+    });
+  };
+
+  const handleDeleteSynonym = (id: string) => {
+    deleteSynonymMutation.mutate(id);
+  };
 
   useEffect(() => {
     if (newLimitType !== "Concurrency") {
@@ -558,19 +720,33 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                 <PencilLine className="h-4 w-4" />
                 Edit tenant
               </Button>
-              <Sheet open={limitDrawerOpen} onOpenChange={handleLimitDrawerChange}>
-                <SheetTrigger asChild>
-                  <Button
-                    className="bg-primary border border-primary-border text-primary-foreground hover:bg-primary/90"
-                    onClick={() => {
-                      setEditingLimitId(null);
-                      resetLimitForm();
-                    }}
-                  >
-                    <Plus className="h-4 w-4" />
-                    New limit
-                  </Button>
-                </SheetTrigger>
+              {activeTab === "Execution states" ? (
+                <Button
+                  className="bg-primary border border-primary-border text-primary-foreground hover:bg-primary/90"
+                  onClick={() => {
+                    setSelectedStateForSynonym("");
+                    setNewSynonymValue("");
+                    setSynonymError("");
+                    setSynonymDialogOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  New state
+                </Button>
+              ) : (
+                <Sheet open={limitDrawerOpen} onOpenChange={handleLimitDrawerChange}>
+                  <SheetTrigger asChild>
+                    <Button
+                      className="bg-primary border border-primary-border text-primary-foreground hover:bg-primary/90"
+                      onClick={() => {
+                        setEditingLimitId(null);
+                        resetLimitForm();
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      New limit
+                    </Button>
+                  </SheetTrigger>
                 <SheetContent
                   side="right"
                   className="w-full border-l border-border bg-background text-foreground sm:max-w-2xl"
@@ -791,6 +967,7 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                   </SheetFooter>
                 </SheetContent>
               </Sheet>
+              )}
             </div>
           </div>
 
@@ -990,6 +1167,187 @@ export default function TenantDetailsPage({ params }: TenantDetailsPageProps) {
                 </table>
               </div>
             </div>
+          </div>
+        ) : activeTab === "Execution states" ? (
+          <div className="flex-1 overflow-y-auto p-6 bg-[#1F232D]">
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground">
+                Define custom execution state synonyms that map to the default Kestra execution states. 
+                These custom states can be used to track business-specific phases or application states.
+              </p>
+            </div>
+            
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {EXECUTION_STATE_CONFIGS.map((stateConfig) => {
+                const StatIcon = stateConfig.icon;
+                const stateSynonyms = synonymsByState[stateConfig.id] || [];
+                
+                return (
+                  <Card
+                    key={stateConfig.id}
+                    className={cn(
+                      "border shadow-sm p-3 flex flex-col gap-2.5 bg-[#262A35]",
+                      stateConfig.color.includes("green") && "border-green-700/40",
+                      stateConfig.color.includes("red") && "border-red-700/40",
+                      stateConfig.color.includes("blue") && "border-blue-700/40",
+                      stateConfig.color.includes("yellow") && "border-yellow-700/40",
+                      stateConfig.color.includes("purple") && "border-purple-700/40",
+                      stateConfig.color.includes("teal") && "border-teal-600/40",
+                      stateConfig.color.includes("orange") && "border-orange-700/40",
+                      stateConfig.color.includes("gray") && "border-gray-700/40",
+                      stateConfig.color.includes("indigo") && "border-indigo-700/40",
+                      stateConfig.color.includes("cyan") && "border-cyan-700/40",
+                      stateConfig.color.includes("pink") && "border-pink-700/40",
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <StatIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs font-semibold text-foreground">
+                        {stateConfig.label}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-1.5 min-h-[60px] flex-1">
+                      {stateSynonyms.length === 0 ? (
+                        <p className="text-[11px] text-muted-foreground/60 italic">
+                          No custom synonyms
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          {stateSynonyms.map((synonym) => (
+                            <Badge
+                              key={synonym.id}
+                              className={cn(
+                                "text-[11px] font-medium px-2 py-0.5 pr-1 flex items-center gap-1 border",
+                                stateConfig.color.includes("green") && "bg-green-500/20 text-green-300 border-green-500/40 hover:bg-green-500/30",
+                                stateConfig.color.includes("red") && "bg-red-500/20 text-red-300 border-red-500/40 hover:bg-red-500/30",
+                                stateConfig.color.includes("blue") && "bg-blue-500/20 text-blue-300 border-blue-500/40 hover:bg-blue-500/30",
+                                stateConfig.color.includes("yellow") && "bg-yellow-500/20 text-yellow-300 border-yellow-500/40 hover:bg-yellow-500/30",
+                                stateConfig.color.includes("purple") && "bg-purple-500/20 text-purple-300 border-purple-500/40 hover:bg-purple-500/30",
+                                stateConfig.color.includes("teal") && "bg-teal-500/20 text-teal-300 border-teal-500/40 hover:bg-teal-500/30",
+                                stateConfig.color.includes("orange") && "bg-orange-500/20 text-orange-300 border-orange-500/40 hover:bg-orange-500/30",
+                                stateConfig.color.includes("gray") && "bg-gray-500/20 text-gray-300 border-gray-500/40 hover:bg-gray-500/30",
+                                stateConfig.color.includes("indigo") && "bg-indigo-500/20 text-indigo-300 border-indigo-500/40 hover:bg-indigo-500/30",
+                                stateConfig.color.includes("cyan") && "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/30",
+                                stateConfig.color.includes("pink") && "bg-pink-500/20 text-pink-300 border-pink-500/40 hover:bg-pink-500/30",
+                              )}
+                            >
+                              <span>{synonym.synonym}</span>
+                              <button
+                                onClick={() => handleDeleteSynonym(synonym.id)}
+                                className="ml-0.5 hover:text-destructive transition-colors"
+                                aria-label="Remove synonym"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenSynonymDialog(stateConfig.id)}
+                      className="w-full text-[11px] h-7 border-border/70 bg-transparent text-foreground hover:bg-muted/40"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add synonym
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+
+            <Dialog open={synonymDialogOpen} onOpenChange={setSynonymDialogOpen}>
+              <DialogContent className="bg-background border-border text-foreground">
+                <DialogHeader>
+                  <DialogTitle>Add Custom Synonym</DialogTitle>
+                  <DialogDescription>
+                    {selectedStateForSynonym ? (
+                      <>
+                        Create a custom execution state that maps to{" "}
+                        <span className="font-semibold text-foreground">{selectedStateForSynonym}</span>.
+                        The synonym must be unique across all tenants.
+                      </>
+                    ) : (
+                      <>
+                        Select an execution state and create a custom synonym that maps to it.
+                        The synonym must be unique across all tenants.
+                      </>
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Default State *</label>
+                    {selectedStateForSynonym ? (
+                      <Input
+                        value={selectedStateForSynonym}
+                        disabled
+                        className="bg-muted/50"
+                      />
+                    ) : (
+                      <Select
+                        value={selectedStateForSynonym}
+                        onValueChange={setSelectedStateForSynonym}
+                      >
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Select a state" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover text-popover-foreground max-h-[300px]">
+                          {EXECUTION_STATE_CONFIGS.map((config) => (
+                            <SelectItem key={config.id} value={config.id}>
+                              {config.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Custom Synonym *</label>
+                    <Input
+                      value={newSynonymValue}
+                      onChange={(e) => setNewSynonymValue(e.target.value)}
+                      placeholder="e.g., Application Submitted"
+                      className="bg-background"
+                    />
+                    {newSynonymValue.trim() && (
+                      <p className="text-xs text-muted-foreground">
+                        Will be saved as:{" "}
+                        <span className="font-mono text-foreground">
+                          {newSynonymValue.trim().toUpperCase().replace(/\s+/g, "_")}
+                        </span>
+                      </p>
+                    )}
+                    {synonymError && (
+                      <p className="text-xs text-destructive">{synonymError}</p>
+                    )}
+                  </div>
+                </div>
+                
+                <DialogFooter>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSynonymDialogOpen(false)}
+                    className="text-muted-foreground hover:bg-muted"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveSynonym}
+                    disabled={createSynonymMutation.isPending || !selectedStateForSynonym}
+                    className="bg-primary border border-primary-border text-primary-foreground hover:bg-primary/90"
+                  >
+                    {createSynonymMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center px-6 py-10 text-sm text-muted-foreground">
