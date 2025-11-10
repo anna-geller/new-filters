@@ -17,6 +17,7 @@ import ExecutionsPage from "@/pages/ExecutionsPage";
 import { defaultColumns } from "@/components/ExecutionsTable";
 import { EXECUTION_FIXTURES } from "@/pages/ExecutionsPage";
 import { MoreVertical, Pencil, Play } from "lucide-react";
+import { FlowCanvas } from "@/components/FlowCanvas";
 
 interface FlowDetailsPageProps {
   params?: {
@@ -30,6 +31,7 @@ const TAB_CONFIG = [
   { id: "topology", label: "Topology" },
   { id: "executions", label: "Executions" },
   { id: "edit", label: "Edit" },
+  { id: "canvas", label: "Canvas" },
   { id: "revisions", label: "Revisions" },
   { id: "triggers", label: "Triggers" },
   { id: "logs", label: "Logs" },
@@ -353,6 +355,19 @@ export default function FlowDetailsPage({ params }: FlowDetailsPageProps) {
               "Edit",
               "This tab will display editing capabilities for updating flow configuration and metadata.",
             )}
+          </TabsContent>
+
+          <TabsContent value="canvas" className="mt-0 p-0">
+            <FlowCanvas
+              flowId={flow.id}
+              namespace={flow.namespace}
+              initialProperties={{
+                id: flow.id,
+                namespace: flow.namespace,
+                description: flow.description,
+                revision: typeof flow.revision === 'string' ? parseInt(flow.revision, 10) : flow.revision,
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="revisions">

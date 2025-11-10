@@ -52,6 +52,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Flow Canvas routes
+  app.get("/api/flows/:namespace/:flowId/canvas", async (req, res) => {
+    try {
+      const { namespace, flowId } = req.params;
+      const canvasData = await storage.getFlowCanvas(namespace, flowId);
+      
+      if (!canvasData) {
+        return res.status(404).json({ error: "Canvas data not found" });
+      }
+      
+      res.json(canvasData);
+    } catch (error) {
+      console.error("Error fetching flow canvas:", error);
+      res.status(500).json({ error: "Failed to fetch flow canvas" });
+    }
+  });
+
+  app.post("/api/flows/:namespace/:flowId/canvas", async (req, res) => {
+    try {
+      const { namespace, flowId } = req.params;
+      const canvasData = req.body;
+
+      if (!canvasData) {
+        return res.status(400).json({ error: "Canvas data is required" });
+      }
+
+      await storage.saveFlowCanvas(namespace, flowId, canvasData);
+      res.status(200).json({ message: "Canvas saved successfully" });
+    } catch (error) {
+      console.error("Error saving flow canvas:", error);
+      res.status(500).json({ error: "Failed to save flow canvas" });
+    }
+  });
+
+  app.delete("/api/flows/:namespace/:flowId/canvas", async (req, res) => {
+    try {
+      const { namespace, flowId } = req.params;
+      await storage.deleteFlowCanvas(namespace, flowId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting flow canvas:", error);
+      res.status(500).json({ error: "Failed to delete flow canvas" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
