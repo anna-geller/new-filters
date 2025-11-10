@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, NodeResizer } from '@xyflow/react';
 import { 
   Play, 
   Clock, 
@@ -7,7 +7,6 @@ import {
   LogOut, 
   AlertTriangle, 
   CheckCircle, 
-  Ear,
   StickyNote 
 } from 'lucide-react';
 
@@ -16,7 +15,7 @@ const baseNodeClass = "px-4 py-3 rounded-lg border-2 shadow-lg min-w-[180px] tra
 const labelClass = "text-sm font-semibold truncate";
 const typeClass = "text-xs text-muted-foreground truncate mt-1";
 
-// Task Node
+// Task Node - Only tasks have input/output handles for workflow connections
 export const TaskNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   return (
@@ -36,7 +35,7 @@ export const TaskNode = memo(({ data, selected }: NodeProps) => {
 
 TaskNode.displayName = 'TaskNode';
 
-// Trigger Node
+// Trigger Node - No handles, triggers are flow initiators
 export const TriggerNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   return (
@@ -48,14 +47,13 @@ export const TriggerNode = memo(({ data, selected }: NodeProps) => {
           <div className={typeClass}>{config?.type || 'Trigger'}</div>
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-[#10B981]" />
     </div>
   );
 });
 
 TriggerNode.displayName = 'TriggerNode';
 
-// Input Node
+// Input Node - Flow element, no handles
 export const InputNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   return (
@@ -67,19 +65,17 @@ export const InputNode = memo(({ data, selected }: NodeProps) => {
           <div className={typeClass}>{config?.type || 'Input'}</div>
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-[#3B82F6]" />
     </div>
   );
 });
 
 InputNode.displayName = 'InputNode';
 
-// Output Node
+// Output Node - Flow element, no handles
 export const OutputNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   return (
     <div className={`${baseNodeClass} bg-[#262A35] ${selected ? 'border-[#F59E0B] ring-2 ring-[#F59E0B]/30' : 'border-[#3A3F4F]'}`}>
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-[#F59E0B]" />
       <div className="flex items-center gap-2">
         <LogOut className="w-4 h-4 text-[#F59E0B]" />
         <div className="flex-1 min-w-0">
@@ -93,7 +89,7 @@ export const OutputNode = memo(({ data, selected }: NodeProps) => {
 
 OutputNode.displayName = 'OutputNode';
 
-// Error Handler Node
+// Error Handler Node - Has handles for ordering error handlers
 export const ErrorNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   return (
@@ -113,7 +109,7 @@ export const ErrorNode = memo(({ data, selected }: NodeProps) => {
 
 ErrorNode.displayName = 'ErrorNode';
 
-// Finally Node
+// Finally Node - Has handles for ordering finally tasks
 export const FinallyNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   return (
@@ -126,45 +122,68 @@ export const FinallyNode = memo(({ data, selected }: NodeProps) => {
           <div className={typeClass}>{config?.type || 'Finally'}</div>
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-[#8B5CF6]" />
     </div>
   );
 });
 
 FinallyNode.displayName = 'FinallyNode';
 
-// Listener Node
-export const ListenerNode = memo(({ data, selected }: NodeProps) => {
-  const config = data.config as any;
-  return (
-    <div className={`${baseNodeClass} bg-[#262A35] ${selected ? 'border-[#06B6D4] ring-2 ring-[#06B6D4]/30' : 'border-[#3A3F4F]'}`}>
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-[#06B6D4]" />
-      <div className="flex items-center gap-2">
-        <Ear className="w-4 h-4 text-[#06B6D4]" />
-        <div className="flex-1 min-w-0">
-          <div className={labelClass}>{data.label as string}</div>
-          <div className={typeClass}>{config?.type || 'Listener'}</div>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-ListenerNode.displayName = 'ListenerNode';
-
-// Note Node
+// Note Node - Styled as sticky note with customizable color, no handles, resizable
 export const NoteNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
+  const noteText = config?.text || (data.label as string) || 'Double click to edit me';
+  const color = config?.color || '#9B8B6B';
+  const width = config?.width || 240;
+  const height = config?.height || 120;
+  
+  // Map colors to their gradient pairs
+  const getGradientColors = (baseColor: string): [string, string] => {
+    const colorMap: Record<string, [string, string]> = {
+      '#9B8B6B': ['#A39771', '#9B8B6B'], // Tan
+      '#FDE047': ['#FEF08A', '#FDE047'], // Yellow
+      '#FDA4AF': ['#FECDD3', '#FDA4AF'], // Pink
+      '#93C5FD': ['#BFDBFE', '#93C5FD'], // Blue
+      '#86EFAC': ['#BBF7D0', '#86EFAC'], // Green
+      '#C4B5FD': ['#DDD6FE', '#C4B5FD'], // Purple
+    };
+    
+    return colorMap[baseColor] || [baseColor, baseColor];
+  };
+  
+  const [fromColor, toColor] = getGradientColors(color);
+  
   return (
-    <div className={`${baseNodeClass} bg-[#2F3341] ${selected ? 'border-[#C4B5FD] ring-2 ring-[#C4B5FD]/30' : 'border-[#3A3F4F]'}`}>
-      <div className="flex items-start gap-2">
-        <StickyNote className="w-4 h-4 text-[#C4B5FD] mt-0.5" />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm text-foreground whitespace-pre-wrap">{config?.text || 'Note'}</div>
+    <>
+      <NodeResizer
+        color={selected ? '#ffffff' : '#7A6B55'}
+        isVisible={selected}
+        minWidth={200}
+        minHeight={100}
+      />
+      <div 
+        className={`px-4 py-3 rounded-lg shadow-lg transition-all hover:shadow-xl ${
+          selected 
+            ? 'border-2 border-white ring-2 ring-white/30' 
+            : 'border-2 border-transparent'
+        }`}
+        style={{
+          background: `linear-gradient(135deg, ${fromColor} 0%, ${toColor} 100%)`,
+          width: `${width}px`,
+          height: `${height}px`,
+        }}
+      >
+        <div className="flex items-start gap-2 h-full">
+          <StickyNote className="w-4 h-4 text-[#3A3020] mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0 overflow-auto">
+            <div className="text-sm font-medium text-[#2A2010] whitespace-pre-wrap leading-relaxed break-words">
+              {noteText}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 });
 
 NoteNode.displayName = 'NoteNode';
-

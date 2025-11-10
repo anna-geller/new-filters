@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Node } from '@xyflow/react';
+import yaml from 'js-yaml';
 import { FlowProperties } from '@/types/canvas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,14 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronDown, ChevronRight, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, X, Trash2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import InputOutputEditor from './InputOutputEditor';
 
 interface FlowPropertiesPanelProps {
   properties: FlowProperties;
   selectedNode?: Node;
   onPropertiesChange: (properties: FlowProperties) => void;
   onNodeUpdate?: (nodeId: string, data: any) => void;
+  onNodeDelete?: (nodeId: string) => void;
 }
 
 export default function FlowPropertiesPanel({
@@ -24,6 +27,7 @@ export default function FlowPropertiesPanel({
   selectedNode,
   onPropertiesChange,
   onNodeUpdate,
+  onNodeDelete,
 }: FlowPropertiesPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     basic: true,
@@ -49,13 +53,19 @@ export default function FlowPropertiesPanel({
     });
   };
 
+  const [newLabelKey, setNewLabelKey] = useState('');
+  const [showNewLabel, setShowNewLabel] = useState(false);
+  const [newVariableKey, setNewVariableKey] = useState('');
+  const [showNewVariable, setShowNewVariable] = useState(false);
+
   const addLabel = () => {
-    const key = prompt('Enter label key:');
-    if (key) {
+    if (newLabelKey.trim()) {
       updateProperty('labels', {
         ...properties.labels,
-        [key]: '',
+        [newLabelKey.trim()]: '',
       });
+      setNewLabelKey('');
+      setShowNewLabel(false);
     }
   };
 
@@ -65,7 +75,15 @@ export default function FlowPropertiesPanel({
     updateProperty('labels', newLabels);
   };
 
-  const updateLabel = (key: string, value: string) => {
+  const updateLabelKey = (oldKey: string, newKey: string) => {
+    const newLabels = { ...properties.labels };
+    const value = newLabels[oldKey];
+    delete newLabels[oldKey];
+    newLabels[newKey] = value;
+    updateProperty('labels', newLabels);
+  };
+
+  const updateLabelValue = (key: string, value: string) => {
     updateProperty('labels', {
       ...properties.labels,
       [key]: value,
@@ -73,12 +91,13 @@ export default function FlowPropertiesPanel({
   };
 
   const addVariable = () => {
-    const key = prompt('Enter variable key:');
-    if (key) {
+    if (newVariableKey.trim()) {
       updateProperty('variables', {
         ...properties.variables,
-        [key]: '',
+        [newVariableKey.trim()]: '',
       });
+      setNewVariableKey('');
+      setShowNewVariable(false);
     }
   };
 
@@ -88,7 +107,15 @@ export default function FlowPropertiesPanel({
     updateProperty('variables', newVariables);
   };
 
-  const updateVariable = (key: string, value: any) => {
+  const updateVariableKey = (oldKey: string, newKey: string) => {
+    const newVariables = { ...properties.variables };
+    const value = newVariables[oldKey];
+    delete newVariables[oldKey];
+    newVariables[newKey] = value;
+    updateProperty('variables', newVariables);
+  };
+
+  const updateVariableValue = (key: string, value: any) => {
     updateProperty('variables', {
       ...properties.variables,
       [key]: value,
@@ -101,85 +128,101 @@ export default function FlowPropertiesPanel({
     return (
       <div className="w-96 bg-[#262A35] border-l border-border overflow-hidden flex flex-col">
         <div className="p-4 border-b border-border">
-          <h3 className="text-lg font-semibold text-foreground">Node Properties</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {selectedNode.data.label as string}
-          </p>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-foreground">Node Properties</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {selectedNode.data.label as string}
+              </p>
+            </div>
+            {onNodeDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onNodeDelete(selectedNode.id)}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
         <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="node-label">Label</Label>
-              <Input
-                id="node-label"
-                value={selectedNode.data.label as string}
-                onChange={(e) => {
-                  if (onNodeUpdate) {
-                    onNodeUpdate(selectedNode.id, {
-                      label: e.target.value,
-                    });
-                  }
-                }}
-                className="mt-1"
-              />
+          {(selectedNode.type === 'input' || selectedNode.type === 'output') ? (
+            <InputOutputEditor
+              nodeType={selectedNode.type}
+              config={nodeConfig}
+              onChange={(newConfig) => {
+                if (onNodeUpdate) {
+                  // Use displayName or id for label
+                  const label = newConfig.displayName || newConfig.id;
+                  onNodeUpdate(selectedNode.id, {
+                    label,
+                    config: newConfig,
+                  });
+                }
+              }}
+            />
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="node-id">ID</Label>
+                <Input
+                  id="node-id"
+                  value={nodeConfig.id || ''}
+                  onChange={(e) => {
+                    if (onNodeUpdate) {
+                      onNodeUpdate(selectedNode.id, {
+                        config: {
+                          ...nodeConfig,
+                          id: e.target.value,
+                        },
+                      });
+                    }
+                  }}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="node-type">Type</Label>
+                <Input
+                  id="node-type"
+                  value={nodeConfig.type || ''}
+                  onChange={(e) => {
+                    if (onNodeUpdate) {
+                      onNodeUpdate(selectedNode.id, {
+                        config: {
+                          ...nodeConfig,
+                          type: e.target.value,
+                        },
+                      });
+                    }
+                  }}
+                  className="mt-1"
+                  placeholder="e.g., io.kestra.plugin.core.log.Log"
+                />
+              </div>
+              <div>
+                <Label htmlFor="node-description">Description</Label>
+                <Textarea
+                  id="node-description"
+                  value={nodeConfig.description || ''}
+                  onChange={(e) => {
+                    if (onNodeUpdate) {
+                      onNodeUpdate(selectedNode.id, {
+                        config: {
+                          ...nodeConfig,
+                          description: e.target.value,
+                        },
+                      });
+                    }
+                  }}
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="node-id">ID</Label>
-              <Input
-                id="node-id"
-                value={nodeConfig.id || ''}
-                onChange={(e) => {
-                  if (onNodeUpdate) {
-                    onNodeUpdate(selectedNode.id, {
-                      config: {
-                        ...nodeConfig,
-                        id: e.target.value,
-                      },
-                    });
-                  }
-                }}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="node-type">Type</Label>
-              <Input
-                id="node-type"
-                value={nodeConfig.type || ''}
-                onChange={(e) => {
-                  if (onNodeUpdate) {
-                    onNodeUpdate(selectedNode.id, {
-                      config: {
-                        ...nodeConfig,
-                        type: e.target.value,
-                      },
-                    });
-                  }
-                }}
-                className="mt-1"
-                placeholder="e.g., io.kestra.plugin.core.log.Log"
-              />
-            </div>
-            <div>
-              <Label htmlFor="node-description">Description</Label>
-              <Textarea
-                id="node-description"
-                value={nodeConfig.description || ''}
-                onChange={(e) => {
-                  if (onNodeUpdate) {
-                    onNodeUpdate(selectedNode.id, {
-                      config: {
-                        ...nodeConfig,
-                        description: e.target.value,
-                      },
-                    });
-                  }
-                }}
-                className="mt-1"
-                rows={3}
-              />
-            </div>
-          </div>
+          )}
         </ScrollArea>
       </div>
     );
@@ -339,31 +382,67 @@ export default function FlowPropertiesPanel({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={addLabel}
+                    onClick={() => setShowNewLabel(!showNewLabel)}
                     className="h-6 px-2"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3 h-3 mr-1" />
+                    <span className="text-xs">Add</span>
                   </Button>
                 </div>
                 <div className="space-y-2">
+                  {showNewLabel && (
+                    <div className="flex items-center gap-2 p-2 bg-[#1F232D] rounded-md border border-border">
+                      <Input
+                        value={newLabelKey}
+                        onChange={(e) => setNewLabelKey(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') addLabel();
+                          if (e.key === 'Escape') setShowNewLabel(false);
+                        }}
+                        className="flex-1 text-xs bg-[#262A35]"
+                        placeholder="Key"
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        onClick={addLabel}
+                        disabled={!newLabelKey.trim()}
+                        className="h-8 px-2 text-xs"
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setShowNewLabel(false);
+                          setNewLabelKey('');
+                        }}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
                   {Object.entries(properties.labels || {}).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-2">
                       <Input
                         value={key}
-                        disabled
-                        className="flex-1 text-xs"
+                        onChange={(e) => updateLabelKey(key, e.target.value)}
+                        className="flex-1 text-xs bg-[#1F232D]"
+                        placeholder="Key"
                       />
                       <Input
                         value={value}
-                        onChange={(e) => updateLabel(key, e.target.value)}
-                        className="flex-1 text-xs"
+                        onChange={(e) => updateLabelValue(key, e.target.value)}
+                        className="flex-1 text-xs bg-[#1F232D]"
                         placeholder="Value"
                       />
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => removeLabel(key)}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 hover:bg-destructive/20"
                       >
                         <X className="w-3 h-3" />
                       </Button>
@@ -377,31 +456,67 @@ export default function FlowPropertiesPanel({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={addVariable}
+                    onClick={() => setShowNewVariable(!showNewVariable)}
                     className="h-6 px-2"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3 h-3 mr-1" />
+                    <span className="text-xs">Add</span>
                   </Button>
                 </div>
                 <div className="space-y-2">
+                  {showNewVariable && (
+                    <div className="flex items-center gap-2 p-2 bg-[#1F232D] rounded-md border border-border">
+                      <Input
+                        value={newVariableKey}
+                        onChange={(e) => setNewVariableKey(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') addVariable();
+                          if (e.key === 'Escape') setShowNewVariable(false);
+                        }}
+                        className="flex-1 text-xs bg-[#262A35]"
+                        placeholder="Key"
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        onClick={addVariable}
+                        disabled={!newVariableKey.trim()}
+                        className="h-8 px-2 text-xs"
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setShowNewVariable(false);
+                          setNewVariableKey('');
+                        }}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
                   {Object.entries(properties.variables || {}).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-2">
                       <Input
                         value={key}
-                        disabled
-                        className="flex-1 text-xs"
+                        onChange={(e) => updateVariableKey(key, e.target.value)}
+                        className="flex-1 text-xs bg-[#1F232D]"
+                        placeholder="Key"
                       />
                       <Input
                         value={value}
-                        onChange={(e) => updateVariable(key, e.target.value)}
-                        className="flex-1 text-xs"
+                        onChange={(e) => updateVariableValue(key, e.target.value)}
+                        className="flex-1 text-xs bg-[#1F232D]"
                         placeholder="Value"
                       />
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => removeVariable(key)}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 hover:bg-destructive/20"
                       >
                         <X className="w-3 h-3" />
                       </Button>

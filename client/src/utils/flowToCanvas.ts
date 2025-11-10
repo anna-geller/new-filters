@@ -84,15 +84,15 @@ export function flowToCanvas(flow: any): { canvasData: FlowCanvasData; propertie
     }
   }
 
-  // Create error handler nodes
+  // Create error handler nodes (individual nodes, not containers)
   if (flow.errors && Array.isArray(flow.errors)) {
     flow.errors.forEach((error: any, index: number) => {
       nodes.push({
-        id: `error-${error.id}`,
+        id: `error-${error.id || index}`,
         type: 'error',
         position: { x: 50, y: yOffset + index * ySpacing },
         data: {
-          label: error.id,
+          label: error.id || `Error ${index + 1}`,
           config: error,
         },
       });
@@ -102,39 +102,21 @@ export function flowToCanvas(flow: any): { canvasData: FlowCanvasData; propertie
     }
   }
 
-  // Create finally nodes
+  // Create finally task nodes (individual nodes, not containers)
   if (flow.finally && Array.isArray(flow.finally)) {
     flow.finally.forEach((finallyTask: any, index: number) => {
       nodes.push({
-        id: `finally-${finallyTask.id}`,
+        id: `finally-${finallyTask.id || index}`,
         type: 'finally',
         position: { x: 50, y: yOffset + index * ySpacing },
         data: {
-          label: finallyTask.id,
+          label: finallyTask.id || `Finally ${index + 1}`,
           config: finallyTask,
         },
       });
     });
     if (flow.finally.length > 0) {
       yOffset += flow.finally.length * ySpacing + 50;
-    }
-  }
-
-  // Create listener nodes
-  if (flow.listeners && Array.isArray(flow.listeners)) {
-    flow.listeners.forEach((listener: any, index: number) => {
-      nodes.push({
-        id: `listener-${listener.id}`,
-        type: 'listener',
-        position: { x: 50, y: yOffset + index * ySpacing },
-        data: {
-          label: listener.id,
-          config: listener,
-        },
-      });
-    });
-    if (flow.listeners.length > 0) {
-      yOffset += flow.listeners.length * ySpacing + 50;
     }
   }
 
@@ -169,7 +151,6 @@ export function flowToCanvas(flow: any): { canvasData: FlowCanvasData; propertie
     triggers: flow.triggers,
     errors: flow.errors,
     finally: flow.finally,
-    listeners: flow.listeners,
     labels: flow.labels,
     variables: flow.variables,
     taskDefaults: flow.taskDefaults,

@@ -74,22 +74,16 @@ export function canvasToFlow(canvasData: FlowCanvasData, properties: FlowPropert
     flow.triggers = properties.triggers || triggerNodes.map((node) => node.data.config);
   }
 
-  // Add error handlers from canvas nodes
+  // Add error handlers from canvas nodes (individual nodes, not containers)
   const errorNodes = canvasData.nodes.filter((node) => node.type === 'error');
   if (errorNodes.length > 0 || properties.errors) {
     flow.errors = properties.errors || errorNodes.map((node) => node.data.config);
   }
 
-  // Add finally tasks from canvas nodes
+  // Add finally tasks from canvas nodes (individual nodes, not containers)
   const finallyNodes = canvasData.nodes.filter((node) => node.type === 'finally');
   if (finallyNodes.length > 0 || properties.finally) {
     flow.finally = properties.finally || finallyNodes.map((node) => node.data.config);
-  }
-
-  // Add listeners from canvas nodes
-  const listenerNodes = canvasData.nodes.filter((node) => node.type === 'listener');
-  if (listenerNodes.length > 0 || properties.listeners) {
-    flow.listeners = properties.listeners || listenerNodes.map((node) => node.data.config);
   }
 
   // Add labels

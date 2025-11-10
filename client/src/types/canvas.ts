@@ -6,7 +6,6 @@ export type FlowCanvasNodeType =
   | 'output'
   | 'error'
   | 'finally'
-  | 'listener'
   | 'note';
 
 // Configuration for different node types
@@ -24,19 +23,46 @@ export interface TriggerNodeConfig {
   [key: string]: any; // Additional trigger-specific properties
 }
 
+export type InputType = 
+  | 'STRING'
+  | 'INT'
+  | 'FLOAT'
+  | 'BOOL'
+  | 'ARRAY'
+  | 'SELECT'
+  | 'MULTISELECT'
+  | 'DATETIME'
+  | 'DATE'
+  | 'TIME'
+  | 'DURATION'
+  | 'FILE'
+  | 'JSON'
+  | 'URI'
+  | 'SECRET'
+  | 'YAML';
+
 export interface InputNodeConfig {
   id: string;
-  type: string; // Input type (e.g., STRING, INT, BOOLEAN)
+  type: InputType;
   description?: string;
   required?: boolean;
   defaults?: any;
+  displayName?: string;
+  // For ARRAY type
+  itemType?: 'STRING' | 'INT' | 'FLOAT' | 'BOOL';
+  // For SELECT/MULTISELECT
+  values?: string[];
+  // For FILE type
+  allowedFileExtensions?: string[];
   [key: string]: any;
 }
 
 export interface OutputNodeConfig {
   id: string;
-  type: string;
+  type: InputType;
   value?: string;
+  description?: string;
+  displayName?: string;
   [key: string]: any;
 }
 
@@ -54,16 +80,11 @@ export interface FinallyNodeConfig {
   [key: string]: any;
 }
 
-export interface ListenerNodeConfig {
-  id: string;
-  type: string;
-  description?: string;
-  [key: string]: any;
-}
-
 export interface NoteNodeConfig {
   text: string;
   color?: string;
+  width?: number;
+  height?: number;
 }
 
 export type NodeConfig = 
@@ -73,7 +94,6 @@ export type NodeConfig =
   | OutputNodeConfig
   | ErrorHandlerConfig
   | FinallyNodeConfig
-  | ListenerNodeConfig
   | NoteNodeConfig;
 
 // Flow canvas node matching ReactFlow's Node interface
@@ -199,13 +219,6 @@ export interface FlowProperties {
   }>;
   
   finally?: Array<{
-    id: string;
-    type: string;
-    description?: string;
-    [key: string]: any;
-  }>;
-  
-  listeners?: Array<{
     id: string;
     type: string;
     description?: string;

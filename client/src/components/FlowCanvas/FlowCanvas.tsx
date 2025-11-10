@@ -4,7 +4,6 @@ import {
   Background,
   Controls,
   MiniMap,
-  Panel,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -13,13 +12,14 @@ import {
   Edge,
   NodeTypes,
   BackgroundVariant,
+  NodeDimensionChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { FlowCanvasNode, FlowCanvasEdge, FlowCanvasData, FlowProperties } from '@/types/canvas';
 import FlowCanvasPalette from './FlowCanvasPalette';
 import FlowPropertiesPanel from './FlowPropertiesPanel';
 import FlowNodePropertiesModal from './FlowNodePropertiesModal';
-import { TaskNode, TriggerNode, InputNode, OutputNode, ErrorNode, FinallyNode, ListenerNode, NoteNode } from './FlowCanvasNode';
+import { TaskNode, TriggerNode, InputNode, OutputNode, ErrorNode, FinallyNode, NoteNode } from './FlowCanvasNode';
 
 interface FlowCanvasProps {
   flowId?: string;
@@ -65,7 +65,6 @@ export default function FlowCanvas({
       output: OutputNode,
       error: ErrorNode,
       finally: FinallyNode,
-      listener: ListenerNode,
       note: NoteNode,
     }),
     []
@@ -107,6 +106,7 @@ export default function FlowCanvas({
 
       const type = event.dataTransfer.getData('application/reactflow');
       const label = event.dataTransfer.getData('application/reactflow-label');
+      const pluginType = event.dataTransfer.getData('application/reactflow-plugin');
 
       if (typeof type === 'undefined' || !type) {
         return;
@@ -124,10 +124,12 @@ export default function FlowCanvas({
         position,
         data: {
           label: label || type,
-          config: {
-            id: `${type}_${Date.now()}`,
-            type: '',
-          },
+          config: type === 'note' 
+            ? { text: 'Double click to edit me. Guide', width: 240, height: 120 }
+            : {
+                id: `${label.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
+                type: pluginType || '',
+              },
         },
       };
 
@@ -135,18 +137,6 @@ export default function FlowCanvas({
     },
     [setNodes]
   );
-
-  // Handle save
-  const handleSave = useCallback(() => {
-    const canvasData: FlowCanvasData = {
-      nodes: nodes as FlowCanvasNode[],
-      edges: edges as FlowCanvasEdge[],
-    };
-
-    if (onSave) {
-      onSave(canvasData, flowProperties);
-    }
-  }, [nodes, edges, flowProperties, onSave]);
 
   // Handle delete selected nodes/edges
   const onDeleteSelected = useCallback(() => {
@@ -186,18 +176,46 @@ export default function FlowCanvas({
     [setNodes]
   );
 
+  // Auto-save canvas data whenever nodes or edges change
+  const handleAutoSave = useCallback(() => {
+    if (onSave) {
+      const canvasData: FlowCanvasData = {
+        nodes: nodes as FlowCanvasNode[],
+        edges: edges as FlowCanvasEdge[],
+      };
+      onSave(canvasData, flowProperties);
+    }
+  }, [nodes, edges, flowProperties, onSave]);
+
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (event.key === 'Delete' || event.key === 'Backspace') {
         onDeleteSelected();
-      } else if ((event.metaKey || event.ctrlKey) && event.key === 's') {
-        event.preventDefault();
-        handleSave();
       }
     },
-    [onDeleteSelected, handleSave]
+    [onDeleteSelected]
   );
+
+  // Handle adding node from palette dropdown
+  const handleAddNode = useCallback((type: string, label: string, pluginType: string) => {
+    const newNode: Node = {
+      id: `${type}-${Date.now()}`,
+      type,
+      position: { x: 100, y: 100 }, // Default position in viewport
+      data: {
+        label: label || type,
+        config: type === 'note' 
+          ? { text: 'Double click to edit me. Guide', width: 240, height: 120 }
+          : {
+              id: `${label.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
+              type: pluginType || '',
+            },
+      },
+    };
+
+    setNodes((nds) => nds.concat(newNode));
+  }, [setNodes]);
 
   return (
     <div 
@@ -206,15 +224,46 @@ export default function FlowCanvas({
       tabIndex={0}
     >
       {/* Left Palette */}
-      <FlowCanvasPalette />
+      <FlowCanvasPalette onAddNode={handleAddNode} />
 
       {/* Main Canvas */}
       <div className="flex-1 relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
+          onNodesChange={(changes) => {
+            // Handle dimension changes for note nodes
+            changes.forEach((change) => {
+              if (change.type === 'dimensions' && change.dimensions) {
+                const node = nodes.find((n) => n.id === change.id);
+                if (node && node.type === 'note') {
+                  setNodes((nds) =>
+                    nds.map((n) =>
+                      n.id === change.id
+                        ? {
+                            ...n,
+                            data: {
+                              ...n.data,
+                              config: {
+                                ...(n.data.config as any),
+                                width: Math.round(change.dimensions!.width),
+                                height: Math.round(change.dimensions!.height),
+                              },
+                            },
+                          }
+                        : n
+                    )
+                  );
+                }
+              }
+            });
+            onNodesChange(changes);
+            handleAutoSave();
+          }}
+          onEdgesChange={(changes) => {
+            onEdgesChange(changes);
+            handleAutoSave();
+          }}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
@@ -222,6 +271,7 @@ export default function FlowCanvas({
           onDrop={onDrop}
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
+          nodesDraggable={true}
           fitView
           className="bg-[#1F232D]"
         >
@@ -230,9 +280,7 @@ export default function FlowCanvas({
             gap={16} 
             variant={BackgroundVariant.Dots}
           />
-          <Controls 
-            className="bg-[#262A35] border-border"
-          />
+          <Controls />
           <MiniMap 
             className="bg-[#262A35] border-border"
             nodeColor={(node) => {
@@ -249,8 +297,6 @@ export default function FlowCanvas({
                   return '#EF4444';
                 case 'finally':
                   return '#8B5CF6';
-                case 'listener':
-                  return '#06B6D4';
                 case 'note':
                   return '#6B7280';
                 default:
@@ -258,14 +304,6 @@ export default function FlowCanvas({
               }
             }}
           />
-          <Panel position="top-right" className="bg-[#262A35] border border-border rounded-md p-2">
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-[#8408FF] hover:bg-[#8613f7] text-white rounded-md text-sm font-medium transition-colors"
-            >
-              Save Canvas
-            </button>
-          </Panel>
         </ReactFlow>
       </div>
 
@@ -275,6 +313,11 @@ export default function FlowCanvas({
         selectedNode={selectedNode}
         onPropertiesChange={setFlowProperties}
         onNodeUpdate={handleNodeUpdate}
+        onNodeDelete={(nodeId) => {
+          setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+          setSelectedNodeId(null);
+          handleAutoSave();
+        }}
       />
 
       {/* Node Properties Modal */}
@@ -285,6 +328,12 @@ export default function FlowCanvas({
           onSave={(updatedData) => {
             handleNodeUpdate(editingNode.id, updatedData);
             setEditingNodeId(null);
+            handleAutoSave();
+          }}
+          onDelete={() => {
+            setNodes((nds) => nds.filter((n) => n.id !== editingNode.id));
+            setEditingNodeId(null);
+            handleAutoSave();
           }}
         />
       )}
