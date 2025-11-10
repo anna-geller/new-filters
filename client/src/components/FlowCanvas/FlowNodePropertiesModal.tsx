@@ -94,8 +94,19 @@ export default function FlowNodePropertiesModal({
       .filter(([key]) => !['id', 'type', 'description', 'displayName', 'required', 'defaults', 'value', 'itemType', 'values', 'allowedFileExtensions', 'text', 'color', 'min', 'max', 'validator', 'prefill', 'expression', 'allowCustomValue', 'autoSelectFirst', 'isRadio', 'after', 'before', 'width', 'height', 'tasks'].includes(key))
       .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
     
+    // Return empty string if no custom properties to show placeholder
+    if (Object.keys(filteredConfig).length === 0) {
+      return '';
+    }
+    
     try {
-      return yaml.dump(filteredConfig, { indent: 2 });
+      const yamlString = yaml.dump(filteredConfig, { indent: 2 });
+      // Trim the result and return empty if it's just whitespace or empty object representation
+      const trimmed = yamlString.trim();
+      if (trimmed === '' || trimmed === '{}' || trimmed === '{ }') {
+        return '';
+      }
+      return trimmed;
     } catch (error) {
       return '';
     }
