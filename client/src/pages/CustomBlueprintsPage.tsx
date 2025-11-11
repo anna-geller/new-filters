@@ -43,8 +43,8 @@ const INITIAL_CUSTOM_BLUEPRINTS: BlueprintCard[] = [
     description: "Create flows that call subflows with configurable namespace, ID, and wait behavior.",
     tags: ["Getting Started", "Kestra"],
     plugins: ["kestra"],
-    flowTemplate: `id: <<flow_id>>
-namespace: <<namespace>>
+    flowTemplate: `id: templatedBlueprint
+namespace: company
 
 inputs:
   - id: order_id

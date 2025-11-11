@@ -64,6 +64,40 @@ function stripTemplateMetadata(yamlText: string) {
   }
 }
 
+function ensureFlowMetadata(yamlText: string, flowId: string, namespace: string) {
+  try {
+    const doc = yaml.load(yamlText) as Record<string, any> | null;
+    if (doc && typeof doc === "object") {
+      doc.id = flowId;
+      doc.namespace = namespace;
+      return yaml.dump(doc, {
+        noRefs: true,
+        lineWidth: 120,
+      });
+    }
+  } catch {
+    // fall through to regex replacement
+  }
+
+  let updated = yamlText || "";
+  const idRegex = /^id:\s*.+$/m;
+  const namespaceRegex = /^namespace:\s*.+$/m;
+
+  if (idRegex.test(updated)) {
+    updated = updated.replace(idRegex, `id: ${flowId}`);
+  } else {
+    updated = `id: ${flowId}\n${updated}`.trim();
+  }
+
+  if (namespaceRegex.test(updated)) {
+    updated = updated.replace(namespaceRegex, `namespace: ${namespace}`);
+  } else {
+    updated = updated.replace(`id: ${flowId}`, `id: ${flowId}\nnamespace: ${namespace}`);
+  }
+
+  return updated;
+}
+
 export function resolveBlueprint(
   template: string,
   flowId: string,
@@ -150,6 +184,7 @@ export function resolveBlueprint(
   });
 
   resolvedYaml = stripTemplateMetadata(resolvedYaml);
+  resolvedYaml = ensureFlowMetadata(resolvedYaml, trimmedFlowId, trimmedNamespace);
 
   return {
     success: true,
