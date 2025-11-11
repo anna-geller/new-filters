@@ -208,7 +208,7 @@ export default function BlueprintFormDialog({
               id="blueprint-flow"
               value={formState.flowTemplate}
               onChange={(event) => handleFieldChange("flowTemplate", event.target.value)}
-              placeholder={`id: <<flow_id>>\nnamespace: <<namespace>>\n\nextend:\n  templateArguments:\n    - id: recipient\n      type: STRING\n\ntasks:\n  - id: example\n    type: io.kestra.plugin.core.log.Log\n    message: "Hello <<arg.recipient>>!"`}
+              placeholder={`id: templatedBlueprint\nnamespace: company\n\nextend:\n  templateArguments:\n    - id: recipient\n      type: STRING\n\ntasks:\n  - id: example\n    type: io.kestra.plugin.core.log.Log\n    message: "Hello <<arg.recipient>>!"`}
               rows={14}
               className={`font-mono text-sm ${errors.flowTemplate ? "border-destructive focus-visible:ring-destructive" : ""}`}
             />
