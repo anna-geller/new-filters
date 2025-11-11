@@ -40,6 +40,10 @@ function getInitialArgValues(args?: TemplateArgument[]) {
       acc[arg.id] = typeof arg.defaults === "boolean" ? arg.defaults : false;
       return acc;
     }
+    if (arg.defaults !== undefined && arg.defaults !== null) {
+      acc[arg.id] = String(arg.defaults);
+      return acc;
+    }
     acc[arg.id] = "";
     return acc;
   }, {});
@@ -213,12 +217,12 @@ export default function UseBlueprintDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-xl sm:max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
+        <div className="space-y-6 pr-1">
           <div className="space-y-1.5">
             <Label htmlFor="flow-id">
               Flow ID

@@ -1,3 +1,4 @@
+import yaml from "js-yaml";
 import type { TemplateArgument } from "@/pages/blueprints/BlueprintsLibraryPage";
 
 export interface ResolveBlueprintResult {
@@ -27,6 +28,40 @@ function replaceToken(template: string, token: string, replacement: string) {
 
 function formatArgumentLabel(arg: TemplateArgument) {
   return arg.displayName || arg.id;
+}
+
+function stripTemplateMetadata(yamlText: string) {
+  try {
+    const doc = yaml.load(yamlText) as Record<string, any> | null;
+    if (!doc || typeof doc !== "object") {
+      return yamlText;
+    }
+
+    if (!("extend" in doc)) {
+      return yamlText;
+    }
+
+    const extendBlock = doc.extend as Record<string, any> | undefined;
+    if (!extendBlock) {
+      return yamlText;
+    }
+
+    if (Array.isArray(extendBlock.templateArguments)) {
+      delete extendBlock.templateArguments;
+      if (Object.keys(extendBlock).length === 0) {
+        delete doc.extend;
+      }
+
+      return yaml.dump(doc, {
+        noRefs: true,
+        lineWidth: 120,
+      });
+    }
+
+    return yamlText;
+  } catch {
+    return yamlText;
+  }
 }
 
 export function resolveBlueprint(
@@ -113,6 +148,8 @@ export function resolveBlueprint(
     const token = `<<arg.${arg.id}>>`;
     resolvedYaml = replaceToken(resolvedYaml, token, resolvedArgs[arg.id] ?? "");
   });
+
+  resolvedYaml = stripTemplateMetadata(resolvedYaml);
 
   return {
     success: true,

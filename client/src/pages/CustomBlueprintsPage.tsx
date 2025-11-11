@@ -51,6 +51,26 @@ inputs:
     type: INT
     defaults: 42
 
+extend:
+  templateArguments:
+    - id: subflow_id
+      displayName: Subflow ID
+      type: STRING
+      required: true
+
+    - id: subflow_namespace
+      displayName: Subflow Namespace
+      type: STRING
+      required: true
+
+    - id: subflow_input_id
+      type: STRING
+      defaults: order_id
+
+    - id: subflow_wait
+      type: BOOL
+      defaults: true
+
 tasks:
   - id: subflow_task
     type: io.kestra.plugin.core.flow.Subflow
@@ -59,21 +79,6 @@ tasks:
     wait: <<arg.subflow_wait>>
     inputs:
       order_id: "{{ inputs.order_id }}"`,
-    templateArguments: [
-      { id: "subflow_id", displayName: "Subflow ID", type: "STRING", required: true },
-      {
-        id: "subflow_namespace",
-        displayName: "Subflow Namespace",
-        type: "STRING",
-        required: true,
-      },
-      {
-        id: "subflow_wait",
-        displayName: "Wait for Subflow",
-        type: "BOOL",
-        defaults: true,
-      },
-    ],
   },
   {
     id: "customer-onboarding-starter",
