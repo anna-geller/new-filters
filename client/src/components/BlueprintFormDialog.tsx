@@ -135,10 +135,6 @@ export default function BlueprintFormDialog({
     if (!trimmedFlow) {
       nextErrors.flowTemplate = "Flow YAML is required";
     }
-    if (parsedTags.length === 0) {
-      nextErrors.tagsInput = "Enter at least one tag";
-    }
-
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
@@ -191,32 +187,30 @@ export default function BlueprintFormDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="blueprint-tags">Tags</Label>
+            <Label htmlFor="blueprint-tags">Tags (optional)</Label>
             <Input
               id="blueprint-tags"
               value={formState.tagsInput}
               onChange={(event) => handleFieldChange("tagsInput", event.target.value)}
               placeholder="Comma-separated tags, e.g. Getting Started, Kestra"
-              className={errors.tagsInput ? "border-destructive focus-visible:ring-destructive" : ""}
             />
-            {errors.tagsInput ? (
-              <p className="text-xs text-destructive">{errors.tagsInput}</p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Tags help teammates filter and find this blueprint quickly.
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">
+              Leave blank if you do not need discovery tags for this template.
+            </p>
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="blueprint-flow">Flow</Label>
+            <p className="text-xs text-muted-foreground">
+              Define <code>extend.templateArguments</code> to describe inputs like <code>{"<<arg.myvariable>>"}</code>.
+            </p>
             <Textarea
               id="blueprint-flow"
               value={formState.flowTemplate}
               onChange={(event) => handleFieldChange("flowTemplate", event.target.value)}
-              placeholder={`id: <<flow_id>>\nnamespace: <<namespace>>\n\ntasks:\n  - id: example\n    type: io.kestra.plugin.core.log.Log\n    message: "Hello <<arg.recipient>>!"`}
-              className={errors.flowTemplate ? "border-destructive focus-visible:ring-destructive" : ""}
-              rows={12}
+              placeholder={`id: <<flow_id>>\nnamespace: <<namespace>>\n\nextend:\n  templateArguments:\n    - id: recipient\n      type: STRING\n\ntasks:\n  - id: example\n    type: io.kestra.plugin.core.log.Log\n    message: "Hello <<arg.recipient>>!"`}
+              rows={14}
+              className={`font-mono text-sm ${errors.flowTemplate ? "border-destructive focus-visible:ring-destructive" : ""}`}
             />
             {errors.flowTemplate && (
               <p className="text-xs text-destructive">{errors.flowTemplate}</p>
