@@ -1,9 +1,11 @@
+import { useMemo, useState } from "react";
 import BlueprintsLibraryPage, {
   type BlueprintCard,
 } from "./blueprints/BlueprintsLibraryPage";
 import type { TagOption } from "@/components/TagsFilterEditor";
+import BlueprintFormDialog from "@/components/BlueprintFormDialog";
 
-const CUSTOM_TAG_OPTIONS: TagOption[] = [
+const STATIC_TAG_OPTIONS: TagOption[] = [
   { id: "Getting Started", label: "Getting Started" },
   { id: "Notifications", label: "Notifications" },
   { id: "Python", label: "Python" },
@@ -27,7 +29,7 @@ const CUSTOM_TAG_OPTIONS: TagOption[] = [
   { id: "Alerting", label: "Alerting" },
 ];
 
-const CUSTOM_BLUEPRINTS: BlueprintCard[] = [
+const INITIAL_CUSTOM_BLUEPRINTS: BlueprintCard[] = [
   {
     id: "incident-response-agent",
     name: "Incident Response Agent",
@@ -125,15 +127,82 @@ tasks:
 ];
 
 export default function CustomBlueprintsPage() {
+  const [blueprints, setBlueprints] = useState<BlueprintCard[]>(INITIAL_CUSTOM_BLUEPRINTS);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const [editingBlueprint, setEditingBlueprint] = useState<BlueprintCard | null>(null);
+
+  const tagOptions = useMemo(() => {
+    const tagMap = new Map<string, TagOption>();
+    STATIC_TAG_OPTIONS.forEach((tag) => tagMap.set(tag.id.toLowerCase(), tag));
+    blueprints.forEach((blueprint) => {
+      blueprint.tags.forEach((tag) => {
+        const normalized = tag.toLowerCase();
+        if (!tagMap.has(normalized)) {
+          tagMap.set(normalized, { id: tag, label: tag });
+        }
+      });
+    });
+    return Array.from(tagMap.values());
+  }, [blueprints]);
+
+  const handleOpenCreate = () => {
+    setFormMode("create");
+    setEditingBlueprint(null);
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (blueprint: BlueprintCard) => {
+    setFormMode("edit");
+    setEditingBlueprint(blueprint);
+    setIsFormOpen(true);
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsFormOpen(open);
+    if (!open) {
+      setEditingBlueprint(null);
+    }
+  };
+
+  const handleSubmitBlueprint = (
+    blueprint: BlueprintCard,
+    meta: { originalId?: string } = {},
+  ) => {
+    setBlueprints((prev) => {
+      const targetId = meta.originalId ?? blueprint.id;
+      const existingIndex = prev.findIndex((bp) => bp.id === targetId);
+      if (existingIndex >= 0) {
+        const next = [...prev];
+        next[existingIndex] = blueprint;
+        return next;
+      }
+      return [blueprint, ...prev];
+    });
+    handleDialogOpenChange(false);
+  };
+
   return (
-    <BlueprintsLibraryPage
-      title="Custom Blueprints"
-      subtitle="Build custom blueprints shared across your organization."
-      tagOptions={CUSTOM_TAG_OPTIONS}
-      blueprints={CUSTOM_BLUEPRINTS}
-      savedFilterNamespace="custom-blueprints"
-      allowEdit
-      showCreateButton
-    />
+    <>
+      <BlueprintsLibraryPage
+        title="Custom Blueprints"
+        subtitle="Build custom blueprints shared across your organization."
+        tagOptions={tagOptions}
+        blueprints={blueprints}
+        savedFilterNamespace="custom-blueprints"
+        allowEdit
+        showCreateButton
+        onCreateBlueprint={handleOpenCreate}
+        onEditBlueprint={handleOpenEdit}
+      />
+      <BlueprintFormDialog
+        open={isFormOpen}
+        mode={formMode}
+        initialBlueprint={editingBlueprint ?? undefined}
+        existingIds={blueprints.map((blueprint) => blueprint.id)}
+        onOpenChange={handleDialogOpenChange}
+        onSubmit={handleSubmitBlueprint}
+      />
+    </>
   );
 }

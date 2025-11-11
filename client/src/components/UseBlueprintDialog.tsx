@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { resolveBlueprint } from "@/utils/resolveBlueprint";
+import { extractTemplateArguments } from "@/utils/templateArgs";
 import type {
   BlueprintCard,
   TemplateArgument,
@@ -62,7 +63,15 @@ export default function UseBlueprintDialog({
   const [argValues, setArgValues] = useState<Record<string, TemplateValue>>({});
   const [errors, setErrors] = useState<TemplateFieldErrors>({});
 
-  const templateArguments = blueprint?.templateArguments ?? [];
+  const templateArguments = useMemo(() => {
+    if (!blueprint?.flowTemplate) {
+      return [];
+    }
+    if (blueprint.templateArguments?.length) {
+      return blueprint.templateArguments;
+    }
+    return extractTemplateArguments(blueprint.flowTemplate);
+  }, [blueprint]);
 
   useEffect(() => {
     if (!open) {

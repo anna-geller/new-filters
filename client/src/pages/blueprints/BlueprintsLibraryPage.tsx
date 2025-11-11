@@ -91,6 +91,8 @@ interface BlueprintsLibraryPageProps {
   searchPlaceholder?: string;
   allowEdit?: boolean;
   showCreateButton?: boolean;
+  onCreateBlueprint?: () => void;
+  onEditBlueprint?: (blueprint: BlueprintCard) => void;
 }
 
 const TAG_FILTER_OPTIONS: FilterOption[] = [
@@ -109,6 +111,8 @@ export function BlueprintsLibraryPage({
   searchPlaceholder = "Search blueprints...",
   allowEdit = false,
   showCreateButton = false,
+  onCreateBlueprint,
+  onEditBlueprint,
 }: BlueprintsLibraryPageProps) {
   const [searchValue, setSearchValue] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -382,7 +386,7 @@ export function BlueprintsLibraryPage({
   const noop = () => {};
 
   const handleUseBlueprint = (blueprint: BlueprintCard) => {
-    if (blueprint.flowTemplate && blueprint.templateArguments) {
+    if (blueprint.flowTemplate) {
       setActiveBlueprint(blueprint);
       setIsDialogOpen(true);
       return;
@@ -424,7 +428,10 @@ export function BlueprintsLibraryPage({
             <span>Jump to...</span>
             <span>Ctrl+Cmd+K</span>
             {showCreateButton && (
-              <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
+              <button
+                className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate"
+                onClick={onCreateBlueprint}
+              >
                 Create
               </button>
             )}
@@ -575,6 +582,7 @@ export function BlueprintsLibraryPage({
                                 size="icon"
                                 className="h-8 w-8 rounded-md border border-transparent text-muted-foreground hover:border-border/60 hover:text-foreground"
                                 aria-label="Edit"
+                                onClick={() => onEditBlueprint?.(blueprint)}
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
