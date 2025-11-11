@@ -323,3 +323,51 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
+
+/* ReactFlow Controls dark mode styling */
+.react-flow__controls {
+  box-shadow: none !important;
+}
+
+.react-flow__controls-button {
+  background-color: #262A35 !important;
+  border-color: #3A3F4F !important;
+  color: #9CA3AF !important;
+  border-width: 1px !important;
+  transition: all 0.2s !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #2F3341 !important;
+  border-color: #8408FF !important;
+  color: #C4B5FD !important;
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor !important;
+}
+
+/* ReactFlow Node styling - remove default white backgrounds */
+.react-flow__node {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.react-flow__node-default {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Ensure custom nodes have no default padding/background */
+.react-flow__node-input,
+.react-flow__node-output,
+.react-flow__node-error,
+.react-flow__node-finally,
+.react-flow__node-task,
+.react-flow__node-trigger,
+.react-flow__node-note {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}

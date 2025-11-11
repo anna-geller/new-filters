@@ -9,6 +9,7 @@ import ExecutionsPage from "@/pages/ExecutionsPage";
 import ExecutionDetailsPage from "@/pages/ExecutionDetailsPage";
 import FlowsPage from "@/pages/FlowsPage";
 import FlowDetailsPage from "@/pages/FlowDetailsPage";
+import FlowEditorPage from "@/pages/FlowEditorPage";
 import AppsPage from "@/pages/AppsPage";
 import AssetsPage from "@/pages/AssetsPage";
 import AssetDetailsPage from "@/pages/AssetDetailsPage";
@@ -57,6 +58,8 @@ function Router() {
       <Route path="/executions/:executionId" component={ExecutionDetailsPage} />
       <Route path="/executions" component={ExecutionsPage} />
       <Route path="/dashboards" component={DashboardsPage} />
+      <Route path="/flows/new" component={FlowEditorPage} />
+      <Route path="/flows/editor" component={FlowEditorPage} />
       <Route path="/flows/:namespace/:flowId" component={FlowDetailsPage} />
       <Route path="/flows" component={FlowsPage} />
       <Route path="/assets/:namespace/:assetId" component={AssetDetailsPage} />

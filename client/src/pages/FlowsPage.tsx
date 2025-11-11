@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'wouter';
 import FilterInterface, { type FilterOption } from '@/components/FilterInterface';
 import FlowsTable, { type FlowRow } from '@/components/FlowsTable';
 import type { ColumnConfig } from '@/types/savedFilters';
@@ -71,6 +72,7 @@ const operatorDisplay: Record<string, string> = {
 const DEFAULT_VISIBLE_FILTERS: string[] = [];
 
 export default function FlowsPage() {
+  const [, setLocation] = useLocation();
   const [searchValue, setSearchValue] = useState('');
   const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([]);
   const [namespaceOperator, setNamespaceOperator] = useState<string>('in');
@@ -401,7 +403,10 @@ export default function FlowsPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Ctrl+Cmd+K</span>
             </div>
-            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate">
+            <button 
+              onClick={() => setLocation('/flows/new')}
+              className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-md hover-elevate"
+            >
               Create
             </button>
           </div>

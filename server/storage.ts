@@ -11,15 +11,22 @@ export interface IStorage {
   getExecutionStateSynonyms(tenantId: string): Promise<ExecutionStateSynonym[]>;
   createExecutionStateSynonym(tenantId: string, defaultState: string, synonym: string): Promise<ExecutionStateSynonym>;
   deleteExecutionStateSynonym(id: string): Promise<void>;
+  
+  // Canvas data methods
+  getFlowCanvas(namespace: string, flowId: string): Promise<any | undefined>;
+  saveFlowCanvas(namespace: string, flowId: string, canvasData: any): Promise<void>;
+  deleteFlowCanvas(namespace: string, flowId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private executionStateSynonyms: Map<string, ExecutionStateSynonym>;
+  private canvasData: Map<string, any>;
 
   constructor() {
     this.users = new Map();
     this.executionStateSynonyms = new Map();
+    this.canvasData = new Map();
     this.seedExecutionStateSynonyms();
   }
 
@@ -105,6 +112,22 @@ export class MemStorage implements IStorage {
 
   async deleteExecutionStateSynonym(id: string): Promise<void> {
     this.executionStateSynonyms.delete(id);
+  }
+
+  // Canvas data methods
+  async getFlowCanvas(namespace: string, flowId: string): Promise<any | undefined> {
+    const key = `${namespace}/${flowId}`;
+    return this.canvasData.get(key);
+  }
+
+  async saveFlowCanvas(namespace: string, flowId: string, canvasData: any): Promise<void> {
+    const key = `${namespace}/${flowId}`;
+    this.canvasData.set(key, canvasData);
+  }
+
+  async deleteFlowCanvas(namespace: string, flowId: string): Promise<void> {
+    const key = `${namespace}/${flowId}`;
+    this.canvasData.delete(key);
   }
 }
 
