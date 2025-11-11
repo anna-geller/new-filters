@@ -1,4 +1,5 @@
 import { useMemo, useState, type ComponentType } from "react";
+import { useLocation } from "wouter";
 import FilterInterface, { type FilterOption } from "@/components/FilterInterface";
 import type { ColumnConfig } from "@/components/ExecutionsTable";
 import type { TagOption } from "@/components/TagsFilterEditor";
@@ -7,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import UseBlueprintDialog from "@/components/UseBlueprintDialog";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -61,12 +64,22 @@ export const BLUEPRINT_PLUGIN_LIBRARY = {
 
 export type BlueprintPluginId = keyof typeof BLUEPRINT_PLUGIN_LIBRARY;
 
+export interface TemplateArgument {
+  id: string;
+  displayName?: string;
+  type: "STRING" | "INT" | "BOOL";
+  required?: boolean;
+  defaults?: string | number | boolean;
+}
+
 export interface BlueprintCard {
   id: string;
   name: string;
   description: string;
   tags: string[];
   plugins: BlueprintPluginId[];
+  flowTemplate?: string;
+  templateArguments?: TemplateArgument[];
 }
 
 interface BlueprintsLibraryPageProps {
@@ -107,6 +120,10 @@ export function BlueprintsLibraryPage({
   const [columns, setColumns] = useState<ColumnConfig[]>([]);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeBlueprint, setActiveBlueprint] = useState<BlueprintCard | null>(null);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const normalizedSelectedTags = useMemo(
     () => selectedTags.map((tag) => tag.toLowerCase()),
@@ -364,6 +381,37 @@ export function BlueprintsLibraryPage({
 
   const noop = () => {};
 
+  const handleUseBlueprint = (blueprint: BlueprintCard) => {
+    if (blueprint.flowTemplate && blueprint.templateArguments) {
+      setActiveBlueprint(blueprint);
+      setIsDialogOpen(true);
+      return;
+    }
+    toast({
+      title: "Template unavailable",
+      description: "This blueprint does not have a template yet.",
+    });
+  };
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    setIsDialogOpen(nextOpen);
+    if (!nextOpen) {
+      setActiveBlueprint(null);
+    }
+  };
+
+  const handleDialogResolved = (payload: { yaml: string; flowId: string; namespace: string }) => {
+    setIsDialogOpen(false);
+    setActiveBlueprint(null);
+    setLocation("/flows/editor", {
+      state: {
+        initialYaml: payload.yaml,
+        flowId: payload.flowId,
+        namespace: payload.namespace,
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-[#262A35]/80">
@@ -534,7 +582,7 @@ export function BlueprintsLibraryPage({
                             <TooltipContent>Edit</TooltipContent>
                           </Tooltip>
                         )}
-                        <Button size="sm" className="h-8 px-3">
+                        <Button size="sm" className="h-8 px-3" onClick={() => handleUseBlueprint(blueprint)}>
                           Use
                         </Button>
                       </div>
@@ -565,6 +613,12 @@ export function BlueprintsLibraryPage({
           <span>Total: {filteredBlueprints.length}</span>
         </div>
       </main>
+      <UseBlueprintDialog
+        open={isDialogOpen}
+        blueprint={activeBlueprint}
+        onOpenChange={handleDialogOpenChange}
+        onResolved={handleDialogResolved}
+      />
     </div>
   );
 }

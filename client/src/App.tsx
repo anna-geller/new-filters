@@ -59,6 +59,7 @@ function Router() {
       <Route path="/executions" component={ExecutionsPage} />
       <Route path="/dashboards" component={DashboardsPage} />
       <Route path="/flows/new" component={FlowEditorPage} />
+      <Route path="/flows/editor" component={FlowEditorPage} />
       <Route path="/flows/:namespace/:flowId" component={FlowDetailsPage} />
       <Route path="/flows" component={FlowsPage} />
       <Route path="/assets/:namespace/:assetId" component={AssetDetailsPage} />

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useHistoryState } from "wouter/use-browser-location";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save } from "lucide-react";
 import { FlowCanvas } from "@/components/FlowCanvas";
 import type { FlowProperties, FlowCanvasData } from "@/types/canvas";
@@ -17,6 +19,20 @@ interface FlowEditorPageProps {
 const TAB_TRIGGER_CLASSES =
   "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground/80 transition-colors hover:bg-white/5 hover:text-foreground data-[state=active]:bg-[#2F3547] data-[state=active]:text-[#C4B5FD] data-[state=active]:font-semibold data-[state=active]:shadow-[0_0_0_1px_rgba(196,181,253,0.25)]";
 
+const YAML_PLACEHOLDER = `id: demo-flow
+namespace: prod.team
+
+tasks:
+  - id: log
+    type: io.kestra.plugin.core.log.Log
+    message: "Hello from Kestra!"`;
+
+interface FlowEditorRouteState {
+  initialYaml?: string;
+  flowId?: string;
+  namespace?: string;
+}
+
 function renderPlaceholderCard(title: string, description: string) {
   return (
     <Card className="p-6 bg-[#262A35] border-border space-y-2">
@@ -28,10 +44,16 @@ function renderPlaceholderCard(title: string, description: string) {
 
 export default function FlowEditorPage({ params }: FlowEditorPageProps) {
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<string>("canvas");
+  const historyState = useHistoryState<FlowEditorRouteState>();
+  const initialFlowId = historyState?.flowId || params?.flowId || "";
+  const initialNamespace = historyState?.namespace || params?.namespace || "";
+  const initialYaml = historyState?.initialYaml || "";
+  const defaultTab = initialYaml ? "code" : "canvas";
+  const [activeTab, setActiveTab] = useState<string>(defaultTab);
+  const [codeValue, setCodeValue] = useState(initialYaml);
   const [flowProperties, setFlowProperties] = useState<FlowProperties>({
-    id: params?.flowId || "",
-    namespace: params?.namespace || "",
+    id: initialFlowId,
+    namespace: initialNamespace,
   });
   const [canvasData, setCanvasData] = useState<FlowCanvasData>({
     nodes: [],
@@ -39,7 +61,7 @@ export default function FlowEditorPage({ params }: FlowEditorPageProps) {
   });
 
   const handleSave = () => {
-    console.log("Saving flow:", flowProperties, canvasData);
+    console.log("Saving flow:", flowProperties, canvasData, codeValue);
     alert("Flow saved successfully! (This is a prototype - data is not persisted)");
   };
 
@@ -117,10 +139,28 @@ export default function FlowEditorPage({ params }: FlowEditorPageProps) {
 
         <main className="flex-1 overflow-y-auto">
           <TabsContent value="code" className="space-y-6 p-6">
-            {renderPlaceholderCard(
-              "Code Editor",
-              "This tab will display a YAML code editor for defining your flow. You can write Kestra flow definitions directly in YAML format."
-            )}
+            <Card className="border-border bg-[#262A35]">
+              <div className="border-b border-border/70 px-4 py-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">Flow YAML</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Fill in the Kestra YAML for this flow. Changes are not saved automatically.
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {flowProperties.namespace ? `${flowProperties.namespace} / ` : ""}
+                  {flowProperties.id || "New Flow"}
+                </span>
+              </div>
+              <div className="p-4">
+                <Textarea
+                  value={codeValue}
+                  onChange={(event) => setCodeValue(event.target.value)}
+                  placeholder={YAML_PLACEHOLDER}
+                  className="min-h-[420px] font-mono text-sm bg-[#1F232D] border-border/60 focus-visible:ring-1 focus-visible:ring-primary/40"
+                />
+              </div>
+            </Card>
           </TabsContent>
 
           <TabsContent value="no-code" className="space-y-6 p-6">
@@ -144,4 +184,3 @@ export default function FlowEditorPage({ params }: FlowEditorPageProps) {
     </Tabs>
   );
 }
-

@@ -36,6 +36,44 @@ const CUSTOM_BLUEPRINTS: BlueprintCard[] = [
     plugins: ["pagerduty", "slack", "notion", "kestra"],
   },
   {
+    id: "subflow-starter",
+    name: "Subflow Starter Template",
+    description: "Create flows that call subflows with configurable namespace, ID, and wait behavior.",
+    tags: ["Getting Started", "Kestra"],
+    plugins: ["kestra"],
+    flowTemplate: `id: <<flow_id>>
+namespace: <<namespace>>
+
+inputs:
+  - id: order_id
+    type: INT
+    defaults: 42
+
+tasks:
+  - id: subflow_task
+    type: io.kestra.plugin.core.flow.Subflow
+    namespace: <<arg.subflow_namespace>>
+    flowId: <<arg.subflow_id>>
+    wait: <<arg.subflow_wait>>
+    inputs:
+      order_id: "{{ inputs.order_id }}"`,
+    templateArguments: [
+      { id: "subflow_id", displayName: "Subflow ID", type: "STRING", required: true },
+      {
+        id: "subflow_namespace",
+        displayName: "Subflow Namespace",
+        type: "STRING",
+        required: true,
+      },
+      {
+        id: "subflow_wait",
+        displayName: "Wait for Subflow",
+        type: "BOOL",
+        defaults: true,
+      },
+    ],
+  },
+  {
     id: "customer-onboarding-starter",
     name: "Customer Onboarding Starter",
     description: "Kick off a guided onboarding data pipeline for new tenants with ready-to-run flows.",

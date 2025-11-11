@@ -1,0 +1,121 @@
+import type { TemplateArgument } from "@/pages/blueprints/BlueprintsLibraryPage";
+
+export interface ResolveBlueprintResult {
+  success: boolean;
+  yaml?: string;
+  errors?: Record<string, string>;
+}
+
+type UserInputs = Record<string, unknown>;
+
+const FLOW_ID_TOKEN = "<<flow_id>>";
+const NAMESPACE_TOKEN = "<<namespace>>";
+
+const REQUIRED_FIELD_ERROR = "This field is required";
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function replaceToken(template: string, token: string, replacement: string) {
+  if (!template || !token) {
+    return template;
+  }
+  const pattern = new RegExp(escapeRegExp(token), "g");
+  return template.replace(pattern, replacement);
+}
+
+function formatArgumentLabel(arg: TemplateArgument) {
+  return arg.displayName || arg.id;
+}
+
+export function resolveBlueprint(
+  template: string,
+  flowId: string,
+  namespace: string,
+  templateArgs: TemplateArgument[] = [],
+  userInputs: UserInputs = {},
+): ResolveBlueprintResult {
+  const errors: Record<string, string> = {};
+  const trimmedFlowId = flowId.trim();
+  const trimmedNamespace = namespace.trim();
+
+  if (!trimmedFlowId) {
+    errors.flowId = REQUIRED_FIELD_ERROR;
+  }
+  if (!trimmedNamespace) {
+    errors.namespace = REQUIRED_FIELD_ERROR;
+  }
+
+  const resolvedArgs: Record<string, string> = {};
+
+  templateArgs.forEach((arg) => {
+    const rawValue = userInputs[arg.id];
+    const fallback = arg.defaults;
+    const value =
+      rawValue === undefined || rawValue === ""
+        ? fallback
+        : rawValue;
+    const hasValue = value !== undefined && value !== null && value !== "";
+
+    if (arg.required && !hasValue) {
+      errors[arg.id] = REQUIRED_FIELD_ERROR;
+      return;
+    }
+
+    if (!hasValue) {
+      resolvedArgs[arg.id] = "";
+      return;
+    }
+
+    if (arg.type === "INT") {
+      const numericValue = typeof value === "number" ? value : Number(String(value).trim());
+      if (!Number.isInteger(numericValue)) {
+        errors[arg.id] = `${formatArgumentLabel(arg)} must be an integer`;
+        return;
+      }
+      resolvedArgs[arg.id] = String(numericValue);
+      return;
+    }
+
+    if (arg.type === "BOOL") {
+      let boolValue: boolean | null = null;
+      if (typeof value === "boolean") {
+        boolValue = value;
+      } else if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        if (normalized === "true") {
+          boolValue = true;
+        } else if (normalized === "false") {
+          boolValue = false;
+        }
+      }
+      if (boolValue === null) {
+        errors[arg.id] = `${formatArgumentLabel(arg)} must be true or false`;
+        return;
+      }
+      resolvedArgs[arg.id] = boolValue ? "true" : "false";
+      return;
+    }
+
+    resolvedArgs[arg.id] = String(value).trim();
+  });
+
+  if (Object.keys(errors).length > 0) {
+    return { success: false, errors };
+  }
+
+  let resolvedYaml = template || "";
+  resolvedYaml = replaceToken(resolvedYaml, FLOW_ID_TOKEN, trimmedFlowId);
+  resolvedYaml = replaceToken(resolvedYaml, NAMESPACE_TOKEN, trimmedNamespace);
+
+  templateArgs.forEach((arg) => {
+    const token = `<<arg.${arg.id}>>`;
+    resolvedYaml = replaceToken(resolvedYaml, token, resolvedArgs[arg.id] ?? "");
+  });
+
+  return {
+    success: true,
+    yaml: resolvedYaml,
+  };
+}
