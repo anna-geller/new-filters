@@ -1,6 +1,14 @@
 # Overview
 
-This is a React-based execution management interface featuring a sophisticated filter system and data visualization dashboard. The application provides users with advanced filtering capabilities, customizable table views, and real-time data management for execution monitoring. Built with modern web technologies, it emphasizes dark mode design patterns and accessibility, following a system-based design approach for productivity-focused interfaces.
+This is a Kestra workflow Canvas editor with an n8n-inspired three-panel node editing experience. The editor supports drag-and-drop task creation, visual workflow design, and inline property editing with real-time task execution via Playground feature. Built with modern web technologies using React Flow for the canvas, the design uses Kestra's dark theme aesthetic (#262A35 background, #8408FF purple accents) and supports metadata-driven task configuration based on plugin types from kestra.io/plugins.
+
+## Recent Changes (November 2024)
+
+- **Config Persistence Fix**: Fixed critical bug where node property edits were not saved due to stale config variable in FlowNodeSidePanel.handleSave. Now correctly uses `node.data.config` to capture all user changes.
+- **Return Task Rename**: Renamed "Debug" task to "Return" across the Canvas palette for consistency with Kestra terminology.
+- **Three-Panel Side Panel**: Implemented comprehensive node editing interface with Inputs (upstream outputs + execution context), Properties (metadata-driven editable fields), and Outputs (tabs for outputs/metrics/logs) panels.
+- **Playground Integration**: Blue Play icon enables ad-hoc task execution with runtime data displayed in Outputs panel.
+- **Task Metadata Registry**: Created extensible system for dynamic property/output definitions based on Kestra plugin types.
 
 # User Preferences
 

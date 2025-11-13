@@ -18,7 +18,7 @@ import '@xyflow/react/dist/style.css';
 import { FlowCanvasNode, FlowCanvasEdge, FlowCanvasData, FlowProperties } from '@/types/canvas';
 import FlowCanvasPalette from './FlowCanvasPalette';
 import FlowPropertiesPanel from './FlowPropertiesPanel';
-import FlowNodePropertiesModal from './FlowNodePropertiesModal';
+import FlowNodeSidePanel, { PlaygroundExecutionData } from './FlowNodeSidePanel';
 import { TaskNode, TriggerNode, InputNode, OutputNode, ErrorNode, FinallyNode, NoteNode } from './FlowCanvasNode';
 
 interface FlowCanvasProps {
@@ -217,6 +217,61 @@ export default function FlowCanvas({
     setNodes((nds) => nds.concat(newNode));
   }, [setNodes]);
 
+  // Mock playground execution handler
+  const handlePlaygroundRun = useCallback(async (nodeId: string): Promise<PlaygroundExecutionData> => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Mock execution data based on the node's task type
+    const node = nodes.find(n => n.id === nodeId);
+    const config = node?.data.config as any || {};
+    const pluginType = config.type || '';
+
+    // Return mock data based on task type
+    if (pluginType === 'io.kestra.plugin.core.debug.Return') {
+      return {
+        outputs: {
+          value: config.format || 'Hello there'
+        },
+        metrics: {
+          duration: '145ms',
+          length: 11
+        },
+        logs: [
+          '[INFO] Task execution started',
+          '[INFO] Rendering template: ' + (config.format || 'Hello there'),
+          '[INFO] Task execution completed successfully'
+        ]
+      };
+    } else if (pluginType === 'io.kestra.plugin.core.log.Log') {
+      return {
+        outputs: {},
+        metrics: {
+          duration: '12ms'
+        },
+        logs: [
+          '[INFO] Task execution started',
+          `[${config.level || 'INFO'}] ${config.message || 'Log message'}`,
+          '[INFO] Task execution completed successfully'
+        ]
+      };
+    }
+
+    // Default mock data for other tasks
+    return {
+      outputs: {
+        status: 'completed'
+      },
+      metrics: {
+        duration: '200ms'
+      },
+      logs: [
+        '[INFO] Task execution started',
+        '[INFO] Task execution completed successfully'
+      ]
+    };
+  }, [nodes]);
+
   return (
     <div 
       className="flex h-[calc(100vh-200px)] w-full bg-[#1F232D]"
@@ -320,23 +375,26 @@ export default function FlowCanvas({
         }}
       />
 
-      {/* Node Properties Modal */}
-      {editingNode && (
-        <FlowNodePropertiesModal
-          node={editingNode}
-          onClose={() => setEditingNodeId(null)}
-          onSave={(updatedData) => {
+      {/* Node Properties Side Panel */}
+      <FlowNodeSidePanel
+        node={editingNode || null}
+        allNodes={nodes}
+        allEdges={edges}
+        open={!!editingNode}
+        onClose={() => setEditingNodeId(null)}
+        onSave={(updatedData) => {
+          if (editingNode) {
             handleNodeUpdate(editingNode.id, updatedData);
-            setEditingNodeId(null);
             handleAutoSave();
-          }}
-          onDelete={() => {
-            setNodes((nds) => nds.filter((n) => n.id !== editingNode.id));
-            setEditingNodeId(null);
-            handleAutoSave();
-          }}
-        />
-      )}
+          }
+        }}
+        onDelete={editingNode ? () => {
+          setNodes((nds) => nds.filter((n) => n.id !== editingNode.id));
+          setEditingNodeId(null);
+          handleAutoSave();
+        } : undefined}
+        onPlaygroundRun={handlePlaygroundRun}
+      />
     </div>
   );
 }
