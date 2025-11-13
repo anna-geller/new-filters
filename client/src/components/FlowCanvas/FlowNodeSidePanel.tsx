@@ -78,7 +78,8 @@ export default function FlowNodeSidePanel({
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent 
-        side="right" 
+        side="right"
+        hideCloseButton={true}
         className="w-[90vw] max-w-[1400px] p-0 bg-[#1F232D] border-l border-[#3A3F4F] flex flex-col"
         data-testid="flow-node-side-panel"
       >

@@ -2,17 +2,36 @@ import { TaskMetadata } from '@/data/taskMetadata';
 import { PlaygroundExecutionData } from '../FlowNodeSidePanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Database, BarChart3, FileText } from 'lucide-react';
+import { Loader2, Database, BarChart3, FileText, Code2, Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface OutputsPanelProps {
   taskMetadata?: TaskMetadata;
   playgroundData: PlaygroundExecutionData | null;
   isRunning: boolean;
+  taskId?: string;
 }
 
-export default function OutputsPanel({ taskMetadata, playgroundData, isRunning }: OutputsPanelProps) {
+export default function OutputsPanel({ taskMetadata, playgroundData, isRunning, taskId }: OutputsPanelProps) {
+  const { toast } = useToast();
   const hasOutputs = taskMetadata?.outputs && taskMetadata.outputs.length > 0;
   const hasMetrics = taskMetadata?.metrics && taskMetadata.metrics.length > 0;
+
+  const copyDebugSnippet = (snippet: string) => {
+    navigator.clipboard.writeText(snippet);
+    toast({
+      title: 'Copied to clipboard',
+      description: snippet,
+      duration: 2000,
+    });
+  };
+
+  const generateDebugSnippet = (outputName: string) => {
+    if (!taskId) return `{{ outputs.task_id.${outputName} }}`;
+    return `{{ outputs.${taskId}.${outputName} }}`;
+  };
 
   return (
     <div className="flex flex-col h-full" data-testid="outputs-panel">
