@@ -130,7 +130,11 @@ export default function FlowNodeSidePanel({
           className="w-[90vw] max-w-[1400px] p-0 bg-[#1F232D] border-l border-[#3A3F4F] flex flex-col relative group"
           data-testid="flow-node-side-panel"
         >
-          {node && (
+          {!node ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          ) : (
             <>
           {/* Previous Task Navigation - Left Edge */}
           {previousTask && onNodeSelect ? (
