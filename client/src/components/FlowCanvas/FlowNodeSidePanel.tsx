@@ -52,22 +52,37 @@ export default function FlowNodeSidePanel({
 
   const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
 
-  // Find previous and next tasks based on edges
+  // Find previous and next tasks based on visual positioning
   const { previousTask, nextTask } = useMemo(() => {
+    const currentY = node.position.y;
+    
+    // Find all connected nodes
     const incomingEdges = allEdges.filter(edge => edge.target === node.id);
     const outgoingEdges = allEdges.filter(edge => edge.source === node.id);
-
-    const prevTaskId = incomingEdges[0]?.source;
-    const nextTaskId = outgoingEdges[0]?.target;
-
-    const prevTask = prevTaskId ? allNodes.find(n => n.id === prevTaskId) : null;
-    const nextTask = nextTaskId ? allNodes.find(n => n.id === nextTaskId) : null;
+    
+    const incomingNodes = incomingEdges
+      .map(edge => allNodes.find(n => n.id === edge.source))
+      .filter((n): n is Node => n !== undefined);
+    
+    const outgoingNodes = outgoingEdges
+      .map(edge => allNodes.find(n => n.id === edge.target))
+      .filter((n): n is Node => n !== undefined);
+    
+    // Previous task: connected node with highest Y position that's above current node
+    const prevTask = incomingNodes
+      .filter(n => n.position.y < currentY)
+      .sort((a, b) => b.position.y - a.position.y)[0] || incomingNodes[0] || null;
+    
+    // Next task: connected node with lowest Y position that's below current node
+    const nextTask = outgoingNodes
+      .filter(n => n.position.y > currentY)
+      .sort((a, b) => a.position.y - b.position.y)[0] || outgoingNodes[0] || null;
 
     return {
       previousTask: prevTask,
       nextTask: nextTask
     };
-  }, [node.id, allNodes, allEdges]);
+  }, [node.id, node.position.y, allNodes, allEdges]);
 
   const handleRunPlayground = async () => {
     if (!node || !onPlaygroundRun) return;
