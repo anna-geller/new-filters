@@ -4,6 +4,7 @@ This is a Kestra workflow Canvas editor with an n8n-inspired three-panel node ed
 
 ## Recent Changes (November 2024)
 
+- **Side Panel Width Fix**: Fixed shadcn Sheet component constraining FlowNodeSidePanel to 640px by removing `sm:max-w-sm` and changing `w-3/4` to `w-full` in the right-side variant. Panel now correctly displays at 90% viewport width (up to 1400px) for full n8n-style editor experience.
 - **Config Persistence Fix**: Fixed critical bug where node property edits were not saved due to stale config variable in FlowNodeSidePanel.handleSave. Now correctly uses `node.data.config` to capture all user changes.
 - **Return Task Rename**: Renamed "Debug" task to "Return" across the Canvas palette for consistency with Kestra terminology.
 - **Three-Panel Side Panel**: Implemented comprehensive node editing interface with Inputs (upstream outputs + execution context), Properties (metadata-driven editable fields), and Outputs (tabs for outputs/metrics/logs) panels.
