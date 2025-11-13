@@ -2,8 +2,9 @@ import { TaskMetadata } from '@/data/taskMetadata';
 import { PlaygroundExecutionData } from '../FlowNodeSidePanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Database, BarChart3, FileText, Code2, Play } from 'lucide-react';
+import { Loader2, Database, BarChart3, FileText, Code2, Copy, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,16 +17,19 @@ interface OutputsPanelProps {
 
 export default function OutputsPanel({ taskMetadata, playgroundData, isRunning, taskId }: OutputsPanelProps) {
   const { toast } = useToast();
+  const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
   const hasOutputs = taskMetadata?.outputs && taskMetadata.outputs.length > 0;
   const hasMetrics = taskMetadata?.metrics && taskMetadata.metrics.length > 0;
 
   const copyDebugSnippet = (snippet: string) => {
     navigator.clipboard.writeText(snippet);
+    setCopiedSnippet(snippet);
     toast({
       title: 'Copied to clipboard',
       description: snippet,
       duration: 2000,
     });
+    setTimeout(() => setCopiedSnippet(null), 2000);
   };
 
   const generateDebugSnippet = (outputName: string) => {
@@ -64,7 +68,60 @@ export default function OutputsPanel({ taskMetadata, playgroundData, isRunning, 
         </TabsList>
 
         <ScrollArea className="flex-1">
-          <TabsContent value="outputs" className="mt-0 p-4 space-y-3">
+          <TabsContent value="outputs" className="mt-0 p-4 space-y-4">
+            {/* Debug Expressions - Always Visible */}
+            {hasOutputs ? (
+              <Card className="bg-[#1F232D] border-[#3A3F4F]" data-testid="debug-expressions-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Code2 className="w-4 h-4 text-[#8408FF]" />
+                    Debug Expressions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Use these expressions to reference outputs from this task in other tasks:
+                  </p>
+                  {taskMetadata?.outputs.map((output) => {
+                    const snippet = generateDebugSnippet(output.name);
+                    const isCopied = copiedSnippet === snippet;
+                    return (
+                      <div 
+                        key={output.name}
+                        className="flex items-center justify-between gap-2 bg-[#262A35] border border-[#3A3F4F] rounded p-2 hover:border-[#8408FF] transition-colors group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium text-foreground mb-1">{output.name}</div>
+                          <div className="text-xs font-mono text-[#8408FF] truncate">{snippet}</div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                          onClick={() => copyDebugSnippet(snippet)}
+                          data-testid={`button-copy-debug-${output.name}`}
+                        >
+                          {isCopied ? (
+                            <CheckCircle2 className="w-3 h-3 text-green-500" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-[#1F232D] border-[#3A3F4F]" data-testid="debug-expressions-empty">
+                <CardContent className="pt-6">
+                  <p className="text-xs text-muted-foreground text-center">
+                    This task does not produce outputs. No debug expressions available.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {isRunning && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-[#8408FF]" />

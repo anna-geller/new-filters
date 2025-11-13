@@ -394,6 +394,9 @@ export default function FlowCanvas({
           handleAutoSave();
         } : undefined}
         onPlaygroundRun={handlePlaygroundRun}
+        onNodeSelect={(nodeId: string) => {
+          setEditingNodeId(nodeId);
+        }}
       />
     </div>
   );

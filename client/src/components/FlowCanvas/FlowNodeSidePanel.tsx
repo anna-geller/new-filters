@@ -1,9 +1,10 @@
-import { Node } from '@xyflow/react';
-import { X, Trash2, Play } from 'lucide-react';
+import { Node, Edge } from '@xyflow/react';
+import { X, Trash2, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getTaskMetadata, TaskMetadata } from '@/data/taskMetadata';
 import { useState, useMemo } from 'react';
 import InputsPanel from './panels/InputsPanel';
@@ -19,12 +20,13 @@ export interface PlaygroundExecutionData {
 interface FlowNodeSidePanelProps {
   node: Node | null;
   allNodes: Node[];
-  allEdges: any[];
+  allEdges: Edge[];
   open: boolean;
   onClose: () => void;
   onSave: (updatedData: any) => void;
   onDelete?: () => void;
   onPlaygroundRun?: (nodeId: string) => Promise<PlaygroundExecutionData>;
+  onNodeSelect?: (nodeId: string) => void;
 }
 
 export default function FlowNodeSidePanel({
@@ -35,7 +37,8 @@ export default function FlowNodeSidePanel({
   onClose,
   onSave,
   onDelete,
-  onPlaygroundRun
+  onPlaygroundRun,
+  onNodeSelect
 }: FlowNodeSidePanelProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [playgroundData, setPlaygroundData] = useState<PlaygroundExecutionData | null>(null);
@@ -48,6 +51,23 @@ export default function FlowNodeSidePanel({
   const taskMetadata = getTaskMetadata(pluginType);
 
   const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
+
+  // Find previous and next tasks based on edges
+  const { previousTask, nextTask } = useMemo(() => {
+    const incomingEdges = allEdges.filter(edge => edge.target === node.id);
+    const outgoingEdges = allEdges.filter(edge => edge.source === node.id);
+
+    const prevTaskId = incomingEdges[0]?.source;
+    const nextTaskId = outgoingEdges[0]?.target;
+
+    const prevTask = prevTaskId ? allNodes.find(n => n.id === prevTaskId) : null;
+    const nextTask = nextTaskId ? allNodes.find(n => n.id === nextTaskId) : null;
+
+    return {
+      previousTask: prevTask,
+      nextTask: nextTask
+    };
+  }, [node.id, allNodes, allEdges]);
 
   const handleRunPlayground = async () => {
     if (!node || !onPlaygroundRun) return;
@@ -75,16 +95,63 @@ export default function FlowNodeSidePanel({
     }
   };
 
+  const handleNavigateTask = (taskNode: Node) => {
+    if (onNodeSelect) {
+      onNodeSelect(taskNode.id);
+    }
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent 
-        side="right"
-        hideCloseButton={true}
-        className="w-[90vw] max-w-[1400px] p-0 bg-[#1F232D] border-l border-[#3A3F4F] flex flex-col"
-        data-testid="flow-node-side-panel"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3F4F] bg-[#262A35]">
+    <TooltipProvider>
+      <Sheet open={open} onOpenChange={onClose}>
+        <SheetContent 
+          side="right"
+          hideCloseButton={true}
+          className="w-[90vw] max-w-[1400px] p-0 bg-[#1F232D] border-l border-[#3A3F4F] flex flex-col relative group"
+          data-testid="flow-node-side-panel"
+        >
+          {/* Previous Task Navigation - Left Edge */}
+          {previousTask && onNodeSelect && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 h-20 w-8 rounded-l-none rounded-r-md bg-[#262A35]/80 hover:bg-[#8408FF]/20 border-r border-[#3A3F4F] opacity-0 group-hover:opacity-100 transition-opacity z-50"
+                  onClick={() => handleNavigateTask(previousTask)}
+                  data-testid="button-navigate-prev"
+                >
+                  <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-[#262A35] border-[#3A3F4F]">
+                <p className="text-xs">Previous: {previousTask.data.label || previousTask.id}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {/* Next Task Navigation - Right Edge */}
+          {nextTask && onNodeSelect && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 h-20 w-8 rounded-r-none rounded-l-md bg-[#262A35]/80 hover:bg-[#8408FF]/20 border-l border-[#3A3F4F] opacity-0 group-hover:opacity-100 transition-opacity z-50"
+                  onClick={() => handleNavigateTask(nextTask)}
+                  data-testid="button-navigate-next"
+                >
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="bg-[#262A35] border-[#3A3F4F]">
+                <p className="text-xs">Next: {nextTask.data.label || nextTask.id}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3F4F] bg-[#262A35]">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold text-foreground">
@@ -144,10 +211,10 @@ export default function FlowNodeSidePanel({
               <X className="w-4 h-4" />
             </Button>
           </div>
-        </div>
+          </div>
 
-        {/* Three-panel layout */}
-        <div className="flex-1 flex overflow-hidden">
+          {/* Three-panel layout */}
+          <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Inputs */}
           {isTaskNode && (
             <div className="w-1/3 border-r border-[#3A3F4F] flex flex-col">
@@ -200,12 +267,14 @@ export default function FlowNodeSidePanel({
                   taskMetadata={taskMetadata}
                   playgroundData={playgroundData}
                   isRunning={isRunningPlayground}
+                  taskId={config.id || node.data.label}
                 />
               </ScrollArea>
             </div>
           )}
-        </div>
-      </SheetContent>
-    </Sheet>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </TooltipProvider>
   );
 }
