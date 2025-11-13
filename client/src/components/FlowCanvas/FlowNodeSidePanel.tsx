@@ -81,13 +81,11 @@ export default function FlowNodeSidePanel({
     };
   }, [node, allNodes, allEdges]);
 
-  if (!node) return null;
-
-  const config = node.data.config as any || {};
+  // Extract node data conditionally
+  const config = node?.data.config as any || {};
   const pluginType = config.type || '';
   const taskMetadata = getTaskMetadata(pluginType);
-
-  const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
+  const isTaskNode = node?.type === 'task' || node?.type === 'error' || node?.type === 'finally';
 
   const handleRunPlayground = async () => {
     if (!node || !onPlaygroundRun) return;
@@ -104,6 +102,8 @@ export default function FlowNodeSidePanel({
   };
 
   const handleSave = async () => {
+    if (!node) return;
+    
     setIsSaving(true);
     try {
       await onSave({ config: node.data.config });
@@ -130,6 +130,8 @@ export default function FlowNodeSidePanel({
           className="w-[90vw] max-w-[1400px] p-0 bg-[#1F232D] border-l border-[#3A3F4F] flex flex-col relative group"
           data-testid="flow-node-side-panel"
         >
+          {!node ? null : (
+            <>
           {/* Previous Task Navigation - Left Edge */}
           {previousTask && onNodeSelect && (
             <Tooltip>
@@ -293,6 +295,8 @@ export default function FlowNodeSidePanel({
             </div>
           )}
           </div>
+            </>
+          )}
         </SheetContent>
       </Sheet>
     </TooltipProvider>
