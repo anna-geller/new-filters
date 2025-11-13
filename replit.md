@@ -4,12 +4,6 @@ This is a Kestra workflow Canvas editor with an n8n-inspired three-panel node ed
 
 ## Recent Changes (November 2024)
 
-- **Visual Navigation System**: Implemented n8n-style task navigation with hover-based prev/next buttons using visual positioning (Y-coordinates) to intelligently determine task order. Handles complex branching workflows by selecting the visually closest connected task.
-- **Debug Expression Snippets**: Added Debug Expressions feature in OutputsPanel with per-output code snippet cards ({{ outputs.taskId.outputName }}) and copy-to-clipboard buttons. Security-safe implementation prevents code injection.
-- **Drag-and-Drop Variables**: Full HTML5 drag-and-drop support from InputsPanel to PropertiesPanel fields. All task outputs and execution context variables are draggable into any property field for expression building.
-- **Enhanced PropertiesPanel**: Added core task fields (id, type, description) display before plugin-specific properties. All fields support drop zones for drag-and-drop variable insertion.
-- **InputsPanel Reordering**: Reorganized panel to show Task Outputs first (upstream dependencies), Execution Context last. Removed redundant execution.namespace and execution.flowId variables.
-- **Sheet Component Enhancement**: Added hideCloseButton prop to Sheet component to prevent duplicate close buttons in FlowNodeSidePanel.
 - **Side Panel Width Fix**: Fixed shadcn Sheet component constraining FlowNodeSidePanel to 640px by removing `sm:max-w-sm` and changing `w-3/4` to `w-full` in the right-side variant. Panel now correctly displays at 90% viewport width (up to 1400px) for full n8n-style editor experience.
 - **Config Persistence Fix**: Fixed critical bug where node property edits were not saved due to stale config variable in FlowNodeSidePanel.handleSave. Now correctly uses `node.data.config` to capture all user changes.
 - **Return Task Rename**: Renamed "Debug" task to "Return" across the Canvas palette for consistency with Kestra terminology.

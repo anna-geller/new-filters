@@ -57,6 +57,8 @@ export default function InputsPanel({ nodeId, allNodes, allEdges }: InputsPanelP
 
   const executionContext = [
     { name: 'execution.id', type: 'String', value: DEFAULT_EXECUTION_CONTEXT.id },
+    { name: 'execution.namespace', type: 'String', value: DEFAULT_EXECUTION_CONTEXT.namespace },
+    { name: 'execution.flowId', type: 'String', value: DEFAULT_EXECUTION_CONTEXT.flowId },
     { name: 'execution.startDate', type: 'DateTime', value: DEFAULT_EXECUTION_CONTEXT.startDate },
     { name: 'flow.id', type: 'String', value: DEFAULT_EXECUTION_CONTEXT.flowId },
     { name: 'flow.namespace', type: 'String', value: DEFAULT_EXECUTION_CONTEXT.namespace },
@@ -64,7 +66,49 @@ export default function InputsPanel({ nodeId, allNodes, allEdges }: InputsPanelP
 
   return (
     <div className="p-4 space-y-6" data-testid="inputs-panel">
-      {/* Connected Task Outputs - First */}
+      {/* Execution Context */}
+      <div>
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+          Execution Context
+        </h4>
+        <div className="space-y-2">
+          {executionContext.map((item) => (
+            <div 
+              key={item.name}
+              className="group relative bg-[#262A35] border border-[#3A3F4F] rounded p-2 hover:border-[#8408FF] transition-colors"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-mono text-foreground truncate">
+                    {item.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {item.type}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 font-mono truncate">
+                    {item.value}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleCopy(item.name)}
+                  data-testid={`button-copy-${item.name}`}
+                >
+                  {copiedPath === item.name ? (
+                    <CheckCircle2 className="w-3 h-3 text-green-500" />
+                  ) : (
+                    <Copy className="w-3 h-3" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Connected Task Outputs */}
       {connectedInputs.length > 0 && (
         <div>
           <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
@@ -81,13 +125,7 @@ export default function InputsPanel({ nodeId, allNodes, allEdges }: InputsPanelP
                     {input.outputs.map((output: any) => (
                       <div 
                         key={output.path}
-                        className="group relative bg-[#262A35] border border-[#3A3F4F] rounded p-2 hover:border-[#8408FF] transition-colors cursor-move"
-                        draggable="true"
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', `{{ ${output.path} }}`);
-                          e.dataTransfer.effectAllowed = 'copy';
-                        }}
-                        data-testid={`draggable-output-${output.path}`}
+                        className="group relative bg-[#262A35] border border-[#3A3F4F] rounded p-2 hover:border-[#8408FF] transition-colors"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
@@ -134,54 +172,6 @@ export default function InputsPanel({ nodeId, allNodes, allEdges }: InputsPanelP
           No connected tasks. Connect tasks to see their outputs here.
         </div>
       )}
-
-      {/* Execution Context - Last */}
-      <div>
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
-          Execution Context
-        </h4>
-        <div className="space-y-2">
-          {executionContext.map((item) => (
-            <div 
-              key={item.name}
-              className="group relative bg-[#262A35] border border-[#3A3F4F] rounded p-2 hover:border-[#8408FF] transition-colors cursor-move"
-              draggable="true"
-              onDragStart={(e) => {
-                e.dataTransfer.setData('text/plain', `{{ ${item.name} }}`);
-                e.dataTransfer.effectAllowed = 'copy';
-              }}
-              data-testid={`draggable-context-${item.name}`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-mono text-foreground truncate">
-                    {item.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {item.type}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1 font-mono truncate">
-                    {item.value}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleCopy(item.name)}
-                  data-testid={`button-copy-${item.name}`}
-                >
-                  {copiedPath === item.name ? (
-                    <CheckCircle2 className="w-3 h-3 text-green-500" />
-                  ) : (
-                    <Copy className="w-3 h-3" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
