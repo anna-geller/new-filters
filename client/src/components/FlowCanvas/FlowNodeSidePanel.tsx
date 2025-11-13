@@ -44,16 +44,13 @@ export default function FlowNodeSidePanel({
   const [playgroundData, setPlaygroundData] = useState<PlaygroundExecutionData | null>(null);
   const [isRunningPlayground, setIsRunningPlayground] = useState(false);
 
-  if (!node) return null;
-
-  const config = node.data.config as any || {};
-  const pluginType = config.type || '';
-  const taskMetadata = getTaskMetadata(pluginType);
-
-  const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
-
   // Find previous and next tasks based on visual positioning
+  // Must be called before early return to follow Rules of Hooks
   const { previousTask, nextTask } = useMemo(() => {
+    if (!node) {
+      return { previousTask: null, nextTask: null };
+    }
+    
     const currentY = node.position.y;
     
     // Find all connected nodes
@@ -82,7 +79,15 @@ export default function FlowNodeSidePanel({
       previousTask: prevTask,
       nextTask: nextTask
     };
-  }, [node.id, node.position.y, allNodes, allEdges]);
+  }, [node, allNodes, allEdges]);
+
+  if (!node) return null;
+
+  const config = node.data.config as any || {};
+  const pluginType = config.type || '';
+  const taskMetadata = getTaskMetadata(pluginType);
+
+  const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
 
   const handleRunPlayground = async () => {
     if (!node || !onPlaygroundRun) return;
