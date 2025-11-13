@@ -40,7 +40,7 @@ interface PaletteItem {
 const TASK_PLUGINS: PaletteItem[] = [
   // Core tasks
   { id: 'log', label: 'Log', type: 'task', pluginType: 'io.kestra.plugin.core.log.Log', icon: <Play className="w-4 h-4" />, description: 'Log a message', category: 'Core' },
-  { id: 'debug', label: 'Debug', type: 'task', pluginType: 'io.kestra.plugin.core.debug.Return', icon: <Play className="w-4 h-4" />, description: 'Return debug information', category: 'Core' },
+  { id: 'return', label: 'Return', type: 'task', pluginType: 'io.kestra.plugin.core.debug.Return', icon: <Play className="w-4 h-4" />, description: 'Return a value for debugging purposes', category: 'Core' },
   { id: 'pause', label: 'Pause', type: 'task', pluginType: 'io.kestra.plugin.core.flow.Pause', icon: <Play className="w-4 h-4" />, description: 'Pause flow execution', category: 'Core' },
   { id: 'sequential', label: 'Sequential', type: 'task', pluginType: 'io.kestra.plugin.core.flow.Sequential', icon: <Play className="w-4 h-4" />, description: 'Run tasks sequentially', category: 'Core' },
   { id: 'parallel', label: 'Parallel', type: 'task', pluginType: 'io.kestra.plugin.core.flow.Parallel', icon: <Play className="w-4 h-4" />, description: 'Run tasks in parallel', category: 'Core' },
@@ -111,7 +111,7 @@ const TRIGGER_PLUGINS: PaletteItem[] = [
 // Error handler tasks (same as regular tasks but shown in error handling context)
 const ERROR_HANDLER_TASKS: PaletteItem[] = [
   { id: 'error-log', label: 'Log', type: 'error', pluginType: 'io.kestra.plugin.core.log.Log', icon: <AlertTriangle className="w-4 h-4" />, description: 'Log error message', category: 'Core' },
-  { id: 'error-debug', label: 'Debug', type: 'error', pluginType: 'io.kestra.plugin.core.debug.Return', icon: <AlertTriangle className="w-4 h-4" />, description: 'Debug error', category: 'Core' },
+  { id: 'error-return', label: 'Return', type: 'error', pluginType: 'io.kestra.plugin.core.debug.Return', icon: <AlertTriangle className="w-4 h-4" />, description: 'Return error debug information', category: 'Core' },
   { id: 'error-email', label: 'Send Email', type: 'error', pluginType: 'io.kestra.plugin.notifications.mail.MailSend', icon: <AlertTriangle className="w-4 h-4" />, description: 'Send error notification', category: 'Notifications' },
   { id: 'error-slack', label: 'Slack', type: 'error', pluginType: 'io.kestra.plugin.notifications.slack.SlackIncomingWebhook', icon: <AlertTriangle className="w-4 h-4" />, description: 'Send Slack alert', category: 'Notifications' },
   { id: 'error-teams', label: 'Teams', type: 'error', pluginType: 'io.kestra.plugin.notifications.teams.TeamsIncomingWebhook', icon: <AlertTriangle className="w-4 h-4" />, description: 'Send Teams alert', category: 'Notifications' },
@@ -120,7 +120,7 @@ const ERROR_HANDLER_TASKS: PaletteItem[] = [
 // Finally tasks (cleanup tasks that always run)
 const FINALLY_TASKS: PaletteItem[] = [
   { id: 'finally-log', label: 'Log', type: 'finally', pluginType: 'io.kestra.plugin.core.log.Log', icon: <CheckCircle className="w-4 h-4" />, description: 'Log cleanup message', category: 'Core' },
-  { id: 'finally-debug', label: 'Debug', type: 'finally', pluginType: 'io.kestra.plugin.core.debug.Return', icon: <CheckCircle className="w-4 h-4" />, description: 'Debug cleanup', category: 'Core' },
+  { id: 'finally-return', label: 'Return', type: 'finally', pluginType: 'io.kestra.plugin.core.debug.Return', icon: <CheckCircle className="w-4 h-4" />, description: 'Return cleanup debug information', category: 'Core' },
   { id: 'finally-cleanup', label: 'Cleanup', type: 'finally', pluginType: 'io.kestra.plugin.scripts.shell.Script', icon: <CheckCircle className="w-4 h-4" />, description: 'Run cleanup script', category: 'Core' },
   { id: 'finally-email', label: 'Send Email', type: 'finally', pluginType: 'io.kestra.plugin.notifications.mail.MailSend', icon: <CheckCircle className="w-4 h-4" />, description: 'Send completion notification', category: 'Notifications' },
 ];
