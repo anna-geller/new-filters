@@ -123,7 +123,7 @@ export default function FlowNodeSidePanel({
 
   return (
     <TooltipProvider>
-      <Sheet open={open} onOpenChange={onClose}>
+      <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
         <SheetContent 
           side="right"
           hideCloseButton={true}
@@ -133,7 +133,7 @@ export default function FlowNodeSidePanel({
           {node && (
             <>
           {/* Previous Task Navigation - Left Edge */}
-          {previousTask && onNodeSelect && (
+          {previousTask && onNodeSelect ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -150,10 +150,10 @@ export default function FlowNodeSidePanel({
                 <p className="text-xs">Previous: {previousTask.data.label || previousTask.id}</p>
               </TooltipContent>
             </Tooltip>
-          )}
+          ) : null}
 
           {/* Next Task Navigation - Right Edge */}
-          {nextTask && onNodeSelect && (
+          {nextTask && onNodeSelect ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -170,7 +170,7 @@ export default function FlowNodeSidePanel({
                 <p className="text-xs">Next: {nextTask.data.label || nextTask.id}</p>
               </TooltipContent>
             </Tooltip>
-          )}
+          ) : null}
 
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[#3A3F4F] bg-[#262A35]">
