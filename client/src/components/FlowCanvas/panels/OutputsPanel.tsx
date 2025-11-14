@@ -2,7 +2,11 @@ import { TaskMetadata } from '@/data/taskMetadata';
 import { PlaygroundExecutionData } from '../FlowNodeSidePanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Database, BarChart3, FileText } from 'lucide-react';
+import { Loader2, Database, BarChart3, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useState } from 'react';
 
 interface OutputsPanelProps {
   taskMetadata?: TaskMetadata;
@@ -13,6 +17,43 @@ interface OutputsPanelProps {
 export default function OutputsPanel({ taskMetadata, playgroundData, isRunning }: OutputsPanelProps) {
   const hasOutputs = taskMetadata?.outputs && taskMetadata.outputs.length > 0;
   const hasMetrics = taskMetadata?.metrics && taskMetadata.metrics.length > 0;
+  const [debugExpression, setDebugExpression] = useState('');
+  const [debugResult, setDebugResult] = useState<string | null>(null);
+  const [isDebugOpen, setIsDebugOpen] = useState(false);
+
+  const handleDebugExpression = () => {
+    try {
+      const expression = debugExpression.trim();
+      if (!expression) {
+        setDebugResult('Please enter an expression');
+        return;
+      }
+
+      if (playgroundData?.outputs) {
+        const cleanExpression = expression.replace(/\{\{|\}\}/g, '').trim();
+        const parts = cleanExpression.split('.');
+        
+        let result: any = { outputs: playgroundData.outputs };
+        for (const part of parts) {
+          const arrayMatch = part.match(/^(\w+)\["(.+)"\]$/);
+          if (arrayMatch) {
+            const key = arrayMatch[1];
+            const index = arrayMatch[2];
+            result = result[key]?.[index];
+          } else {
+            result = result[part];
+          }
+          if (result === undefined) break;
+        }
+        
+        setDebugResult(result !== undefined ? String(result) : 'undefined');
+      } else {
+        setDebugResult('No execution data available. Run the task first.');
+      }
+    } catch (error) {
+      setDebugResult(`Error: ${error instanceof Error ? error.message : 'Invalid expression'}`);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full" data-testid="outputs-panel">
@@ -45,7 +86,7 @@ export default function OutputsPanel({ taskMetadata, playgroundData, isRunning }
         </TabsList>
 
         <ScrollArea className="flex-1">
-          <TabsContent value="outputs" className="mt-0 p-4 space-y-3">
+          <TabsContent value="outputs" className="mt-0 p-4 space-y-4">
             {isRunning && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-[#8408FF]" />
@@ -54,24 +95,62 @@ export default function OutputsPanel({ taskMetadata, playgroundData, isRunning }
             )}
 
             {!isRunning && playgroundData?.outputs && (
-              <div>
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
-                  Execution Results
-                </h4>
-                <div className="space-y-2">
-                  {Object.entries(playgroundData.outputs).map(([key, value]) => (
-                    <div 
-                      key={key}
-                      className="bg-[#262A35] border border-[#3A3F4F] rounded p-3"
-                    >
-                      <div className="text-xs font-medium text-foreground mb-1">{key}</div>
-                      <div className="text-xs text-muted-foreground font-mono break-all">
-                        {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+              <>
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+                    Execution Results
+                  </h4>
+                  <div className="space-y-2">
+                    {Object.entries(playgroundData.outputs).map(([key, value]) => (
+                      <div 
+                        key={key}
+                        className="bg-[#262A35] border border-[#3A3F4F] rounded p-3"
+                      >
+                        <div className="text-xs font-medium text-foreground mb-1">{key}</div>
+                        <div className="text-xs text-muted-foreground font-mono break-all">
+                          {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+
+                <Collapsible open={isDebugOpen} onOpenChange={setIsDebugOpen}>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-sm font-semibold text-foreground hover:text-foreground/80">
+                    <span>Debug Expression</span>
+                    {isDebugOpen ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 mt-2">
+                    <div>
+                      <Textarea
+                        value={debugExpression}
+                        onChange={(e) => setDebugExpression(e.target.value)}
+                        placeholder='{{ outputs.hello["value"] }}'
+                        className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm min-h-[80px]"
+                        data-testid="input-debug-expression"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleDebugExpression}
+                      className="w-full bg-[#8408FF] hover:bg-[#8613f7] text-white"
+                      data-testid="button-debug-expression"
+                    >
+                      Debug Expression
+                    </Button>
+                    {debugResult !== null && (
+                      <div className="bg-[#262A35] border border-[#3A3F4F] rounded p-3">
+                        <div className="text-xs font-mono text-foreground break-all">
+                          {debugResult}
+                        </div>
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+              </>
             )}
 
             {!isRunning && !playgroundData?.outputs && hasOutputs && (

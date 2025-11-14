@@ -132,16 +132,6 @@ export default function FlowNodeSidePanel({
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
-            
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onClose}
-              className="text-muted-foreground hover:text-foreground"
-              data-testid="button-close"
-            >
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         </div>
 
