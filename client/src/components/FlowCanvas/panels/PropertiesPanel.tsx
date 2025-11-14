@@ -321,7 +321,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
           data-testid="input-id"
         />
       </div>
-
       {/* Type - Always Second */}
       <div className="space-y-2">
         <Label htmlFor="node-type" className="text-sm font-medium text-foreground">
@@ -339,14 +338,12 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
           data-testid="input-type"
         />
       </div>
-
       {/* Required Task Properties */}
       {requiredTaskProperties.length > 0 && (
         <div className="space-y-4">
           {requiredTaskProperties.map(property => renderPropertyInput(property))}
         </div>
       )}
-
       {/* Task Description */}
       {taskMetadata?.description && (
         <div className="bg-[#262A35] border border-[#3A3F4F] rounded p-3">
@@ -356,7 +353,7 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
               href={taskMetadata.documentationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7] mt-2"
+              className="inline-flex items-center gap-1 text-xs hover:text-[#8613f7] mt-2 text-[#a676d6]"
             >
               View documentation
               <ExternalLink className="w-3 h-3" />
@@ -364,7 +361,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
           )}
         </div>
       )}
-
       {/* Optional Task Properties */}
       {optionalTaskProperties.length > 0 && (
         <div className="space-y-4">
@@ -374,7 +370,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
           {optionalTaskProperties.map(property => renderPropertyInput(property))}
         </div>
       )}
-
       {/* Optional Core Properties - Collapsible (Collapsed by Default) */}
       <Collapsible defaultOpen={false}>
         <CollapsibleTrigger className="flex items-center justify-between w-full p-3 bg-[#262A35] hover:bg-[#2A2E3A] border border-[#3A3F4F] rounded transition-colors">
