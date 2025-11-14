@@ -152,6 +152,7 @@ export default function FlowNodeSidePanel({
                   nodeId={node.id}
                   allNodes={allNodes}
                   allEdges={allEdges}
+                  showAllTasks={isOutputNode}
                 />
               </ScrollArea>
             </div>
@@ -171,7 +172,8 @@ export default function FlowNodeSidePanel({
                 taskMetadata={taskMetadata}
                 onConfigChange={(newConfig: any) => {
                   // Always merge with latest config to avoid stale data
-                  node.data.config = { ...node.data.config, ...newConfig };
+                  const currentConfig = node.data.config || {};
+                  node.data.config = { ...currentConfig, ...newConfig };
                   // Auto-save for Output nodes to persist changes immediately
                   if (isOutputNode) {
                     onSave({ config: node.data.config });

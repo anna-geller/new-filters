@@ -9,9 +9,10 @@ interface InputsPanelProps {
   nodeId: string;
   allNodes: Node[];
   allEdges: Edge[];
+  showAllTasks?: boolean; // If true, show all tasks (for Output nodes); if false, show only connected tasks
 }
 
-export default function InputsPanel({ nodeId, allNodes, allEdges }: InputsPanelProps) {
+export default function InputsPanel({ nodeId, allNodes, allEdges, showAllTasks = false }: InputsPanelProps) {
   const { toast } = useToast();
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
 
@@ -31,10 +32,16 @@ export default function InputsPanel({ nodeId, allNodes, allEdges }: InputsPanelP
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const connectedInputs = allEdges
-    .filter(edge => edge.target === nodeId)
-    .map(edge => {
-      const sourceNode = allNodes.find(n => n.id === edge.source);
+  // Get task nodes to display
+  const taskNodesToShow = showAllTasks
+    ? allNodes.filter(n => n.type === 'task' || n.type === 'error' || n.type === 'finally')
+    : allEdges
+        .filter(edge => edge.target === nodeId)
+        .map(edge => allNodes.find(n => n.id === edge.source))
+        .filter(Boolean);
+
+  const connectedInputs = taskNodesToShow
+    .map(sourceNode => {
       if (!sourceNode) return null;
       
       const config = sourceNode.data.config as any || {};
