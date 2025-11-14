@@ -4,6 +4,8 @@ This is a Kestra workflow Canvas editor with an n8n-inspired three-panel node ed
 
 ## Recent Changes (November 2024)
 
+- **Output Node Three-Panel Layout**: Extended three-panel layout to Output nodes for flow output configuration. Output nodes now show Inputs (task outputs available for mapping), Properties (output configuration), and Flow Outputs (aggregated task outputs from the flow) panels. The Outputs panel for Output nodes displays a simplified single-view without tabs, listing all task outputs as draggable items with proper Kestra expressions (`{{ outputs.taskId.outputName }}`).
+- **Side Panel Header Spacing**: Added 48px right margin to button container in FlowNodeSidePanel header, creating better visual separation between Run/Delete buttons and the close icon.
 - **Side Panel Width Fix**: Fixed shadcn Sheet component constraining FlowNodeSidePanel to 640px by removing `sm:max-w-sm` and changing `w-3/4` to `w-full` in the right-side variant. Panel now correctly displays at 90% viewport width (up to 1400px) for full n8n-style editor experience.
 - **Config Persistence Fix**: Fixed critical bug where node property edits were not saved due to stale config variable in FlowNodeSidePanel.handleSave. Now correctly uses `node.data.config` to capture all user changes.
 - **Return Task Rename**: Renamed "Debug" task to "Return" across the Canvas palette for consistency with Kestra terminology.
