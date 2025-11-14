@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, ChevronRight, Plus, X, Trash2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import InputOutputEditor from './InputOutputEditor';
+import ColorPicker from '@/components/ColorPicker';
 
 interface FlowPropertiesPanelProps {
   properties: FlowProperties;
@@ -163,6 +164,67 @@ export default function FlowPropertiesPanel({
                 }
               }}
             />
+          ) : selectedNode.type === 'note' ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="note-id">ID</Label>
+                <Input
+                  id="note-id"
+                  value={nodeConfig.id || ''}
+                  onChange={(e) => {
+                    if (onNodeUpdate) {
+                      onNodeUpdate(selectedNode.id, {
+                        label: e.target.value,
+                        config: {
+                          ...nodeConfig,
+                          id: e.target.value,
+                        },
+                      });
+                    }
+                  }}
+                  className="mt-1"
+                  placeholder="note-id"
+                  data-testid="input-note-id"
+                />
+              </div>
+              <div>
+                <Label htmlFor="note-content">Content</Label>
+                <Textarea
+                  id="note-content"
+                  value={nodeConfig.text || ''}
+                  onChange={(e) => {
+                    if (onNodeUpdate) {
+                      onNodeUpdate(selectedNode.id, {
+                        config: {
+                          ...nodeConfig,
+                          text: e.target.value,
+                        },
+                      });
+                    }
+                  }}
+                  className="mt-1"
+                  rows={5}
+                  placeholder="Enter your note content..."
+                  data-testid="input-note-content"
+                />
+              </div>
+              <div data-testid="colorpicker-note-color">
+                <ColorPicker
+                  value={nodeConfig.color || '#9B8B6B'}
+                  onChange={(color: string) => {
+                    if (onNodeUpdate) {
+                      onNodeUpdate(selectedNode.id, {
+                        config: {
+                          ...nodeConfig,
+                          color,
+                        },
+                      });
+                    }
+                  }}
+                  label="Color"
+                />
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
               <div>

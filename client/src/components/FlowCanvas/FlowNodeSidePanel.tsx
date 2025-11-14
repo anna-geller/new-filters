@@ -97,7 +97,7 @@ export default function FlowNodeSidePanel({
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {isTaskNode && onPlaygroundRun && (
               <Button
                 size="sm"
