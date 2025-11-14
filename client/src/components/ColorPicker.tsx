@@ -10,20 +10,20 @@ interface ColorPickerProps {
   label?: string;
 }
 
-// Predefined color palette
+// Predefined color palette - darker colors for better white text contrast
 const PRESET_COLORS = [
-  '#9B8B6B', // Tan
-  '#FDE047', // Yellow
-  '#FDA4AF', // Pink
-  '#93C5FD', // Blue
-  '#86EFAC', // Green
-  '#C4B5FD', // Purple
-  '#F87171', // Red
-  '#FB923C', // Orange
-  '#A78BFA', // Light Purple
-  '#60A5FA', // Light Blue
-  '#34D399', // Light Green
-  '#FBBF24', // Amber
+  'transparent', // Transparent
+  '#1E3A8A', // Dark Blue
+  '#7C2D12', // Dark Orange
+  '#166534', // Dark Green
+  '#6B21A8', // Dark Purple
+  '#831843', // Dark Rose
+  '#713F12', // Dark Yellow/Brown
+  '#0F172A', // Slate
+  '#1F2937', // Gray
+  '#7F1D1D', // Dark Red
+  '#064E3B', // Emerald
+  '#4C1D95', // Violet
 ];
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -53,16 +53,28 @@ export default function ColorPicker({ value, onChange, label = 'Color' }: ColorP
   const [b, setB] = useState(rgb.b);
 
   useEffect(() => {
-    const newRgb = hexToRgb(value);
-    setR(newRgb.r);
-    setG(newRgb.g);
-    setB(newRgb.b);
-    setTempColor(value);
+    if (value === 'transparent') {
+      setTempColor('transparent');
+      setR(0);
+      setG(0);
+      setB(0);
+    } else {
+      const newRgb = hexToRgb(value);
+      setR(newRgb.r);
+      setG(newRgb.g);
+      setB(newRgb.b);
+      setTempColor(value);
+    }
   }, [value]);
 
   useEffect(() => {
-    setTempColor(rgbToHex(r, g, b));
-  }, [r, g, b]);
+    // If RGB values change from (0,0,0) while in transparent mode, exit transparent
+    if (tempColor === 'transparent' && (r !== 0 || g !== 0 || b !== 0)) {
+      setTempColor(rgbToHex(r, g, b));
+    } else if (tempColor !== 'transparent') {
+      setTempColor(rgbToHex(r, g, b));
+    }
+  }, [r, g, b, tempColor]);
 
   const handleOk = () => {
     onChange(tempColor);
@@ -70,18 +82,25 @@ export default function ColorPicker({ value, onChange, label = 'Color' }: ColorP
   };
 
   const handleClear = () => {
-    setR(155);
-    setG(139);
-    setB(107);
-    setTempColor('#9B8B6B');
+    setR(0);
+    setG(0);
+    setB(0);
+    setTempColor('transparent');
   };
 
   const handlePresetClick = (color: string) => {
-    const newRgb = hexToRgb(color);
-    setR(newRgb.r);
-    setG(newRgb.g);
-    setB(newRgb.b);
-    setTempColor(color);
+    if (color === 'transparent') {
+      setR(0);
+      setG(0);
+      setB(0);
+      setTempColor('transparent');
+    } else {
+      const newRgb = hexToRgb(color);
+      setR(newRgb.r);
+      setG(newRgb.g);
+      setB(newRgb.b);
+      setTempColor(color);
+    }
   };
 
   return (
@@ -94,9 +113,13 @@ export default function ColorPicker({ value, onChange, label = 'Color' }: ColorP
             data-testid="color-picker-trigger"
           >
             <div
-              className="w-6 h-6 rounded border border-[#3A3F4F]"
-              style={{ backgroundColor: value }}
-            />
+              className={`w-6 h-6 rounded border border-[#3A3F4F] flex items-center justify-center ${value === 'transparent' ? 'bg-transparent' : ''}`}
+              style={value !== 'transparent' ? { backgroundColor: value } : undefined}
+            >
+              {value === 'transparent' && (
+                <span className="text-[8px] text-muted-foreground">None</span>
+              )}
+            </div>
             <span className="text-sm text-foreground font-mono">{value}</span>
           </button>
         </PopoverTrigger>
@@ -107,9 +130,13 @@ export default function ColorPicker({ value, onChange, label = 'Color' }: ColorP
             {/* Color Preview */}
             <div className="flex items-center gap-3">
               <div
-                className="w-16 h-16 rounded border-2 border-[#3A3F4F]"
-                style={{ backgroundColor: tempColor }}
-              />
+                className={`w-16 h-16 rounded border-2 border-[#3A3F4F] ${tempColor === 'transparent' ? 'bg-transparent' : ''}`}
+                style={tempColor !== 'transparent' ? { backgroundColor: tempColor } : undefined}
+              >
+                {tempColor === 'transparent' && (
+                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground">None</div>
+                )}
+              </div>
               <div className="flex-1">
                 <div className="text-xs text-muted-foreground mb-1">Current Color</div>
                 <div className="font-mono text-sm text-foreground">{tempColor}</div>
@@ -126,10 +153,14 @@ export default function ColorPicker({ value, onChange, label = 'Color' }: ColorP
                     onClick={() => handlePresetClick(color)}
                     className={`w-10 h-10 rounded border-2 transition-all hover:scale-110 ${
                       tempColor === color ? 'border-white ring-2 ring-white/30' : 'border-[#3A3F4F]'
-                    }`}
-                    style={{ backgroundColor: color }}
+                    } ${color === 'transparent' ? 'bg-transparent' : ''}`}
+                    style={color !== 'transparent' ? { backgroundColor: color } : undefined}
                     data-testid={`preset-color-${color}`}
-                  />
+                  >
+                    {color === 'transparent' && (
+                      <div className="text-xs text-muted-foreground font-mono">None</div>
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
@@ -191,6 +222,7 @@ export default function ColorPicker({ value, onChange, label = 'Color' }: ColorP
                       setR(newRgb.r);
                       setG(newRgb.g);
                       setB(newRgb.b);
+                      setTempColor(hex);
                     }
                   }}
                   className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono h-8 text-xs"

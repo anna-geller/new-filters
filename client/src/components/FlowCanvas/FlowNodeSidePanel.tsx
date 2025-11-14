@@ -98,6 +98,18 @@ export default function FlowNodeSidePanel({
           </div>
           
           <div className="flex items-center gap-6">
+            {onDelete && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onDelete}
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                data-testid="button-delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+            
             {isTaskNode && onPlaygroundRun && (
               <Button
                 size="sm"
@@ -108,18 +120,6 @@ export default function FlowNodeSidePanel({
               >
                 <Play className="w-4 h-4 mr-2" fill="currentColor" />
                 {isRunningPlayground ? 'Running...' : 'Run'}
-              </Button>
-            )}
-            
-            {onDelete && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={onDelete}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                data-testid="button-delete"
-              >
-                <Trash2 className="w-4 h-4" />
               </Button>
             )}
           </div>

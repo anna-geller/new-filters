@@ -133,50 +133,53 @@ FinallyNode.displayName = 'FinallyNode';
 export const NoteNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   const noteText = config?.text || (data.label as string) || 'Double click to edit me';
-  const color = config?.color || '#9B8B6B';
-  const width = config?.width || 180;
-  const height = config?.height || 90;
+  const color = config?.color || 'transparent';
+  const width = config?.width || 120;
+  const height = config?.height || 60;
   
-  // Map colors to their gradient pairs
+  // Map colors to their darker gradient pairs for better white text contrast
   const getGradientColors = (baseColor: string): [string, string] => {
     const colorMap: Record<string, [string, string]> = {
-      '#9B8B6B': ['#A39771', '#9B8B6B'], // Tan
-      '#FDE047': ['#FEF08A', '#FDE047'], // Yellow
-      '#FDA4AF': ['#FECDD3', '#FDA4AF'], // Pink
-      '#93C5FD': ['#BFDBFE', '#93C5FD'], // Blue
-      '#86EFAC': ['#BBF7D0', '#86EFAC'], // Green
-      '#C4B5FD': ['#DDD6FE', '#C4B5FD'], // Purple
+      '#1E3A8A': ['#1E40AF', '#1E3A8A'], // Dark Blue
+      '#7C2D12': ['#9A3412', '#7C2D12'], // Dark Orange
+      '#166534': ['#15803D', '#166534'], // Dark Green
+      '#6B21A8': ['#7E22CE', '#6B21A8'], // Dark Purple
+      '#831843': ['#9F1239', '#831843'], // Dark Rose
+      '#713F12': ['#854D0E', '#713F12'], // Dark Yellow/Brown
     };
     
     return colorMap[baseColor] || [baseColor, baseColor];
   };
   
   const [fromColor, toColor] = getGradientColors(color);
+  const isTransparent = color === 'transparent';
   
   return (
     <>
       <NodeResizer
-        color={selected ? '#ffffff' : '#7A6B55'}
+        color={selected ? '#8408FF' : '#3A3F4F'}
         isVisible={selected}
-        minWidth={180}
-        minHeight={90}
+        minWidth={120}
+        minHeight={60}
       />
       <div 
-        className={`px-3 py-2 rounded-lg shadow-lg transition-all hover:shadow-xl ${
+        className={`px-3 py-2 rounded-lg shadow-lg transition-all hover:shadow-xl border-2 ${
           selected 
-            ? 'border-2 border-white ring-2 ring-white/30' 
-            : 'border-2 border-transparent'
+            ? 'border-[#8408FF] ring-2 ring-[#8408FF]/30' 
+            : 'border-[#3A3F4F]'
         }`}
         style={{
-          background: `linear-gradient(135deg, ${fromColor} 0%, ${toColor} 100%)`,
+          background: isTransparent 
+            ? 'transparent' 
+            : `linear-gradient(135deg, ${fromColor} 0%, ${toColor} 100%)`,
           width: `${width}px`,
           height: `${height}px`,
         }}
       >
         <div className="flex items-start gap-1.5 h-full">
-          <StickyNote className="w-3 h-3 text-[#3A3020] mt-0.5 flex-shrink-0" />
+          <StickyNote className={`w-3 h-3 mt-0.5 flex-shrink-0 ${isTransparent ? 'text-muted-foreground' : 'text-white'}`} />
           <div className="flex-1 min-w-0 overflow-auto">
-            <div className="text-xs font-medium text-[#2A2010] whitespace-pre-wrap leading-snug break-words">
+            <div className={`text-xs font-medium whitespace-pre-wrap leading-snug break-words ${isTransparent ? 'text-foreground' : 'text-white'}`}>
               {noteText}
             </div>
           </div>

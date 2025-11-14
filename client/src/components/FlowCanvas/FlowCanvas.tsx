@@ -129,7 +129,7 @@ export default function FlowCanvas({
         data: {
           label: label || type,
           config: type === 'note' 
-            ? { id: `note_${Date.now()}`, text: 'Enter your note here...', color: '#9B8B6B', width: 180, height: 90 }
+            ? { id: `note_${Date.now()}`, text: 'Enter your note here...', color: 'transparent', width: 120, height: 60 }
             : {
                 id: `${label.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
                 type: pluginType || '',
@@ -210,7 +210,7 @@ export default function FlowCanvas({
       data: {
         label: label || type,
         config: type === 'note' 
-          ? { id: `note_${Date.now()}`, text: 'Enter your note here...', color: '#9B8B6B', width: 180, height: 90 }
+          ? { id: `note_${Date.now()}`, text: 'Enter your note here...', color: 'transparent', width: 120, height: 60 }
           : {
               id: `${label.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
               type: pluginType || '',
