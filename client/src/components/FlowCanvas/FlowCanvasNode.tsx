@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 
 // Base node styles
-const baseNodeClass = "px-4 py-3 rounded-lg border-2 shadow-lg min-w-[180px] transition-all hover:shadow-xl";
+const baseNodeClass = "px-3 py-2 rounded-lg border-2 shadow-lg min-w-[140px] transition-all hover:shadow-xl";
 const labelClass = "text-sm font-semibold truncate";
-const typeClass = "text-xs text-muted-foreground truncate mt-1";
+const typeClass = "text-xs text-muted-foreground truncate mt-0.5";
 
 // Task Node - Only tasks have input/output handles for workflow connections
 export const TaskNode = memo(({ data, selected }: NodeProps) => {
@@ -134,8 +134,8 @@ export const NoteNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   const noteText = config?.text || (data.label as string) || 'Double click to edit me';
   const color = config?.color || '#9B8B6B';
-  const width = config?.width || 240;
-  const height = config?.height || 120;
+  const width = config?.width || 200;
+  const height = config?.height || 100;
   
   // Map colors to their gradient pairs
   const getGradientColors = (baseColor: string): [string, string] => {
