@@ -85,6 +85,10 @@ export default function FlowCanvas({
 
   // Handle node double-click
   const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    // Don't open side panel for note nodes
+    if (node.type === 'note') {
+      return;
+    }
     setEditingNodeId(node.id);
   }, []);
 
@@ -125,7 +129,7 @@ export default function FlowCanvas({
         data: {
           label: label || type,
           config: type === 'note' 
-            ? { text: 'Double click to edit me. Guide', width: 240, height: 120 }
+            ? { id: `note_${Date.now()}`, text: 'Enter your note here...', color: '#9B8B6B', width: 180, height: 90 }
             : {
                 id: `${label.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
                 type: pluginType || '',
@@ -206,7 +210,7 @@ export default function FlowCanvas({
       data: {
         label: label || type,
         config: type === 'note' 
-          ? { text: 'Double click to edit me. Guide', width: 240, height: 120 }
+          ? { id: `note_${Date.now()}`, text: 'Enter your note here...', color: '#9B8B6B', width: 180, height: 90 }
           : {
               id: `${label.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
               type: pluginType || '',

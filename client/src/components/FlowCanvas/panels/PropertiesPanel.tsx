@@ -45,6 +45,10 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
 
   const hasTaskProperties = taskMetadata && taskMetadata.properties && taskMetadata.properties.length > 0;
   const isNoteNode = node.type === 'note';
+  
+  // Separate required and optional task properties
+  const requiredTaskProperties = taskMetadata?.properties.filter(p => p.required) || [];
+  const optionalTaskProperties = taskMetadata?.properties.filter(p => !p.required) || [];
 
   // Sticky Note UI
   if (isNoteNode) {
@@ -94,52 +98,199 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
     );
   }
 
+  // Render property input based on type
+  const renderPropertyInput = (property: any) => {
+    const value = localConfig[property.name] ?? property.default ?? '';
+    
+    return (
+      <div key={property.name} className="space-y-2">
+        <Label htmlFor={property.name} className="text-sm font-medium text-foreground">
+          {property.name}
+          {property.required && <span className="text-destructive ml-1">*</span>}
+        </Label>
+        
+        {property.description && (
+          <p className="text-xs text-muted-foreground">{property.description}</p>
+        )}
+
+        {property.type === 'string' && (
+          property.name.toLowerCase().includes('format') || 
+          property.name.toLowerCase().includes('message') ||
+          property.name.toLowerCase().includes('script') ? (
+            <Textarea
+              id={property.name}
+              value={value}
+              onChange={(e) => handlePropertyChange(property.name, e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, property.name)}
+              placeholder={property.placeholder}
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm min-h-[100px]"
+              data-testid={`input-${property.name}`}
+            />
+          ) : (
+            <Input
+              id={property.name}
+              type="text"
+              value={value}
+              onChange={(e) => handlePropertyChange(property.name, e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, property.name)}
+              placeholder={property.placeholder}
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid={`input-${property.name}`}
+            />
+          )
+        )}
+
+        {property.type === 'number' && (
+          <Input
+            id={property.name}
+            type="number"
+            value={value}
+            onChange={(e) => handlePropertyChange(property.name, parseFloat(e.target.value))}
+            placeholder={property.placeholder}
+            className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+            data-testid={`input-${property.name}`}
+          />
+        )}
+
+        {property.type === 'boolean' && (
+          <div className="flex items-center gap-2">
+            <Switch
+              id={property.name}
+              checked={value}
+              onCheckedChange={(checked) => handlePropertyChange(property.name, checked)}
+              data-testid={`switch-${property.name}`}
+            />
+            <Label htmlFor={property.name} className="text-sm text-muted-foreground">
+              {value ? 'Enabled' : 'Disabled'}
+            </Label>
+          </div>
+        )}
+
+        {property.type === 'select' && property.options && (
+          <Select
+            value={value}
+            onValueChange={(newValue) => handlePropertyChange(property.name, newValue)}
+          >
+            <SelectTrigger 
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid={`select-${property.name}`}
+            >
+              <SelectValue placeholder={`Select ${property.name}`} />
+            </SelectTrigger>
+            <SelectContent className="bg-[#262A35] border-[#3A3F4F]">
+              {property.options.map((option: any) => (
+                <SelectItem 
+                  key={option.value} 
+                  value={option.value}
+                  className="text-foreground hover:bg-[#1F232D]"
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {property.helpUrl && (
+          <a 
+            href={property.helpUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7]"
+          >
+            Learn more
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
+      </div>
+    );
+  };
+
   // Regular Task Node UI
   return (
     <div className="p-4 space-y-6" data-testid="properties-panel">
-      {/* Core Properties - Collapsible */}
-      <Collapsible defaultOpen={true}>
+      {/* ID - Always First */}
+      <div className="space-y-2">
+        <Label htmlFor="node-id" className="text-sm font-medium text-foreground">
+          ID <span className="text-destructive ml-1">*</span>
+        </Label>
+        <Input
+          id="node-id"
+          type="text"
+          value={localConfig.id || ''}
+          onChange={(e) => handlePropertyChange('id', e.target.value)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, 'id')}
+          placeholder="task-id"
+          className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+          data-testid="input-id"
+        />
+      </div>
+
+      {/* Type - Always Second */}
+      <div className="space-y-2">
+        <Label htmlFor="node-type" className="text-sm font-medium text-foreground">
+          Type <span className="text-destructive ml-1">*</span>
+        </Label>
+        <Input
+          id="node-type"
+          type="text"
+          value={localConfig.type || ''}
+          onChange={(e) => handlePropertyChange('type', e.target.value)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, 'type')}
+          placeholder="io.kestra.plugin.core.log.Log"
+          className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm"
+          data-testid="input-type"
+        />
+      </div>
+
+      {/* Required Task Properties */}
+      {requiredTaskProperties.length > 0 && (
+        <div className="space-y-4">
+          {requiredTaskProperties.map(property => renderPropertyInput(property))}
+        </div>
+      )}
+
+      {/* Task Description */}
+      {taskMetadata?.description && (
+        <div className="bg-[#262A35] border border-[#3A3F4F] rounded p-3">
+          <p className="text-xs text-muted-foreground">{taskMetadata.description}</p>
+          {taskMetadata.documentationUrl && (
+            <a 
+              href={taskMetadata.documentationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7] mt-2"
+            >
+              View documentation
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Optional Task Properties */}
+      {optionalTaskProperties.length > 0 && (
+        <div className="space-y-4">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+            Optional Task Properties
+          </h4>
+          {optionalTaskProperties.map(property => renderPropertyInput(property))}
+        </div>
+      )}
+
+      {/* Optional Core Properties - Collapsible (Collapsed by Default) */}
+      <Collapsible defaultOpen={false}>
         <CollapsibleTrigger className="flex items-center justify-between w-full p-3 bg-[#262A35] hover:bg-[#2A2E3A] border border-[#3A3F4F] rounded transition-colors">
           <h4 className="text-xs font-semibold text-foreground uppercase">
-            Core Properties
+            Optional Core Properties
           </h4>
           <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform" />
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-4 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="node-id" className="text-sm font-medium text-foreground">
-              ID <span className="text-destructive ml-1">*</span>
-            </Label>
-            <Input
-              id="node-id"
-              type="text"
-              value={localConfig.id || ''}
-              onChange={(e) => handlePropertyChange('id', e.target.value)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 'id')}
-              placeholder="task-id"
-              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
-              data-testid="input-id"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="node-type" className="text-sm font-medium text-foreground">
-              Type <span className="text-destructive ml-1">*</span>
-            </Label>
-            <Input
-              id="node-type"
-              type="text"
-              value={localConfig.type || ''}
-              onChange={(e) => handlePropertyChange('type', e.target.value)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 'type')}
-              placeholder="io.kestra.plugin.core.log.Log"
-              className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm"
-              data-testid="input-type"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="node-description" className="text-sm font-medium text-foreground">
               Description
@@ -312,150 +463,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
               </span>
             </div>
           </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Task Description */}
-      {taskMetadata?.description && (
-        <div className="bg-[#262A35] border border-[#3A3F4F] rounded p-3">
-          <p className="text-xs text-muted-foreground">{taskMetadata.description}</p>
-          {taskMetadata.documentationUrl && (
-            <a 
-              href={taskMetadata.documentationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7] mt-2"
-            >
-              View documentation
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          )}
-        </div>
-      )}
-
-      {/* Optional Properties - Collapsible */}
-      <Collapsible defaultOpen={true}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-3 bg-[#262A35] hover:bg-[#2A2E3A] border border-[#3A3F4F] rounded transition-colors">
-          <h4 className="text-xs font-semibold text-foreground uppercase">
-            Optional Properties
-          </h4>
-          <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4 space-y-4">
-          {hasTaskProperties ? (
-            taskMetadata.properties.map((property) => {
-            const value = localConfig[property.name] ?? property.default ?? '';
-
-            return (
-              <div key={property.name} className="space-y-2">
-                <Label htmlFor={property.name} className="text-sm font-medium text-foreground">
-                  {property.name}
-                  {property.required && <span className="text-destructive ml-1">*</span>}
-                </Label>
-                
-                {property.description && (
-                  <p className="text-xs text-muted-foreground">{property.description}</p>
-                )}
-
-                {property.type === 'string' && (
-                  property.name.toLowerCase().includes('format') || 
-                  property.name.toLowerCase().includes('message') ||
-                  property.name.toLowerCase().includes('script') ? (
-                    <Textarea
-                      id={property.name}
-                      value={value}
-                      onChange={(e) => handlePropertyChange(property.name, e.target.value)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, property.name)}
-                      placeholder={property.placeholder}
-                      className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm min-h-[100px]"
-                      data-testid={`input-${property.name}`}
-                    />
-                  ) : (
-                    <Input
-                      id={property.name}
-                      type="text"
-                      value={value}
-                      onChange={(e) => handlePropertyChange(property.name, e.target.value)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, property.name)}
-                      placeholder={property.placeholder}
-                      className="bg-[#262A35] border-[#3A3F4F] text-foreground"
-                      data-testid={`input-${property.name}`}
-                    />
-                  )
-                )}
-
-                {property.type === 'number' && (
-                  <Input
-                    id={property.name}
-                    type="number"
-                    value={value}
-                    onChange={(e) => handlePropertyChange(property.name, parseFloat(e.target.value))}
-                    placeholder={property.placeholder}
-                    className="bg-[#262A35] border-[#3A3F4F] text-foreground"
-                    data-testid={`input-${property.name}`}
-                  />
-                )}
-
-                {property.type === 'boolean' && (
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id={property.name}
-                      checked={value}
-                      onCheckedChange={(checked) => handlePropertyChange(property.name, checked)}
-                      data-testid={`switch-${property.name}`}
-                    />
-                    <Label htmlFor={property.name} className="text-sm text-muted-foreground">
-                      {value ? 'Enabled' : 'Disabled'}
-                    </Label>
-                  </div>
-                )}
-
-                {property.type === 'select' && property.options && (
-                  <Select
-                    value={value}
-                    onValueChange={(newValue) => handlePropertyChange(property.name, newValue)}
-                  >
-                    <SelectTrigger 
-                      className="bg-[#262A35] border-[#3A3F4F] text-foreground"
-                      data-testid={`select-${property.name}`}
-                    >
-                      <SelectValue placeholder={`Select ${property.name}`} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#262A35] border-[#3A3F4F]">
-                      {property.options.map((option) => (
-                        <SelectItem 
-                          key={option.value} 
-                          value={option.value}
-                          className="text-foreground hover:bg-[#1F232D]"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                {property.helpUrl && (
-                  <a 
-                    href={property.helpUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7]"
-                  >
-                    Learn more
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
-            );
-          })
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No optional properties available for this task type.
-            </p>
-          )}
         </CollapsibleContent>
       </Collapsible>
     </div>

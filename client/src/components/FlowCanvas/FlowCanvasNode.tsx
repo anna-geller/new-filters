@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 
 // Base node styles
-const baseNodeClass = "px-3 py-2 rounded-lg border-2 shadow-lg min-w-[140px] transition-all hover:shadow-xl";
-const labelClass = "text-sm font-semibold truncate";
-const typeClass = "text-xs text-muted-foreground truncate mt-0.5";
+const baseNodeClass = "px-2 py-1.5 rounded-lg border-2 shadow-lg min-w-[120px] transition-all hover:shadow-xl";
+const labelClass = "text-xs font-semibold truncate";
+const typeClass = "text-[10px] text-muted-foreground truncate mt-0.5";
 
 // Task Node - Only tasks have input/output handles for workflow connections
 export const TaskNode = memo(({ data, selected }: NodeProps) => {
@@ -134,8 +134,8 @@ export const NoteNode = memo(({ data, selected }: NodeProps) => {
   const config = data.config as any;
   const noteText = config?.text || (data.label as string) || 'Double click to edit me';
   const color = config?.color || '#9B8B6B';
-  const width = config?.width || 200;
-  const height = config?.height || 100;
+  const width = config?.width || 180;
+  const height = config?.height || 90;
   
   // Map colors to their gradient pairs
   const getGradientColors = (baseColor: string): [string, string] => {
@@ -158,11 +158,11 @@ export const NoteNode = memo(({ data, selected }: NodeProps) => {
       <NodeResizer
         color={selected ? '#ffffff' : '#7A6B55'}
         isVisible={selected}
-        minWidth={200}
-        minHeight={100}
+        minWidth={180}
+        minHeight={90}
       />
       <div 
-        className={`px-4 py-3 rounded-lg shadow-lg transition-all hover:shadow-xl ${
+        className={`px-3 py-2 rounded-lg shadow-lg transition-all hover:shadow-xl ${
           selected 
             ? 'border-2 border-white ring-2 ring-white/30' 
             : 'border-2 border-transparent'
@@ -173,10 +173,10 @@ export const NoteNode = memo(({ data, selected }: NodeProps) => {
           height: `${height}px`,
         }}
       >
-        <div className="flex items-start gap-2 h-full">
-          <StickyNote className="w-4 h-4 text-[#3A3020] mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-1.5 h-full">
+          <StickyNote className="w-3 h-3 text-[#3A3020] mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0 overflow-auto">
-            <div className="text-sm font-medium text-[#2A2010] whitespace-pre-wrap leading-relaxed break-words">
+            <div className="text-xs font-medium text-[#2A2010] whitespace-pre-wrap leading-snug break-words">
               {noteText}
             </div>
           </div>

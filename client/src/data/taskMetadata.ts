@@ -44,7 +44,7 @@ export const TASK_METADATA_REGISTRY: Record<string, TaskMetadata> = {
         name: 'format',
         type: 'string',
         description: 'The templated string to render.',
-        required: false,
+        required: true,
         placeholder: '{{ outputs.previousTask.value }}',
         helpUrl: 'https://kestra.io/docs/developer-guide/variables'
       }
