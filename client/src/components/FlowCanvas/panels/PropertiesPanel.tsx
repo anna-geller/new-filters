@@ -45,6 +45,7 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
 
   const hasTaskProperties = taskMetadata && taskMetadata.properties && taskMetadata.properties.length > 0;
   const isNoteNode = node.type === 'note';
+  const isOutputNode = node.type === 'output';
   
   // Separate required and optional task properties
   const requiredTaskProperties = taskMetadata?.properties.filter(p => p.required) || [];
@@ -93,6 +94,104 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
             onChange={(color) => handlePropertyChange('color', color)}
             label="Color"
           />
+        </div>
+      </div>
+    );
+  }
+
+  // Output Node UI
+  if (isOutputNode && taskMetadata) {
+    return (
+      <div className="p-4 space-y-6" data-testid="properties-panel">
+        <div className="space-y-4">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+            Flow Output Configuration
+          </h4>
+          
+          {taskMetadata.properties.map((property) => {
+            const value = localConfig[property.name] ?? property.default ?? '';
+            
+            return (
+              <div key={property.name} className="space-y-2">
+                <Label htmlFor={property.name} className="text-sm font-medium text-foreground">
+                  {property.name === 'type' ? 'Type' : 
+                   property.name === 'id' ? 'ID' :
+                   property.name === 'displayName' ? 'Display Name' :
+                   property.name === 'description' ? 'Description' :
+                   property.name === 'validator' ? 'Validator' :
+                   property.name === 'prefill' ? 'Prefill' :
+                   property.name === 'value' ? 'Value' :
+                   property.name === 'required' ? 'Required' :
+                   property.name}
+                  {property.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+                
+                {property.description && (
+                  <p className="text-xs text-muted-foreground">{property.description}</p>
+                )}
+
+                {property.type === 'select' && property.options ? (
+                  <Select
+                    value={value}
+                    onValueChange={(newValue) => handlePropertyChange(property.name, newValue)}
+                  >
+                    <SelectTrigger 
+                      className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+                      data-testid={`select-${property.name}`}
+                    >
+                      <SelectValue placeholder={`Select ${property.name}`} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#262A35] border-[#3A3F4F]">
+                      {property.options.map((option: any) => (
+                        <SelectItem 
+                          key={option.value} 
+                          value={option.value}
+                          className="text-foreground hover:bg-[#1F232D]"
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : property.type === 'boolean' ? (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={property.name}
+                      checked={value}
+                      onCheckedChange={(checked) => handlePropertyChange(property.name, checked)}
+                      data-testid={`switch-${property.name}`}
+                    />
+                    <Label htmlFor={property.name} className="text-sm text-muted-foreground">
+                      {value ? 'Yes' : 'No'}
+                    </Label>
+                  </div>
+                ) : property.name === 'description' || property.name === 'value' ? (
+                  <Textarea
+                    id={property.name}
+                    value={value}
+                    onChange={(e) => handlePropertyChange(property.name, e.target.value)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, property.name)}
+                    placeholder={property.placeholder}
+                    className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm min-h-[80px]"
+                    data-testid={`input-${property.name}`}
+                  />
+                ) : (
+                  <Input
+                    id={property.name}
+                    type="text"
+                    value={value}
+                    onChange={(e) => handlePropertyChange(property.name, e.target.value)}
+                    onDragOver={property.name === 'validator' || property.name === 'prefill' ? handleDragOver : undefined}
+                    onDrop={property.name === 'validator' || property.name === 'prefill' ? (e) => handleDrop(e, property.name) : undefined}
+                    placeholder={property.placeholder}
+                    className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+                    data-testid={`input-${property.name}`}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );

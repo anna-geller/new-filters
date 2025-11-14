@@ -80,8 +80,14 @@ export default function FlowNodeSidePanel({
     }
   };
 
+  const handleClose = () => {
+    // Auto-save config when closing the panel
+    onSave({ config: node.data.config });
+    onClose();
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onClose}>
+    <Sheet open={open} onOpenChange={(open) => { if (!open) handleClose(); }}>
       <SheetContent 
         side="right" 
         className="w-[90vw] max-w-[1400px] p-0 bg-[#1F232D] border-l border-[#3A3F4F] flex flex-col"
@@ -164,7 +170,12 @@ export default function FlowNodeSidePanel({
                 node={node}
                 taskMetadata={taskMetadata}
                 onConfigChange={(newConfig: any) => {
-                  node.data.config = { ...config, ...newConfig };
+                  // Always merge with latest config to avoid stale data
+                  node.data.config = { ...node.data.config, ...newConfig };
+                  // Auto-save for Output nodes to persist changes immediately
+                  if (isOutputNode) {
+                    onSave({ config: node.data.config });
+                  }
                 }}
               />
             </ScrollArea>
