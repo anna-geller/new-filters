@@ -7,19 +7,62 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState } from 'react';
+import { Node } from '@xyflow/react';
+import { getTaskMetadata } from '@/data/taskMetadata';
 
 interface OutputsPanelProps {
   taskMetadata?: TaskMetadata;
   playgroundData: PlaygroundExecutionData | null;
   isRunning: boolean;
+  isFlowOutput?: boolean;
+  allNodes?: Node[];
 }
 
-export default function OutputsPanel({ taskMetadata, playgroundData, isRunning }: OutputsPanelProps) {
+export default function OutputsPanel({ taskMetadata, playgroundData, isRunning, isFlowOutput = false, allNodes = [] }: OutputsPanelProps) {
   const hasOutputs = taskMetadata?.outputs && taskMetadata.outputs.length > 0;
   const hasMetrics = taskMetadata?.metrics && taskMetadata.metrics.length > 0;
   const [debugExpression, setDebugExpression] = useState('');
   const [debugResult, setDebugResult] = useState<string | null>(null);
   const [isDebugOpen, setIsDebugOpen] = useState(false);
+
+  // For flow outputs, collect all task outputs from all task nodes
+  const collectFlowOutputs = () => {
+    const outputs: Array<{ taskId: string; taskLabel: string; outputName: string; outputType: string; outputDescription: string; expression: string }> = [];
+    
+    allNodes.forEach(node => {
+      if (node.type === 'task' || node.type === 'error' || node.type === 'finally') {
+        const config = node.data.config as any || {};
+        const pluginType = config.type || '';
+        const metadata = getTaskMetadata(pluginType);
+        
+        // Use config.id if available, otherwise fall back to node.id
+        const taskId = config.id || node.id;
+        
+        if (metadata?.outputs && metadata.outputs.length > 0) {
+          metadata.outputs.forEach(output => {
+            // Build proper Kestra expression for this output
+            const expression = `{{ outputs.${taskId}.${output.name} }}`;
+            
+            outputs.push({
+              taskId,
+              taskLabel: node.data.label as string,
+              outputName: output.name,
+              outputType: output.type,
+              outputDescription: output.description || '',
+              expression,
+            });
+          });
+        }
+      }
+    });
+    
+    return outputs;
+  };
+
+  const handleDragStart = (event: React.DragEvent, text: string) => {
+    event.dataTransfer.setData('text/plain', text);
+    event.dataTransfer.effectAllowed = 'copy';
+  };
 
   const handleDebugExpression = () => {
     try {
@@ -54,6 +97,51 @@ export default function OutputsPanel({ taskMetadata, playgroundData, isRunning }
       setDebugResult(`Error: ${error instanceof Error ? error.message : 'Invalid expression'}`);
     }
   };
+
+  // Render simplified view for flow outputs
+  if (isFlowOutput) {
+    const flowOutputs = collectFlowOutputs();
+    
+    return (
+      <div className="p-4 space-y-4" data-testid="outputs-panel-flow">
+        {flowOutputs.length === 0 ? (
+          <div className="text-xs text-muted-foreground text-center py-8">
+            No task outputs available. Add tasks to the flow to see their outputs here.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Drag any output below to map it to a flow output property
+            </p>
+            {flowOutputs.map((output, index) => (
+              <div
+                key={`${output.taskId}-${output.outputName}-${index}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, output.expression)}
+                className="bg-[#262A35] border border-[#3A3F4F] rounded p-3 cursor-move hover:border-[#8408FF] transition-colors"
+                data-testid={`flow-output-${output.taskId}-${output.outputName}`}
+              >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-foreground mb-0.5">
+                      {output.taskLabel} → {output.outputName}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground font-mono">
+                      {output.expression}
+                    </div>
+                  </div>
+                  <span className="text-xs text-[#8408FF] font-mono whitespace-nowrap">{output.outputType}</span>
+                </div>
+                {output.outputDescription && (
+                  <div className="text-xs text-muted-foreground">{output.outputDescription}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full" data-testid="outputs-panel">

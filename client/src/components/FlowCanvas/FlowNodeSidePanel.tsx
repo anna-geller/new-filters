@@ -48,6 +48,8 @@ export default function FlowNodeSidePanel({
   const taskMetadata = getTaskMetadata(pluginType);
 
   const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
+  const showThreePanelLayout = isTaskNode || node.type === 'output';
+  const isOutputNode = node.type === 'output';
 
   const handleRunPlayground = async () => {
     if (!node || !onPlaygroundRun) return;
@@ -97,7 +99,7 @@ export default function FlowNodeSidePanel({
             </div>
           </div>
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 mr-12">
             {onDelete && (
               <Button
                 size="sm"
@@ -128,12 +130,12 @@ export default function FlowNodeSidePanel({
         {/* Three-panel layout */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Inputs */}
-          {isTaskNode && (
+          {showThreePanelLayout && (
             <div className="w-1/3 border-r border-[#3A3F4F] flex flex-col">
               <div className="px-4 py-3 border-b border-[#3A3F4F] bg-[#262A35]">
                 <h3 className="text-sm font-semibold text-foreground">Inputs</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Available data from connected tasks
+                  {isOutputNode ? 'Task outputs available for mapping' : 'Available data from connected tasks'}
                 </p>
               </div>
               <ScrollArea className="flex-1">
@@ -147,7 +149,7 @@ export default function FlowNodeSidePanel({
           )}
 
           {/* Middle Panel - Properties */}
-          <div className={`${isTaskNode ? 'w-1/3' : 'w-2/3'} border-r border-[#3A3F4F] flex flex-col`}>
+          <div className={`${showThreePanelLayout ? 'w-1/3' : 'w-2/3'} border-r border-[#3A3F4F] flex flex-col`}>
             <div className="px-4 py-3 border-b border-[#3A3F4F] bg-[#262A35]">
               <h3 className="text-sm font-semibold text-foreground">Properties</h3>
               <p className="text-xs text-muted-foreground mt-1">
@@ -166,12 +168,14 @@ export default function FlowNodeSidePanel({
           </div>
 
           {/* Right Panel - Outputs */}
-          {isTaskNode && (
+          {showThreePanelLayout && (
             <div className="w-1/3 flex flex-col">
               <div className="px-4 py-3 border-b border-[#3A3F4F] bg-[#262A35]">
-                <h3 className="text-sm font-semibold text-foreground">Outputs</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  {isOutputNode ? 'Flow Outputs' : 'Outputs'}
+                </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Data produced by this task
+                  {isOutputNode ? 'Outputs produced by the flow' : 'Data produced by this task'}
                 </p>
               </div>
               <ScrollArea className="flex-1">
@@ -179,6 +183,8 @@ export default function FlowNodeSidePanel({
                   taskMetadata={taskMetadata}
                   playgroundData={playgroundData}
                   isRunning={isRunningPlayground}
+                  isFlowOutput={isOutputNode}
+                  allNodes={allNodes}
                 />
               </ScrollArea>
             </div>
