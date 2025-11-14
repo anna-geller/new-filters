@@ -32,6 +32,22 @@ export default function InputsPanel({ nodeId, allNodes, allEdges, showAllTasks =
     e.dataTransfer.effectAllowed = 'copy';
   };
 
+  // Get Input nodes from the flow
+  const inputNodes = allNodes
+    .filter(n => n.type === 'input')
+    .map(inputNode => {
+      const config = inputNode.data.config as any || {};
+      const inputId = config.id || inputNode.data.label;
+      
+      return {
+        id: inputId,
+        label: inputNode.data.label as string,
+        type: config.type || 'STRING',
+        description: config.description,
+        path: `inputs.${inputId}`
+      };
+    });
+
   // Get task nodes to display
   const taskNodesToShow = showAllTasks
     ? allNodes.filter(n => n.type === 'task' || n.type === 'error' || n.type === 'finally')
@@ -76,6 +92,57 @@ export default function InputsPanel({ nodeId, allNodes, allEdges, showAllTasks =
 
   return (
     <div className="p-4 space-y-6" data-testid="inputs-panel">
+      {/* Flow Inputs */}
+      {inputNodes.length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
+            Flow Inputs
+          </h4>
+          <div className="space-y-2">
+            {inputNodes.map((input) => (
+              <div 
+                key={input.path}
+                draggable
+                onDragStart={(e) => handleDragStart(e, input.path)}
+                className="group relative bg-[#262A35] border border-[#3A3F4F] rounded p-2 hover:border-[#8408FF] transition-colors cursor-move"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-mono text-foreground truncate">
+                      {input.id}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {input.type}
+                    </div>
+                    {input.description && (
+                      <div className="text-xs text-muted-foreground mt-1 italic">
+                        {input.description}
+                      </div>
+                    )}
+                    <div className="text-xs text-muted-foreground mt-1 font-mono truncate">
+                      {`{{ ${input.path} }}`}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleCopy(input.path)}
+                    data-testid={`button-copy-${input.path}`}
+                  >
+                    {copiedPath === input.path ? (
+                      <CheckCircle2 className="w-3 h-3 text-green-500" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Connected Task Outputs */}
       {connectedInputs.length > 0 && (
         <div>
