@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChevronDown, ChevronRight, Plus, X, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, X, Trash2, ExternalLink } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import InputOutputEditor from './InputOutputEditor';
 import ColorPicker from '@/components/ColorPicker';
+import { getTaskMetadata } from '@/data/taskMetadata';
 
 interface FlowPropertiesPanelProps {
   properties: FlowProperties;
@@ -21,6 +22,430 @@ interface FlowPropertiesPanelProps {
   onPropertiesChange: (properties: FlowProperties) => void;
   onNodeUpdate?: (nodeId: string, data: any) => void;
   onNodeDelete?: (nodeId: string) => void;
+}
+
+interface TaskPropertiesViewProps {
+  nodeConfig: any;
+  nodeLabel?: string;
+  onNodeUpdate?: (nodeId: string, data: any) => void;
+  selectedNodeId: string;
+}
+
+function TaskPropertiesView({ nodeConfig, nodeLabel, onNodeUpdate, selectedNodeId }: TaskPropertiesViewProps) {
+  const [corePropertiesOpen, setCorePropertiesOpen] = useState(false);
+  const pluginType = nodeConfig.type || '';
+  const taskMetadata = getTaskMetadata(pluginType);
+  
+  const requiredTaskProperties = taskMetadata?.properties.filter(p => p.required) || [];
+  const optionalTaskProperties = taskMetadata?.properties.filter(p => !p.required) || [];
+
+  const handlePropertyChange = (propertyName: string, value: any) => {
+    if (onNodeUpdate) {
+      const updates: any = {
+        config: {
+          ...nodeConfig,
+          [propertyName]: value,
+        },
+      };
+      
+      // Sync label when ID changes, but only if label currently matches the old ID
+      // This preserves custom labels that users may have set
+      if (propertyName === 'id' && nodeLabel === nodeConfig.id) {
+        updates.label = value;
+      }
+      
+      onNodeUpdate(selectedNodeId, updates);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDrop = (e: React.DragEvent, propertyName: string) => {
+    e.preventDefault();
+    const droppedText = e.dataTransfer.getData('text/plain');
+    // Replace value instead of concatenating
+    handlePropertyChange(propertyName, droppedText);
+  };
+
+  const renderPropertyInput = (property: any) => {
+    const value = nodeConfig[property.name] ?? property.default ?? '';
+    
+    return (
+      <div key={property.name} className="space-y-2">
+        <Label htmlFor={property.name} className="text-sm font-medium text-foreground">
+          {property.name}
+          {property.required && <span className="text-destructive ml-1">*</span>}
+        </Label>
+        
+        {property.description && (
+          <p className="text-xs text-muted-foreground">{property.description}</p>
+        )}
+
+        {property.type === 'string' && (
+          property.name.toLowerCase().includes('format') || 
+          property.name.toLowerCase().includes('message') ||
+          property.name.toLowerCase().includes('script') ? (
+            <Textarea
+              id={property.name}
+              value={value}
+              onChange={(e) => handlePropertyChange(property.name, e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, property.name)}
+              placeholder={property.placeholder}
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm min-h-[100px]"
+              data-testid={`input-${property.name}`}
+            />
+          ) : (
+            <Input
+              id={property.name}
+              type="text"
+              value={value}
+              onChange={(e) => handlePropertyChange(property.name, e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, property.name)}
+              placeholder={property.placeholder}
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid={`input-${property.name}`}
+            />
+          )
+        )}
+
+        {property.type === 'number' && (
+          <Input
+            id={property.name}
+            type="number"
+            value={value}
+            onChange={(e) => handlePropertyChange(property.name, parseFloat(e.target.value))}
+            placeholder={property.placeholder}
+            className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+            data-testid={`input-${property.name}`}
+          />
+        )}
+
+        {property.type === 'boolean' && (
+          <div className="flex items-center gap-2">
+            <Switch
+              id={property.name}
+              checked={value}
+              onCheckedChange={(checked) => handlePropertyChange(property.name, checked)}
+              data-testid={`switch-${property.name}`}
+            />
+            <Label htmlFor={property.name} className="text-sm text-muted-foreground">
+              {value ? 'Enabled' : 'Disabled'}
+            </Label>
+          </div>
+        )}
+
+        {property.type === 'select' && property.options && (
+          <Select
+            value={value}
+            onValueChange={(newValue) => handlePropertyChange(property.name, newValue)}
+          >
+            <SelectTrigger 
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid={`select-${property.name}`}
+            >
+              <SelectValue placeholder={`Select ${property.name}`} />
+            </SelectTrigger>
+            <SelectContent className="bg-[#262A35] border-[#3A3F4F]">
+              {property.options.map((option: any) => (
+                <SelectItem 
+                  key={option.value} 
+                  value={option.value}
+                  className="text-foreground hover:bg-[#1F232D]"
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {property.helpUrl && (
+          <a 
+            href={property.helpUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7]"
+            data-testid={`link-help-${property.name}`}
+          >
+            Learn more
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6" data-testid="task-properties-panel">
+      {/* ID - Always First */}
+      <div className="space-y-2">
+        <Label htmlFor="node-id" className="text-sm font-medium text-foreground">
+          ID <span className="text-destructive ml-1">*</span>
+        </Label>
+        <Input
+          id="node-id"
+          type="text"
+          value={nodeConfig.id || ''}
+          onChange={(e) => handlePropertyChange('id', e.target.value)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, 'id')}
+          placeholder="task-id"
+          className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+          data-testid="input-id"
+        />
+      </div>
+
+      {/* Type - Always Second */}
+      <div className="space-y-2">
+        <Label htmlFor="node-type" className="text-sm font-medium text-foreground">
+          Type <span className="text-destructive ml-1">*</span>
+        </Label>
+        <Input
+          id="node-type"
+          type="text"
+          value={nodeConfig.type || ''}
+          onChange={(e) => handlePropertyChange('type', e.target.value)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, 'type')}
+          placeholder="io.kestra.plugin.core.log.Log"
+          className="bg-[#262A35] border-[#3A3F4F] text-foreground font-mono text-sm"
+          data-testid="input-type"
+        />
+      </div>
+
+      {/* Required Task Properties */}
+      {requiredTaskProperties.length > 0 && (
+        <div className="space-y-4">
+          {requiredTaskProperties.map(property => renderPropertyInput(property))}
+        </div>
+      )}
+
+      {/* Task Description */}
+      {taskMetadata?.description && (
+        <div className="bg-[#262A35] border border-[#3A3F4F] rounded p-3">
+          <p className="text-xs text-muted-foreground">{taskMetadata.description}</p>
+          {taskMetadata.documentationUrl && (
+            <a 
+              href={taskMetadata.documentationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7] mt-2"
+              data-testid="link-documentation"
+            >
+              View documentation
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Optional Task Properties */}
+      {optionalTaskProperties.length > 0 && (
+        <div className="space-y-4">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+            Optional Task Properties
+          </h4>
+          {optionalTaskProperties.map(property => renderPropertyInput(property))}
+        </div>
+      )}
+
+      {/* Optional Core Properties - Collapsible (Collapsed by Default) */}
+      <Collapsible open={corePropertiesOpen} onOpenChange={setCorePropertiesOpen}>
+        <CollapsibleTrigger 
+          className="flex items-center justify-between w-full p-3 bg-[#262A35] hover:bg-[#2A2E3A] border border-[#3A3F4F] rounded transition-colors"
+          data-testid="trigger-core-properties"
+        >
+          <h4 className="text-xs font-semibold text-foreground uppercase">
+            Optional Core Properties
+          </h4>
+          <ChevronDown 
+            className={`w-4 h-4 text-muted-foreground transition-transform ${
+              corePropertiesOpen ? 'rotate-180' : ''
+            }`} 
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="node-description" className="text-sm font-medium text-foreground">
+              Description
+            </Label>
+            <Textarea
+              id="node-description"
+              value={nodeConfig.description || ''}
+              onChange={(e) => handlePropertyChange('description', e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'description')}
+              placeholder="Describe what this task does..."
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground min-h-[80px]"
+              data-testid="input-description"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-retry" className="text-sm font-medium text-foreground">
+              Retry
+            </Label>
+            <Input
+              id="node-retry"
+              type="text"
+              value={nodeConfig.retry || ''}
+              onChange={(e) => handlePropertyChange('retry', e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'retry')}
+              placeholder="Retry configuration"
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid="input-retry"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-timeout" className="text-sm font-medium text-foreground">
+              Timeout
+            </Label>
+            <Input
+              id="node-timeout"
+              type="text"
+              value={nodeConfig.timeout || ''}
+              onChange={(e) => handlePropertyChange('timeout', e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'timeout')}
+              placeholder="PT1H (ISO 8601 duration)"
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid="input-timeout"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-runif" className="text-sm font-medium text-foreground">
+              RunIf
+            </Label>
+            <Input
+              id="node-runif"
+              type="text"
+              value={nodeConfig.runIf || ''}
+              onChange={(e) => handlePropertyChange('runIf', e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'runIf')}
+              placeholder="Condition to run task"
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid="input-runif"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-disabled" className="text-sm font-medium text-foreground">
+              Disabled
+            </Label>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="node-disabled"
+                checked={nodeConfig.disabled || false}
+                onCheckedChange={(checked) => handlePropertyChange('disabled', checked)}
+                data-testid="switch-disabled"
+              />
+              <span className="text-sm text-muted-foreground">
+                {nodeConfig.disabled ? 'Task is disabled' : 'Task is enabled'}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-workergroup" className="text-sm font-medium text-foreground">
+              Worker Group
+            </Label>
+            <Input
+              id="node-workergroup"
+              type="text"
+              value={nodeConfig.workerGroup || ''}
+              onChange={(e) => handlePropertyChange('workerGroup', e.target.value)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'workerGroup')}
+              placeholder="Worker group configuration"
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid="input-workergroup"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-allowfailure" className="text-sm font-medium text-foreground">
+              Allow Failure
+            </Label>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="node-allowfailure"
+                checked={nodeConfig.allowFailure || false}
+                onCheckedChange={(checked) => handlePropertyChange('allowFailure', checked)}
+                data-testid="switch-allowfailure"
+              />
+              <span className="text-sm text-muted-foreground">
+                {nodeConfig.allowFailure ? 'Continue on failure' : 'Stop on failure'}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-allowwarning" className="text-sm font-medium text-foreground">
+              Allow Warning
+            </Label>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="node-allowwarning"
+                checked={nodeConfig.allowWarning || false}
+                onCheckedChange={(checked) => handlePropertyChange('allowWarning', checked)}
+                data-testid="switch-allowwarning"
+              />
+              <span className="text-sm text-muted-foreground">
+                {nodeConfig.allowWarning ? 'Mark as success despite warnings' : 'Warnings are errors'}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-loglevel" className="text-sm font-medium text-foreground">
+              Log Level
+            </Label>
+            <Select
+              value={nodeConfig.logLevel || 'INFO'}
+              onValueChange={(value) => handlePropertyChange('logLevel', value)}
+            >
+              <SelectTrigger className="bg-[#262A35] border-[#3A3F4F] text-foreground" data-testid="select-loglevel">
+                <SelectValue placeholder="Select log level" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#262A35] border-[#3A3F4F]">
+                <SelectItem value="TRACE" className="text-foreground hover:bg-[#1F232D]">TRACE</SelectItem>
+                <SelectItem value="DEBUG" className="text-foreground hover:bg-[#1F232D]">DEBUG</SelectItem>
+                <SelectItem value="INFO" className="text-foreground hover:bg-[#1F232D]">INFO</SelectItem>
+                <SelectItem value="WARN" className="text-foreground hover:bg-[#1F232D]">WARN</SelectItem>
+                <SelectItem value="ERROR" className="text-foreground hover:bg-[#1F232D]">ERROR</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="node-logtofile" className="text-sm font-medium text-foreground">
+              Log to File
+            </Label>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="node-logtofile"
+                checked={nodeConfig.logToFile || false}
+                onCheckedChange={(checked) => handlePropertyChange('logToFile', checked)}
+                data-testid="switch-logtofile"
+              />
+              <span className="text-sm text-muted-foreground">
+                {nodeConfig.logToFile ? 'Store logs as file' : 'Store logs in database'}
+              </span>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
 }
 
 export default function FlowPropertiesPanel({
@@ -226,64 +651,12 @@ export default function FlowPropertiesPanel({
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="node-id">ID</Label>
-                <Input
-                  id="node-id"
-                  value={nodeConfig.id || ''}
-                  onChange={(e) => {
-                    if (onNodeUpdate) {
-                      onNodeUpdate(selectedNode.id, {
-                        config: {
-                          ...nodeConfig,
-                          id: e.target.value,
-                        },
-                      });
-                    }
-                  }}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="node-type">Type</Label>
-                <Input
-                  id="node-type"
-                  value={nodeConfig.type || ''}
-                  onChange={(e) => {
-                    if (onNodeUpdate) {
-                      onNodeUpdate(selectedNode.id, {
-                        config: {
-                          ...nodeConfig,
-                          type: e.target.value,
-                        },
-                      });
-                    }
-                  }}
-                  className="mt-1"
-                  placeholder="e.g., io.kestra.plugin.core.log.Log"
-                />
-              </div>
-              <div>
-                <Label htmlFor="node-description">Description</Label>
-                <Textarea
-                  id="node-description"
-                  value={nodeConfig.description || ''}
-                  onChange={(e) => {
-                    if (onNodeUpdate) {
-                      onNodeUpdate(selectedNode.id, {
-                        config: {
-                          ...nodeConfig,
-                          description: e.target.value,
-                        },
-                      });
-                    }
-                  }}
-                  className="mt-1"
-                  rows={3}
-                />
-              </div>
-            </div>
+            <TaskPropertiesView 
+              nodeConfig={nodeConfig}
+              nodeLabel={selectedNode.data.label as string}
+              onNodeUpdate={onNodeUpdate}
+              selectedNodeId={selectedNode.id}
+            />
           )}
         </ScrollArea>
       </div>
