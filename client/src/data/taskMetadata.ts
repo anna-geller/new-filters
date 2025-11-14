@@ -34,6 +34,79 @@ export interface TaskMetadata {
 }
 
 export const TASK_METADATA_REGISTRY: Record<string, TaskMetadata> = {
+  '__output_node__': {
+    pluginType: '__output_node__',
+    displayName: 'Flow Output',
+    description: 'Define an output value for the flow',
+    category: 'Flow',
+    properties: [
+      {
+        name: 'type',
+        type: 'select',
+        description: 'The data type of the output',
+        required: true,
+        default: 'STRING',
+        options: [
+          { label: 'STRING', value: 'STRING' },
+          { label: 'NUMBER', value: 'NUMBER' },
+          { label: 'BOOLEAN', value: 'BOOLEAN' },
+          { label: 'OBJECT', value: 'OBJECT' },
+          { label: 'ARRAY', value: 'ARRAY' }
+        ]
+      },
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for this output',
+        required: true,
+        placeholder: 'output_name'
+      },
+      {
+        name: 'displayName',
+        type: 'string',
+        description: 'Human-readable name for the output',
+        required: false,
+        placeholder: 'Order ID'
+      },
+      {
+        name: 'description',
+        type: 'string',
+        description: 'Description of what this output represents',
+        required: false,
+        placeholder: 'The unique identifier for the order'
+      },
+      {
+        name: 'validator',
+        type: 'string',
+        description: 'Regular expression pattern to validate the output value',
+        required: false,
+        placeholder: '^[a-zA-Z]+$'
+      },
+      {
+        name: 'prefill',
+        type: 'string',
+        description: 'Default/prefill value for the output',
+        required: false,
+        placeholder: ''
+      },
+      {
+        name: 'value',
+        type: 'string',
+        description: 'The value expression for this output',
+        required: true,
+        placeholder: '{{ outputs.task1.value }}'
+      },
+      {
+        name: 'required',
+        type: 'boolean',
+        description: 'Whether this output is required',
+        required: false,
+        default: false
+      }
+    ],
+    outputs: [],
+    metrics: []
+  },
   'io.kestra.plugin.core.debug.Return': {
     pluginType: 'io.kestra.plugin.core.debug.Return',
     displayName: 'Return',

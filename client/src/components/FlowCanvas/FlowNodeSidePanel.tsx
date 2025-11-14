@@ -44,12 +44,15 @@ export default function FlowNodeSidePanel({
   if (!node) return null;
 
   const config = node.data.config as any || {};
-  const pluginType = config.type || '';
+  const isOutputNode = node.type === 'output';
+  
+  // For Output nodes, use special metadata; otherwise use pluginType from config
+  const pluginType = isOutputNode ? '__output_node__' : (config.type || '');
   const taskMetadata = getTaskMetadata(pluginType);
 
   const isTaskNode = node.type === 'task' || node.type === 'error' || node.type === 'finally';
-  const showThreePanelLayout = isTaskNode || node.type === 'output';
-  const isOutputNode = node.type === 'output';
+  const showThreePanelLayout = isTaskNode || isOutputNode;
+  const canRun = isTaskNode || isOutputNode;
 
   const handleRunPlayground = async () => {
     if (!node || !onPlaygroundRun) return;
@@ -112,7 +115,7 @@ export default function FlowNodeSidePanel({
               </Button>
             )}
             
-            {isTaskNode && onPlaygroundRun && (
+            {canRun && onPlaygroundRun && (
               <Button
                 size="sm"
                 onClick={handleRunPlayground}
