@@ -97,7 +97,7 @@ export default function FlowNodeSidePanel({
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             {isTaskNode && onPlaygroundRun && (
               <Button
                 size="sm"
@@ -110,16 +110,6 @@ export default function FlowNodeSidePanel({
                 {isRunningPlayground ? 'Running...' : 'Run'}
               </Button>
             )}
-            
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-[#8408FF] hover:bg-[#8613f7] text-white"
-              data-testid="button-save"
-            >
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
             
             {onDelete && (
               <Button
