@@ -207,11 +207,9 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
           {property.name}
           {property.required && <span className="text-destructive ml-1">*</span>}
         </Label>
-        
         {property.description && (
           <p className="text-xs text-muted-foreground">{property.description}</p>
         )}
-
         {property.type === 'string' && (
           property.name.toLowerCase().includes('format') || 
           property.name.toLowerCase().includes('message') ||
@@ -240,7 +238,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
             />
           )
         )}
-
         {property.type === 'number' && (
           <Input
             id={property.name}
@@ -252,7 +249,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
             data-testid={`input-${property.name}`}
           />
         )}
-
         {property.type === 'boolean' && (
           <div className="flex items-center gap-2">
             <Switch
@@ -266,7 +262,6 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
             </Label>
           </div>
         )}
-
         {property.type === 'select' && property.options && (
           <Select
             value={value}
@@ -291,13 +286,12 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
             </SelectContent>
           </Select>
         )}
-
         {property.helpUrl && (
           <a 
             href={property.helpUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-[#8408FF] hover:text-[#8613f7]"
+            className="inline-flex items-center gap-1 text-xs hover:text-[#8613f7] text-[#a676d6]"
           >
             Learn more
             <ExternalLink className="w-3 h-3" />
