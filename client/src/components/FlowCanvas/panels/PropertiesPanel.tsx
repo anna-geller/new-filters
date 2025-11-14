@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ColorPicker from '@/components/ColorPicker';
 
 interface PropertiesPanelProps {
   node: Node;
@@ -42,7 +43,57 @@ export default function PropertiesPanel({ node, taskMetadata, onConfigChange }: 
   };
 
   const hasTaskProperties = taskMetadata && taskMetadata.properties && taskMetadata.properties.length > 0;
+  const isNoteNode = node.type === 'note';
 
+  // Sticky Note UI
+  if (isNoteNode) {
+    return (
+      <div className="p-4 space-y-6" data-testid="properties-panel">
+        <div className="space-y-4">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+            Note Properties
+          </h4>
+          
+          <div className="space-y-2">
+            <Label htmlFor="note-id" className="text-sm font-medium text-foreground">
+              ID <span className="text-destructive ml-1">*</span>
+            </Label>
+            <Input
+              id="note-id"
+              type="text"
+              value={localConfig.id || ''}
+              onChange={(e) => handlePropertyChange('id', e.target.value)}
+              placeholder="note-id"
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground"
+              data-testid="input-id"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="note-content" className="text-sm font-medium text-foreground">
+              Content
+            </Label>
+            <Textarea
+              id="note-content"
+              value={localConfig.text || ''}
+              onChange={(e) => handlePropertyChange('text', e.target.value)}
+              placeholder="Enter your note content..."
+              className="bg-[#262A35] border-[#3A3F4F] text-foreground min-h-[120px]"
+              data-testid="input-content"
+            />
+          </div>
+
+          <ColorPicker
+            value={localConfig.color || '#9B8B6B'}
+            onChange={(color) => handlePropertyChange('color', color)}
+            label="Color"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Regular Task Node UI
   return (
     <div className="p-4 space-y-6" data-testid="properties-panel">
       {/* Basic Properties */}
